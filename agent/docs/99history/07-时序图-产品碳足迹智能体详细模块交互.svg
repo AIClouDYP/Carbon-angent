@@ -1,0 +1,514 @@
+<svg baseProfile="full" height="6353px" version="1.1" width="1720px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<defs>
+</defs>
+  <text fill="#1a237e" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" x="860" y="35">产品碳足迹智能体 — 详细模块交互时序图</text>
+  <text fill="#555" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="14" text-anchor="middle" x="860" y="58">场景：某汽车企业 电动车辆产品碳足迹核算（GB/T 24067-2024 + QC/T 1248-2025）</text>
+  <rect fill="#e8f5e9" height="718" opacity="0.45" rx="6" stroke="#2e7d32" stroke-width="1.0" width="72" x="5" y="150" />
+    <text fill="#1b5e20" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" x="41" y="168">阶段一</text>
+    <text fill="#1b5e20" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" x="41" y="188">政策分析</text>
+  <line stroke="#2e7d32" stroke-dasharray="8,4" stroke-width="0.8" x1="82" x2="1690" y1="150" y2="150" />
+  <rect fill="#e8f5e9" height="584" opacity="0.45" rx="6" stroke="#2e7d32" stroke-width="1.0" width="72" x="5" y="878" />
+    <text fill="#1b5e20" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" x="41" y="896">阶段二</text>
+    <text fill="#1b5e20" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" x="41" y="916">核算边界</text>
+    <text fill="#1b5e20" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" x="41" y="936">(逐步引导)</text>
+  <line stroke="#2e7d32" stroke-dasharray="8,4" stroke-width="0.8" x1="82" x2="1690" y1="878" y2="878" />
+  <rect fill="#e8f5e9" height="495" opacity="0.45" rx="6" stroke="#2e7d32" stroke-width="1.0" width="72" x="5" y="1472" />
+    <text fill="#1b5e20" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" x="41" y="1490">阶段三</text>
+    <text fill="#1b5e20" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" x="41" y="1510">核算模型</text>
+    <text fill="#1b5e20" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" x="41" y="1530">(工艺解析)</text>
+  <line stroke="#2e7d32" stroke-dasharray="8,4" stroke-width="0.8" x1="82" x2="1690" y1="1472" y2="1472" />
+  <rect fill="#e8f5e9" height="770" opacity="0.45" rx="6" stroke="#2e7d32" stroke-width="1.0" width="72" x="5" y="1992" />
+    <text fill="#1b5e20" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" x="41" y="2010">阶段四</text>
+    <text fill="#1b5e20" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" x="41" y="2030">活动数据</text>
+    <text fill="#1b5e20" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" x="41" y="2050">(数据收集)</text>
+  <line stroke="#2e7d32" stroke-dasharray="8,4" stroke-width="0.8" x1="82" x2="1690" y1="1992" y2="1992" />
+  <rect fill="#e8f5e9" height="470" opacity="0.45" rx="6" stroke="#2e7d32" stroke-width="1.0" width="72" x="5" y="2772" />
+    <text fill="#1b5e20" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" x="41" y="2790">阶段五</text>
+    <text fill="#1b5e20" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" x="41" y="2810">核算因子</text>
+    <text fill="#1b5e20" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" x="41" y="2830">(因子选取)</text>
+  <line stroke="#2e7d32" stroke-dasharray="8,4" stroke-width="0.8" x1="82" x2="1690" y1="2772" y2="2772" />
+  <rect fill="#e8f5e9" height="668" opacity="0.45" rx="6" stroke="#2e7d32" stroke-width="1.0" width="72" x="5" y="3252" />
+    <text fill="#1b5e20" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" x="41" y="3270">阶段六</text>
+    <text fill="#1b5e20" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" x="41" y="3290">数据校验</text>
+    <text fill="#1b5e20" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" x="41" y="3310">(DQR+质检)</text>
+  <line stroke="#2e7d32" stroke-dasharray="8,4" stroke-width="0.8" x1="82" x2="1690" y1="3252" y2="3252" />
+  <rect fill="#e8f5e9" height="838" opacity="0.45" rx="6" stroke="#2e7d32" stroke-width="1.0" width="72" x="5" y="3945" />
+    <text fill="#1b5e20" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" x="41" y="3963">阶段七</text>
+    <text fill="#1b5e20" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" x="41" y="3983">碳足迹计算</text>
+    <text fill="#1b5e20" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" x="41" y="4003">(LCA各阶段)</text>
+  <line stroke="#2e7d32" stroke-dasharray="8,4" stroke-width="0.8" x1="82" x2="1690" y1="3945" y2="3945" />
+  <rect fill="#e8f5e9" height="569" opacity="0.45" rx="6" stroke="#2e7d32" stroke-width="1.0" width="72" x="5" y="4793" />
+    <text fill="#1b5e20" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" x="41" y="4811">阶段八</text>
+    <text fill="#1b5e20" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" x="41" y="4831">碳足迹分析</text>
+    <text fill="#1b5e20" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" x="41" y="4851">(常规与统计分析)</text>
+  <line stroke="#2e7d32" stroke-dasharray="8,4" stroke-width="0.8" x1="82" x2="1690" y1="4793" y2="4793" />
+  <rect fill="#e8f5e9" height="591" opacity="0.45" rx="6" stroke="#2e7d32" stroke-width="1.0" width="72" x="5" y="5372" />
+    <text fill="#1b5e20" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" x="41" y="5390">阶段九</text>
+    <text fill="#1b5e20" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" x="41" y="5410">碳足迹报告</text>
+  <line stroke="#2e7d32" stroke-dasharray="8,4" stroke-width="0.8" x1="82" x2="1690" y1="5372" y2="5372" />
+  <rect fill="none" height="1963" stroke="#ff9100" stroke-dasharray="5,5" stroke-width="1.2" width="1605" x="85" y="1977" />
+  <rect fill="#ffe0b2" height="20" rx="3" stroke="#f57c00" stroke-width="1" width="220" x="85" y="1977" />
+  <text fill="#e65100" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9" font-weight="bold" x="90" y="1990">Loop: 迭代循环（直至活动数据与核算因子质量完全通过）</text>
+  <rect fill="none" height="460" stroke="#0d47a1" stroke-dasharray="6,4" stroke-width="1.2" width="1605" x="85" y="393" />
+  <rect fill="#bbdefb" height="20" rx="3" stroke="#1565c0" stroke-width="1" width="180" x="85" y="393" />
+  <text fill="#0d47a1" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9" font-weight="bold" x="90" y="406">分支 A: 用户选择按照已有的标准进行 (常用热路径)</text>
+  <line stroke="#1565c0" stroke-dasharray="4,4" stroke-width="1.0" x1="85" x2="1690" y1="513" y2="513" />
+  <rect fill="#cfd8dc" height="18" rx="2" stroke="#455a64" stroke-width="0.8" width="160" x="85" y="513" />
+  <text fill="#263238" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="8.5" font-weight="bold" x="90" y="525">分支 B: 上传解析新的标准进行 (低频管理冷路径)</text>
+  <rect fill="none" height="190" stroke="#0d47a1" stroke-dasharray="6,4" stroke-width="1.2" width="1605" x="85" y="3715" />
+  <rect fill="#bbdefb" height="20" rx="3" stroke="#1565c0" stroke-width="1" width="180" x="85" y="3715" />
+  <text fill="#0d47a1" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9" font-weight="bold" x="90" y="3728">分支 A: 数据与因子质量通过校验并由用户固化</text>
+  <line stroke="#1565c0" stroke-dasharray="4,4" stroke-width="1.0" x1="85" x2="1690" y1="3845" y2="3845" />
+  <rect fill="#cfd8dc" height="18" rx="2" stroke="#455a64" stroke-width="0.8" width="160" x="85" y="3845" />
+  <text fill="#263238" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="8.5" font-weight="bold" x="90" y="3857">分支 B: 数据不合格或缺失，需重新获取 (回退循环)</text>
+  <line stroke="#bbb" stroke-dasharray="5,4" stroke-width="1.0" x1="110" x2="110" y1="127" y2="6003" />
+  <line stroke="#bbb" stroke-dasharray="5,4" stroke-width="1.0" x1="290" x2="290" y1="127" y2="6003" />
+  <line stroke="#bbb" stroke-dasharray="5,4" stroke-width="1.0" x1="470" x2="470" y1="127" y2="6003" />
+  <line stroke="#bbb" stroke-dasharray="5,4" stroke-width="1.0" x1="650" x2="650" y1="127" y2="6003" />
+  <line stroke="#bbb" stroke-dasharray="5,4" stroke-width="1.0" x1="830" x2="830" y1="127" y2="6003" />
+  <line stroke="#bbb" stroke-dasharray="5,4" stroke-width="1.0" x1="1010" x2="1010" y1="127" y2="6003" />
+  <line stroke="#bbb" stroke-dasharray="5,4" stroke-width="1.0" x1="1190" x2="1190" y1="127" y2="6003" />
+  <line stroke="#bbb" stroke-dasharray="5,4" stroke-width="1.0" x1="1370" x2="1370" y1="127" y2="6003" />
+  <line stroke="#bbb" stroke-dasharray="5,4" stroke-width="1.0" x1="1550" x2="1550" y1="127" y2="6003" />
+  <line stroke="#333" stroke-width="1.5" x1="110" x2="290" y1="195" y2="195" />
+  <polygon fill="#333" points="290,195 282,190 282,200" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="200.0" y="188">① 发起核算请求：指定核算规范与要求</text>
+  <line stroke="#333" stroke-width="1.5" x1="290" x2="470" y1="230" y2="230" />
+  <polygon fill="#333" points="470,230 462,225 462,235" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="380.0" y="223">② 路由并创建会话</text>
+  <rect fill="#fffde7" height="44" stroke="#f9a825" stroke-width="1" width="290" x="325.0" y="240" rx="4" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="335.0" y="256">创建执行上下文</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="335.0" y="272">product_id, org_id, session_id</text>
+  <rect fill="#fffde7" height="44" stroke="#f9a825" stroke-width="1" width="290" x="325.0" y="304" rx="4" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="335.0" y="320">加载已有支持标准配置列表</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="335.0" y="336">GB/T 24067, QC/T 1248等</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="470" x2="110" y1="393" y2="393" />
+  <polygon fill="#666" points="110,393 118,388 118,398" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="290.0" y="386">③ 推送系统已支持的标准清单与选择/上传菜单</text>
+  <line stroke="#333" stroke-width="1.5" x1="110" x2="470" y1="443" y2="443" />
+  <polygon fill="#333" points="470,443 462,438 462,448" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="290.0" y="436">④ 选择指定已有标准并提交配置</text>
+  <line stroke="#333" stroke-width="1.5" x1="470" x2="1370" y1="478" y2="478" />
+  <polygon fill="#333" points="1370,478 1362,473 1362,483" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="920.0" y="471">⑤ 查询 pcf-standard-catalog 获取已有标准元数据</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="1370" x2="470" y1="513" y2="513" />
+  <polygon fill="#666" points="470,513 478,508 478,518" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="920.0" y="506">⑥ 返回：已存的标准核算边界、分配规则和源定义</text>
+  <line stroke="#333" stroke-width="1.5" x1="110" x2="470" y1="563" y2="563" />
+  <polygon fill="#333" points="470,563 462,558 462,568" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="290.0" y="556">⑦ 上传新标准 PDF 文档并请求解析</text>
+  <line stroke="#0d47a1" stroke-width="1.5" x1="470" x2="650" y1="598" y2="598" />
+  <polygon fill="#0d47a1" points="650,598 642,593 642,603" />
+  <text fill="#0d47a1" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="560.0" y="591">⑧ 注入 System Prompt + 新标准文档，启动推理</text>
+  <line stroke="#7b1fa2" stroke-width="1.5" x1="650" x2="830" y1="633" y2="633" />
+  <polygon fill="#7b1fa2" points="830,633 822,628 822,638" />
+  <text fill="#7b1fa2" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="740.0" y="626">⑨ 调用 Skill: pcf-standard-interpreter (标准深度解析)</text>
+  <line stroke="#00695c" stroke-width="1.5" x1="830" x2="1550" y1="668" y2="668" />
+  <polygon fill="#00695c" points="1550,668 1542,663 1542,673" />
+  <text fill="#00695c" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="1190.0" y="661">⑩ 调用 docparser-mcp 解析新标准 PDF</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="1550" x2="830" y1="703" y2="703" />
+  <polygon fill="#666" points="830,703 838,698 838,708" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="1190.0" y="696">⑪ 返回：新标准文本结构化内容</text>
+  <line stroke="#333" stroke-width="1.5" x1="830" x2="1370" y1="738" y2="738" />
+  <polygon fill="#333" points="1370,738 1362,733 1362,743" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="1100.0" y="731">⑫ 注册新规边界规则定义至 pcf-standard-catalog</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="1370" x2="830" y1="773" y2="773" />
+  <polygon fill="#666" points="830,773 838,768 838,778" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="1100.0" y="766">⑬ 确认注册成功</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="830" x2="650" y1="808" y2="808" />
+  <polygon fill="#666" points="650,808 658,803 658,813" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="740.0" y="801">⑭ 返回：标准深度解析报告</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="650" x2="470" y1="843" y2="843" />
+  <polygon fill="#666" points="470,843 478,838 478,848" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="560.0" y="836">⑮ 同步标准解析状态并反馈用户解析报告</text>
+  <line stroke="#333" stroke-width="1.5" x1="470" x2="1190" y1="923" y2="923" />
+  <polygon fill="#333" points="1190,923 1182,918 1182,928" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="830.0" y="916">⑯ 读取历史核算数据及产品型号映射</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="1190" x2="470" y1="958" y2="958" />
+  <polygon fill="#666" points="470,958 478,953 478,963" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="830.0" y="951">⑰ 返回：2025年同型号产品碳足迹数据摘要 (历史参考)</text>
+  <line stroke="#0d47a1" stroke-width="1.5" x1="470" x2="650" y1="993" y2="993" />
+  <polygon fill="#0d47a1" points="650,993 642,988 642,998" />
+  <text fill="#0d47a1" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="560.0" y="986">⑱ 注入标准规则与历史基准上下文，启动边界推理</text>
+  <line stroke="#7b1fa2" stroke-width="1.5" x1="650" x2="830" y1="1028" y2="1028" />
+  <polygon fill="#7b1fa2" points="830,1028 822,1023 822,1033" />
+  <text fill="#7b1fa2" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="740.0" y="1021">⑲ 调用 Skill: pcf-goal-scope-guide (目标范围引导)</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="830" x2="650" y1="1063" y2="1063" />
+  <polygon fill="#666" points="650,1063 658,1058 658,1068" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="740.0" y="1056">⑳ 返回：核算阶段及时间边界交互问卷</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="650" x2="110" y1="1098" y2="1098" />
+  <polygon fill="#666" points="110,1098 118,1093 118,1103" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="380.0" y="1091">㉑ 推送核算阶段(生命周期各阶段)及时间范围引导配置</text>
+  <line stroke="#333" stroke-width="1.5" x1="110" x2="650" y1="1133" y2="1133" />
+  <polygon fill="#333" points="650,1133 642,1128 642,1138" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="380.0" y="1126">㉒ 确认并提交核算阶段划分与核算代表性时间范围</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="650" x2="110" y1="1168" y2="1168" />
+  <polygon fill="#666" points="110,1168 118,1163 118,1173" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="380.0" y="1161">㉓ 推送核算单位问卷 (提示声明单位与功能单位二选一)</text>
+  <rect fill="#fffde7" height="60" stroke="#f9a825" stroke-width="1" width="290" x="-35.0" y="1178" rx="4" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="-25.0" y="1194">用户在此步骤进行二选一选择：</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="-25.0" y="1210">选中并确认声明单位为：</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="-25.0" y="1226">1辆乘用车 (整备质量:1850kg,寿命:15年)</text>
+  <line stroke="#333" stroke-width="1.5" x1="110" x2="650" y1="1283" y2="1283" />
+  <polygon fill="#333" points="650,1283 642,1278 642,1288" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="380.0" y="1276">㉔ 提交选定的声明单位/功能单位配置参数</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="650" x2="110" y1="1318" y2="1318" />
+  <polygon fill="#666" points="110,1318 118,1313 118,1323" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="380.0" y="1311">㉕ 推送分配规则与取舍限值配置选项</text>
+  <line stroke="#333" stroke-width="1.5" x1="110" x2="650" y1="1353" y2="1353" />
+  <polygon fill="#333" points="650,1353 642,1348 642,1358" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="380.0" y="1346">㉖ 确认并提交分配分摊方法及取舍规则门槛</text>
+  <rect fill="#fffde7" height="44" stroke="#f9a825" stroke-width="1" width="290" x="505.0" y="1363" rx="4" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="515.0" y="1379">收齐5大边界配置参数，</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="515.0" y="1395">打包生成阶段边界参数元数据</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="650" x2="470" y1="1452" y2="1452" />
+  <polygon fill="#666" points="470,1452 478,1447 478,1457" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="560.0" y="1445">㉗ 向运行时同步已确认的 5 大边界数据</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="470" x2="110" y1="1517" y2="1517" />
+  <polygon fill="#666" points="110,1517 118,1512 118,1522" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="290.0" y="1510">㉘ 请求用户上传工艺流程与原料输入输出清单</text>
+  <line stroke="#333" stroke-width="1.5" x1="110" x2="470" y1="1552" y2="1552" />
+  <polygon fill="#333" points="470,1552 462,1547 462,1557" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="290.0" y="1545">㉙ 上传工艺与原料平衡文件 (物料平衡表 PDF/EXCEL)</text>
+  <line stroke="#0d47a1" stroke-width="1.5" x1="470" x2="650" y1="1587" y2="1587" />
+  <polygon fill="#0d47a1" points="650,1587 642,1582 642,1592" />
+  <text fill="#0d47a1" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="560.0" y="1580">㉚ 注入边界参数与工艺文件上下文，启动模型推理</text>
+  <line stroke="#7b1fa2" stroke-width="1.5" x1="650" x2="830" y1="1622" y2="1622" />
+  <polygon fill="#7b1fa2" points="830,1622 822,1617 822,1627" />
+  <text fill="#7b1fa2" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="740.0" y="1615">㉛ 调用 Skill: pcf-lca-modeler (计算建模与工艺提炼)</text>
+  <line stroke="#00695c" stroke-width="1.5" x1="830" x2="1550" y1="1657" y2="1657" />
+  <polygon fill="#00695c" points="1550,1657 1542,1652 1542,1662" />
+  <text fill="#00695c" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="1190.0" y="1650">㉜ 调用 docparser-mcp 解析工艺物料清单文件</text>
+  <rect fill="#fffde7" height="76" stroke="#f9a825" stroke-width="1" width="290" x="1405.0" y="1667" rx="4" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="1415.0" y="1683">工艺文件深度解析 (OCR+NLP)：</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="1415.0" y="1699">提取每个生命周期阶段的：</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="1415.0" y="1715">1. 输入原料/能源 (钢/铝/PP/电力等)</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="1415.0" y="1731">2. 输出产品/废弃物 (主产品/废钢/三废)</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="1550" x2="830" y1="1788" y2="1788" />
+  <polygon fill="#666" points="830,1788 838,1783 838,1793" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="1190.0" y="1781">㉝ 返回结构化工艺输入输出关系 JSON</text>
+  <rect fill="#fffde7" height="44" stroke="#f9a825" stroke-width="1" width="290" x="685.0" y="1798" rx="4" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="1814">结合阶段二边界参数与工艺数据，</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="1830">构建产品 LCA 计算拓扑与公式映射</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="830" x2="650" y1="1887" y2="1887" />
+  <polygon fill="#666" points="650,1887 658,1882 658,1892" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="740.0" y="1880">㉞ 生成最终核算方案与各阶段数据收集模板</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="650" x2="110" y1="1922" y2="1922" />
+  <polygon fill="#666" points="110,1922 118,1917 118,1927" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="380.0" y="1915">㉟ 向前端呈现核算方案与输入输出明细，请最终确认</text>
+  <line stroke="#333" stroke-width="1.5" x1="110" x2="290" y1="1957" y2="1957" />
+  <polygon fill="#333" points="290,1957 282,1952 282,1962" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="200.0" y="1950">㊱ 一键最终大确认方案，正式启动收集流程</text>
+  <line stroke="#333" stroke-width="1.5" x1="290" x2="470" y1="2037" y2="2037" />
+  <polygon fill="#333" points="470,2037 462,2032 462,2042" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="380.0" y="2030">㊲ 确认指令 -> 进入活动数据收集阶段</text>
+  <rect fill="#fffde7" height="44" stroke="#f9a825" stroke-width="1" width="290" x="325.0" y="2047" rx="4" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="335.0" y="2063">规划数据收集策略：</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="335.0" y="2079">通过 MCP 接入层并发采集多个源</text>
+  <line stroke="#333" stroke-width="1.5" x1="470" x2="1010" y1="2136" y2="2136" />
+  <polygon fill="#333" points="1010,2136 1002,2131 1002,2141" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="740.0" y="2129">㊳ 调用 Tool: pcf-data-importer</text>
+  <line stroke="#00695c" stroke-width="1.5" x1="1010" x2="1550" y1="2171" y2="2171" />
+  <polygon fill="#00695c" points="1550,2171 1542,2166 1542,2176" />
+  <text fill="#00695c" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="1280.0" y="2164">㊴ 调用 epr-mcp 获取物料清单 (EPR)</text>
+  <rect fill="#fffde7" height="76" stroke="#f9a825" stroke-width="1" width="290" x="1405.0" y="2181" rx="4" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="1415.0" y="2197">EPR 物料清单：</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="1415.0" y="2213">钢: 420kg, 铝: 85kg</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="1415.0" y="2229">电池: 380kg, 电机: 35kg</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="1415.0" y="2245">塑料/橡胶: 120kg, 电子: 25kg</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="1550" x2="1010" y1="2302" y2="2302" />
+  <polygon fill="#666" points="1010,2302 1018,2297 1018,2307" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="1280.0" y="2295">㊵ 返回 EPR 数据 JSON</text>
+  <line stroke="#00695c" stroke-width="1.5" x1="1010" x2="1550" y1="2337" y2="2337" />
+  <polygon fill="#00695c" points="1550,2337 1542,2332 1542,2342" />
+  <text fill="#00695c" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="1280.0" y="2330">㊶ 调用 battery-data-mcp 获取电池制造碳排放数据</text>
+  <rect fill="#fffde7" height="60" stroke="#f9a825" stroke-width="1" width="290" x="1405.0" y="2347" rx="4" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="1415.0" y="2363">电池制造碳排放：</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="1415.0" y="2379">电芯正负极与组装能耗</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="1415.0" y="2395">合计: 10.6 tCO₂e/组</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="1550" x2="1010" y1="2452" y2="2452" />
+  <polygon fill="#666" points="1010,2452 1018,2447 1018,2457" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="1280.0" y="2445">㊷ 返回电池制造数据 JSON</text>
+  <line stroke="#00695c" stroke-width="1.5" x1="1010" x2="1550" y1="2487" y2="2487" />
+  <polygon fill="#00695c" points="1550,2487 1542,2482 1542,2492" />
+  <text fill="#00695c" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="1280.0" y="2480">㊸ 调用 docparser-mcp 解析供应商 EPD 报告</text>
+  <rect fill="#fffde7" height="60" stroke="#f9a825" stroke-width="1" width="290" x="1405.0" y="2497" rx="4" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="1415.0" y="2513">EPD 报告解析 (OCR+NLP)：</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="1415.0" y="2529">钢回收率: 85%</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="1415.0" y="2545">铝材再生占比: 30%</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="1550" x2="1010" y1="2602" y2="2602" />
+  <polygon fill="#666" points="1010,2602 1018,2597 1018,2607" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="1280.0" y="2595">㊹ 返回结构化供应商数据 JSON</text>
+  <rect fill="#fffde7" height="60" stroke="#f9a825" stroke-width="1" width="290" x="505.0" y="2612" rx="4" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="515.0" y="2628">注入使用阶段参数：</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="515.0" y="2644">设计寿命: 15年 / 15,000 km年</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="515.0" y="2660">百公里电耗: 13.5 kWh / 充电效率: 92%</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="1010" x2="470" y1="2717" y2="2717" />
+  <polygon fill="#666" points="470,2717 478,2712 478,2722" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="740.0" y="2710">㊺ 本轮活动数据收集完成 -> 返回数据汇总</text>
+  <line stroke="#0d47a1" stroke-width="1.5" x1="470" x2="1190" y1="2752" y2="2752" />
+  <polygon fill="#0d47a1" points="1190,2752 1182,2747 1182,2757" />
+  <text fill="#0d47a1" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="830.0" y="2745">㊻ 保存活动数据到短期记忆 (含数据溯源)</text>
+  <line stroke="#0d47a1" stroke-width="1.5" x1="470" x2="650" y1="2817" y2="2817" />
+  <polygon fill="#0d47a1" points="650,2817 642,2812 642,2822" />
+  <text fill="#0d47a1" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="560.0" y="2810">㊼ 数据收集就绪，触发核算因子选取</text>
+  <line stroke="#7b1fa2" stroke-width="1.5" x1="650" x2="830" y1="2852" y2="2852" />
+  <polygon fill="#7b1fa2" points="830,2852 822,2847 822,2857" />
+  <text fill="#7b1fa2" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="740.0" y="2845">㊽ 调用 Skill: pcf-ef-selector (因子智能选择)</text>
+  <line stroke="#333" stroke-width="1.5" x1="830" x2="1370" y1="2887" y2="2887" />
+  <polygon fill="#333" points="1370,2887 1362,2882 1362,2892" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="1100.0" y="2880">㊾ 查询 emission-factor-db (包含 Ecoinvent 因子)</text>
+  <rect fill="#fffde7" height="92" stroke="#f9a825" stroke-width="1" width="290" x="1225.0" y="2897" rx="4" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="1235.0" y="2913">排放因子库检索结果 (规则库)：</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="1235.0" y="2929">钢材: 2.1 tCO₂e/t (默认)</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="1235.0" y="2945">原生铝: 8.2 / 再生铝: 0.5 tCO₂e/t</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="1235.0" y="2961">电网(华东): 0.581 tCO₂/MWh</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="1235.0" y="2977">PP塑料: 3.4 tCO₂e/t</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="1370" x2="830" y1="3034" y2="3034" />
+  <polygon fill="#666" points="830,3034 838,3029 838,3039" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="1100.0" y="3027">㊿ 返回候选排放因子列表、有效期及来源</text>
+  <rect fill="#fffde7" height="108" stroke="#f9a825" stroke-width="1" width="290" x="685.0" y="3044" rx="4" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="3060">因子匹配与加权逻辑：</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="3076">钢材 -> 默认(含回收修正)</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="3092">铝材 -> 30%再生+70%原生加权</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="3108">电池 -> T/CECRPA 012标准</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="3124">电网 -> 2026年华东因子</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="3140">GWP -> AR6 (100年)</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="830" x2="650" y1="3197" y2="3197" />
+  <polygon fill="#666" points="650,3197 658,3192 658,3202" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="740.0" y="3190">51 返回：最优核算因子、选择理由及 GWP 版本</text>
+  <line stroke="#0d47a1" stroke-width="1.5" x1="650" x2="1190" y1="3232" y2="3232" />
+  <polygon fill="#0d47a1" points="1190,3232 1182,3227 1182,3237" />
+  <text fill="#0d47a1" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="920.0" y="3225">52 写入短期记忆：因子选择记录</text>
+  <line stroke="#0d47a1" stroke-width="1.5" x1="470" x2="650" y1="3297" y2="3297" />
+  <polygon fill="#0d47a1" points="650,3297 642,3292 642,3302" />
+  <text fill="#0d47a1" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="560.0" y="3290">53 因子匹配完毕，触发数据质量校验</text>
+  <line stroke="#7b1fa2" stroke-width="1.5" x1="650" x2="830" y1="3332" y2="3332" />
+  <polygon fill="#7b1fa2" points="830,3332 822,3327 822,3337" />
+  <text fill="#7b1fa2" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="740.0" y="3325">54 调用 Skill: pcf-data-quality-inspector (数据质量检验)</text>
+  <line stroke="#333" stroke-width="1.5" x1="830" x2="1190" y1="3367" y2="3367" />
+  <polygon fill="#333" points="1190,3367 1182,3362 1182,3372" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="1010.0" y="3360">55 读取当期活动数据与因子选择记录</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="1190" x2="830" y1="3402" y2="3402" />
+  <polygon fill="#666" points="830,3402 838,3397 838,3407" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="1010.0" y="3395">56 返回：活动数据与因子信息</text>
+  <rect fill="#fffde7" height="76" stroke="#f9a825" stroke-width="1" width="290" x="685.0" y="3412" rx="4" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="3428">数据质量检验指标：</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="3444">✓ 完整性：物料与能耗完全覆盖</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="3460">⚠ 趋势：钢材用量同比偏高 5%</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="3476">✓ 交叉验证：EPR重量与物理重匹配</text>
+  <rect fill="#fffde7" height="92" stroke="#f9a825" stroke-width="1" width="290" x="685.0" y="3508" rx="4" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="3524">Pedigree Matrix 数据评分：</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="3540">钢材EF: 2/2/2/3/2</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="3556">铝材EF: 3/3/2/4/3</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="3572">电池数据: 1/2/1/1/1</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="3588">电网EF: 2/1/1/2/1</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="830" x2="650" y1="3645" y2="3645" />
+  <polygon fill="#666" points="650,3645 658,3640 658,3650" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="740.0" y="3638">57 返回：质检报告 (包含 Pedigree 评分及 2 项 Warning)</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="650" x2="110" y1="3680" y2="3680" />
+  <polygon fill="#666" points="110,3680 118,3675 118,3685" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="380.0" y="3673">58 向前端推送警告问询：再生铝30%是否实测？钢材偏高5%</text>
+  <line stroke="#333" stroke-width="1.5" x1="110" x2="650" y1="3715" y2="3715" />
+  <polygon fill="#333" points="650,3715 642,3710 642,3720" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="380.0" y="3708">59 用户回复：再生铝有EPD声明，新车型增重合理</text>
+  <rect fill="#fffde7" height="60" stroke="#f9a825" stroke-width="1" width="290" x="505.0" y="3740" rx="4" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="515.0" y="3756">评估用户解释：合理</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="515.0" y="3772">数据质量校验通过！</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="515.0" y="3788">Pedigree 综合评分: 2.4/5</text>
+  <line stroke="#0d47a1" stroke-width="1.5" x1="650" x2="1190" y1="3845" y2="3845" />
+  <polygon fill="#0d47a1" points="1190,3845 1182,3840 1182,3850" />
+  <text fill="#0d47a1" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="920.0" y="3838">60 写入短期记忆：质检通过日志 (退出循环)</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="650" x2="470" y1="3895" y2="3895" />
+  <polygon fill="#666" points="470,3895 478,3890 478,3900" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="560.0" y="3888">61 触发数据补录与因子重置流程 (退回阶段四重新执行)</text>
+  <line stroke="#0d47a1" stroke-width="1.5" x1="470" x2="650" y1="3990" y2="3990" />
+  <polygon fill="#0d47a1" points="650,3990 642,3985 642,3995" />
+  <text fill="#0d47a1" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="560.0" y="3983">62 校验通过，开始碳足迹计算</text>
+  <line stroke="#7b1fa2" stroke-width="1.5" x1="650" x2="830" y1="4025" y2="4025" />
+  <polygon fill="#7b1fa2" points="830,4025 822,4020 822,4030" />
+  <text fill="#7b1fa2" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="740.0" y="4018">63 调用 Skill: pcf-lca-calculator (LCA各阶段计算框架)</text>
+  <line stroke="#333" stroke-width="1.5" x1="830" x2="1010" y1="4060" y2="4060" />
+  <polygon fill="#333" points="1010,4060 1002,4055 1002,4065" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="920.0" y="4053">64 调用 Tool: pcf-emission-calculator (计算器)</text>
+  <rect fill="#fffde7" height="108" stroke="#f9a825" stroke-width="1" width="290" x="865.0" y="4070" rx="4" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="4086">【材料生产阶段】</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="4102">钢材: 420kg x 2.1 x 0.7 = 617.4</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="4118">原生铝: 85kg x 0.7 x 8.2 = 487.9</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="4134">再生铝: 85kg x 0.3 x 0.5 = 12.8</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="4150">塑料: 120kg x 3.4 = 408.0</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="4166">小计: 1,694.1 kgCO₂e</text>
+  <rect fill="#fffde7" height="92" stroke="#f9a825" stroke-width="1" width="290" x="865.0" y="4198" rx="4" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="4214">【零部件制造+整车生产】</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="4230">电池组装: 10,600 kgCO₂e</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="4246">电机制造: 35kg x 12.8 = 448 kgCO₂e</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="4262">整车装配(用电): 185.9 kgCO₂e</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="4278">小计: 11,233.9 kgCO₂e</text>
+  <rect fill="#fffde7" height="92" stroke="#f9a825" stroke-width="1" width="290" x="865.0" y="4310" rx="4" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="4326">【使用阶段】</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="4342">行驶用电量 = 30,375 kWh</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="4358">充电损耗折算 = 32,908 kWh</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="4374">电网排放 = 32,908 x 0.581</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="4390">小计: 19,121.8 kgCO₂e</text>
+  <rect fill="#fffde7" height="92" stroke="#f9a825" stroke-width="1" width="290" x="865.0" y="4422" rx="4" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="4438">【报废回收阶段 (Cut-off)】</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="4454">钢回收抵消: -571.2 kgCO₂e</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="4470">铝回收抵消: -586.7 kgCO₂e</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="4486">电池回收抵消: -2,120 kgCO₂e</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="4502">小计: -3,277.9 kgCO₂e</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="1010" x2="830" y1="4559" y2="4559" />
+  <polygon fill="#666" points="830,4559 838,4554 838,4564" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="920.0" y="4552">65 返回各阶段计算明细与分项汇总</text>
+  <rect fill="#fffde7" height="124" stroke="#f9a825" stroke-width="1" width="290" x="685.0" y="4569" rx="4" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="4585">计算汇总 (各阶段累加)：</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="4601">材料生产:  1,694.1</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="4617">制造装配: 11,233.9</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="4633">使用阶段: 19,121.8</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="4649">报废抵消: -3,277.9</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="4665">━━━━━━━━━━━━━</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="4681">合计: 28,771.9 kgCO₂e/辆</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="830" x2="650" y1="4738" y2="4738" />
+  <polygon fill="#666" points="650,4738 658,4733 658,4743" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="740.0" y="4731">66 返回：碳足迹计算结果</text>
+  <line stroke="#0d47a1" stroke-width="1.5" x1="650" x2="1190" y1="4773" y2="4773" />
+  <polygon fill="#0d47a1" points="1190,4773 1182,4768 1182,4778" />
+  <text fill="#0d47a1" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="920.0" y="4766">67 写入短期记忆：计算结果与明细</text>
+  <line stroke="#0d47a1" stroke-width="1.5" x1="470" x2="650" y1="4838" y2="4838" />
+  <polygon fill="#0d47a1" points="650,4838 642,4833 642,4843" />
+  <text fill="#0d47a1" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="560.0" y="4831">68 计算完成，触发碳足迹分析</text>
+  <line stroke="#7b1fa2" stroke-width="1.5" x1="650" x2="830" y1="4873" y2="4873" />
+  <polygon fill="#7b1fa2" points="830,4873 822,4868 822,4878" />
+  <text fill="#7b1fa2" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="740.0" y="4866">69 调用 Skill: pcf-uncertainty-analyzer (分析技能)</text>
+  <rect fill="#fffde7" height="76" stroke="#f9a825" stroke-width="1" width="290" x="685.0" y="4883" rx="4" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="4899">【常规数据分析】</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="4915">1. 原辅料贡献度排序 (电池:36.8%, 钢:2.1%)</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="4931">2. 工艺环节排放强度占比 (使用阶段:66.4%)</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="4947">3. 历史基准同比分析 (较2025年同比下降2.1%)</text>
+  <line stroke="#333" stroke-width="1.5" x1="830" x2="1010" y1="5004" y2="5004" />
+  <polygon fill="#333" points="1010,5004 1002,4999 1002,5009" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="920.0" y="4997">70 调用 Tool: pcf-monte-carlo (蒙特卡洛模拟器)</text>
+  <rect fill="#fffde7" height="92" stroke="#f9a825" stroke-width="1" width="290" x="865.0" y="5014" rx="4" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="5030">【不确定度分析】 (N=10,000)：</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="5046">钢、铝、电池、电网因子输入分布</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="5062">均值: 28,771.9 kgCO₂e</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="5078">95%置信区间: [25,420, 32,150]</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="5094">相对不确定度: ±12.1%</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="1010" x2="830" y1="5151" y2="5151" />
+  <polygon fill="#666" points="830,5151 838,5146 838,5156" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="920.0" y="5144">71 返回：蒙特卡洛模拟结果与不确定度区间</text>
+  <rect fill="#fffde7" height="76" stroke="#f9a825" stroke-width="1" width="290" x="685.0" y="5161" rx="4" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="5177">【敏感度热点分析】</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="5193">电网因子变动10% -> 总结果波动6.8%</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="5209">电池制造变动10% -> 总结果波动4.1%</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="695.0" y="5225">风险热点: 电网因子 + 电池制造</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="830" x2="650" y1="5282" y2="5282" />
+  <polygon fill="#666" points="650,5282 658,5277 658,5287" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="740.0" y="5275">72 返回：常规分析、不确定度与敏感度热点报告</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="650" x2="110" y1="5317" y2="5317" />
+  <polygon fill="#666" points="110,5317 118,5312 118,5322" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="380.0" y="5310">73 推送碳足迹常规分析与统计热点结果</text>
+  <line stroke="#0d47a1" stroke-width="1.5" x1="650" x2="1190" y1="5352" y2="5352" />
+  <polygon fill="#0d47a1" points="1190,5352 1182,5347 1182,5357" />
+  <text fill="#0d47a1" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="920.0" y="5345">74 写入短期记忆：碳足迹分析记录</text>
+  <line stroke="#0d47a1" stroke-width="1.5" x1="470" x2="650" y1="5417" y2="5417" />
+  <polygon fill="#0d47a1" points="650,5417 642,5412 642,5422" />
+  <text fill="#0d47a1" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="560.0" y="5410">75 分析完毕，启动报告生成</text>
+  <line stroke="#7b1fa2" stroke-width="1.5" x1="650" x2="830" y1="5452" y2="5452" />
+  <polygon fill="#7b1fa2" points="830,5452 822,5447 822,5457" />
+  <text fill="#7b1fa2" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="740.0" y="5445">76 调用 Skill: pcf-report-writer (报告撰写)</text>
+  <line stroke="#333" stroke-width="1.5" x1="830" x2="1010" y1="5487" y2="5487" />
+  <polygon fill="#333" points="1010,5487 1002,5482 1002,5492" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="920.0" y="5480">77 调用 Tool: pcf-chart-generator (图表生成器)</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="1010" x2="830" y1="5522" y2="5522" />
+  <polygon fill="#666" points="830,5522 838,5517 838,5527" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="920.0" y="5515">78 返回：报告可视化图表 (SVG/PNG)</text>
+  <line stroke="#333" stroke-width="1.5" x1="830" x2="1010" y1="5557" y2="5557" />
+  <polygon fill="#333" points="1010,5557 1002,5552 1002,5562" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="920.0" y="5550">79 调用 Tool: pcf-report-exporter (报告导出器)</text>
+  <rect fill="#fffde7" height="60" stroke="#f9a825" stroke-width="1" width="290" x="865.0" y="5567" rx="4" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="5583">生成 Word (.docx) 和 PDF 报告</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="5599">包含摘要、计算明细、Pedigree评估表</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="875.0" y="5615">不确定度曲线和敏感度矩阵</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="1010" x2="830" y1="5672" y2="5672" />
+  <polygon fill="#666" points="830,5672 838,5667 838,5677" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="920.0" y="5665">80 返回：报告文件下载链接</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="830" x2="650" y1="5707" y2="5707" />
+  <polygon fill="#666" points="650,5707 658,5702 658,5712" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="740.0" y="5700">81 返回：报告生成完成</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="650" x2="110" y1="5742" y2="5742" />
+  <polygon fill="#666" points="110,5742 118,5737 118,5747" />
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="380.0" y="5735">82 推送核算结果及报告下载链接</text>
+  <line stroke="#0d47a1" stroke-width="1.5" x1="650" x2="1190" y1="5777" y2="5777" />
+  <polygon fill="#0d47a1" points="1190,5777 1182,5772 1182,5782" />
+  <text fill="#0d47a1" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="10" text-anchor="middle" x="920.0" y="5770">83 写入长期记忆：本次核算摘要 (pcf_calculation_context)</text>
+  <rect fill="#fffde7" height="76" stroke="#f9a825" stroke-width="1" width="290" x="1045.0" y="5787" rx="4" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="1055.0" y="5803">长期记忆归档数据结构：</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="1055.0" y="5819">product: 电动车辆 / period: 2026-05</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="1055.0" y="5835">total: 28,771.9 kgCO₂e</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="1055.0" y="5851">下次核算时自动读取比对</text>
+  <rect fill="#fffde7" height="60" stroke="#f9a825" stroke-width="1" width="290" x="325.0" y="5883" rx="4" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="335.0" y="5899">上报监控指标与审计日志：</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="335.0" y="5915">Token: 14,200 / 耗时: 5.8min</text>
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="335.0" y="5931">更新会话状态为完成完成</text>
+  <rect fill="#e3f2fd" height="47" rx="8" stroke="#1565c0" stroke-width="1.5" width="130" x="45" y="80" />
+  <text fill="#1565c0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" x="110" y="108">用户/前端</text>
+  <rect fill="#e8eaf6" height="47" rx="8" stroke="#0d47a1" stroke-width="1.5" width="130" x="225" y="80" />
+  <text fill="#0d47a1" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" x="290" y="108">会话处理</text>
+  <rect fill="#f3e5f5" height="47" rx="8" stroke="#4a148c" stroke-width="1.5" width="130" x="405" y="80" />
+  <text fill="#4a148c" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" x="470" y="108">智能体运行时</text>
+  <rect fill="#fce4ec" height="47" rx="8" stroke="#880e4f" stroke-width="1.5" width="130" x="585" y="80" />
+  <text fill="#880e4f" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" x="650" y="108">LLM大脑</text>
+  <rect fill="#e1bee7" height="47" rx="8" stroke="#7b1fa2" stroke-width="1.5" width="130" x="765" y="80" />
+  <text fill="#7b1fa2" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" x="830" y="108">Skills引擎</text>
+  <rect fill="#ffebee" height="47" rx="8" stroke="#c62828" stroke-width="1.5" width="130" x="945" y="80" />
+  <text fill="#c62828" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" x="1010" y="108">Tool引擎</text>
+  <rect fill="#e8f5e9" height="47" rx="8" stroke="#2e7d32" stroke-width="1.5" width="130" x="1125" y="80" />
+  <text fill="#2e7d32" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" x="1190" y="108">Memory</text>
+  <rect fill="#fff3e0" height="47" rx="8" stroke="#ef6c00" stroke-width="1.5" width="130" x="1305" y="80" />
+  <text fill="#ef6c00" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" x="1370" y="108">规则库</text>
+  <rect fill="#e0f2f1" height="47" rx="8" stroke="#00695c" stroke-width="1.5" width="130" x="1485" y="80" />
+  <text fill="#00695c" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" x="1550" y="98">MCP接入层</text>
+  <text fill="#00695c" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" x="1550" y="114">MCP</text>
+  <rect fill="#e3f2fd" height="47" rx="8" stroke="#1565c0" stroke-width="1.5" width="130" x="45" y="6003" />
+  <text fill="#1565c0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" x="110" y="6031">用户/前端</text>
+  <rect fill="#e8eaf6" height="47" rx="8" stroke="#0d47a1" stroke-width="1.5" width="130" x="225" y="6003" />
+  <text fill="#0d47a1" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" x="290" y="6031">会话处理</text>
+  <rect fill="#f3e5f5" height="47" rx="8" stroke="#4a148c" stroke-width="1.5" width="130" x="405" y="6003" />
+  <text fill="#4a148c" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" x="470" y="6031">智能体运行时</text>
+  <rect fill="#fce4ec" height="47" rx="8" stroke="#880e4f" stroke-width="1.5" width="130" x="585" y="6003" />
+  <text fill="#880e4f" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" x="650" y="6031">LLM大脑</text>
+  <rect fill="#e1bee7" height="47" rx="8" stroke="#7b1fa2" stroke-width="1.5" width="130" x="765" y="6003" />
+  <text fill="#7b1fa2" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" x="830" y="6031">Skills引擎</text>
+  <rect fill="#ffebee" height="47" rx="8" stroke="#c62828" stroke-width="1.5" width="130" x="945" y="6003" />
+  <text fill="#c62828" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" x="1010" y="6031">Tool引擎</text>
+  <rect fill="#e8f5e9" height="47" rx="8" stroke="#2e7d32" stroke-width="1.5" width="130" x="1125" y="6003" />
+  <text fill="#2e7d32" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" x="1190" y="6031">Memory</text>
+  <rect fill="#fff3e0" height="47" rx="8" stroke="#ef6c00" stroke-width="1.5" width="130" x="1305" y="6003" />
+  <text fill="#ef6c00" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" x="1370" y="6031">规则库</text>
+  <rect fill="#e0f2f1" height="47" rx="8" stroke="#00695c" stroke-width="1.5" width="130" x="1485" y="6003" />
+  <text fill="#00695c" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" x="1550" y="6021">MCP接入层</text>
+  <text fill="#00695c" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" x="1550" y="6037">MCP</text>
+  <text fill="#1a237e" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="14" font-weight="bold" x="30" y="6073">图 例</text>
+  <line stroke="#333" stroke-width="1.5" x1="30" x2="110" y1="6093" y2="6093" />
+  <polygon fill="#333" points="110,6093 102,6088 102,6098" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="11" x="120" y="6097">同步调用</text>
+  <line stroke="#666" stroke-dasharray="5,3" stroke-width="1.5" x1="260" x2="340" y1="6093" y2="6093" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="11" x="350" y="6097">返回/异步通知</text>
+  <line stroke="#00695c" stroke-width="1.5" x1="480" x2="560" y1="6093" y2="6093" />
+  <polygon fill="#00695c" points="560,6093 552,6088 552,6098" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="11" x="570" y="6097">MCP 调用（外部系统）</text>
+  <line stroke="#7b1fa2" stroke-width="1.5" x1="740" x2="820" y1="6093" y2="6093" />
+  <polygon fill="#7b1fa2" points="820,6093 812,6088 812,6098" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="11" x="830" y="6097">Skills 引擎操作</text>
+  <line stroke="#0d47a1" stroke-width="1.5" x1="970" x2="1050" y1="6093" y2="6093" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="11" x="1060" y="6097">智能体内部操作</text>
+  <rect fill="#fffde7" height="12" stroke="#f9a825" stroke-width="1" width="12" x="1200" y="6083" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="11" x="1218" y="6094">备注/数据详情</text>
+  <rect fill="#e3f2fd" height="12" stroke="#1565c0" stroke-width="1" width="12" x="1330" y="6083" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="11" x="1348" y="6094">MCP 接入层</text>
+  <rect fill="#e8f5e9" height="12" opacity="0.5" stroke="#2e7d32" stroke-width="1" width="12" x="1480" y="6083" />
+  <text fill="#333" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="11" x="1498" y="6094">执行阶段侧栏</text>
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="30" y="6128">Skills: [S1]pcf-standard-interpreter  [S2]pcf-goal-scope-guide  [S3]pcf-lca-modeler  [S4]pcf-ef-selector  [S5]pcf-data-quality-inspector  [S6]pcf-lca-calculator  [S7]pcf-uncertainty-analyzer  [S8]pcf-report-writer</text>
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="30" y="6145">Tools: [T1]pcf-data-importer  [T2]pcf-emission-calculator  [T3]pcf-monte-carlo  [T4]pcf-chart-generator  [T5]pcf-report-exporter  [T6]pcf-unit-converter</text>
+  <text fill="#666" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="9.5" x="30" y="6162">Rules &amp; MCP: [R1]pcf-standard-catalog  [R2]emission-factor-db (含 Ecoinvent 背景因子)  [R3]pedigree-matrix-db  [R4]pcf-formula-repo  |  [M1]mcp-access-layer (ERP物料/电池工艺/EPD及工艺解析)</text>
+</svg>

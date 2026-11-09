@@ -1,0 +1,111 @@
+@import './variables.scss';
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  color: $text-primary;
+  background: $bg-page;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { text-decoration: none; color: $secondary; }
+
+// 覆盖 Element UI 主题色
+.el-button--primary {
+  background-color: $primary !important;
+  border-color: $primary !important;
+  &:hover { background-color: $primary-light !important; }
+}
+
+// 统计卡片通用样式
+.stat-card {
+  background: $bg-card;
+  border-radius: $radius;
+  padding: 20px 24px;
+  box-shadow: $shadow;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  .stat-icon {
+    width: 52px; height: 52px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+  }
+  .stat-info {
+    flex: 1;
+    .stat-label { color: $text-secondary; font-size: 13px; margin-bottom: 4px; }
+    .stat-value { font-size: 28px; font-weight: 600; color: $text-primary; }
+    .stat-trend { font-size: 12px; margin-top: 2px; }
+  }
+}
+
+// 智能体卡片
+.agent-card {
+  background: $bg-card;
+  border-radius: $radius;
+  padding: 24px;
+  box-shadow: $shadow;
+  border: 1px solid $border-color;
+  transition: box-shadow 0.3s, transform 0.3s;
+  cursor: pointer;
+  &:hover {
+    box-shadow: 0 4px 20px rgba(0,168,112,0.12);
+    transform: translateY(-2px);
+  }
+  .agent-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
+    .agent-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; color: #fff;
+    }
+    .agent-name { font-size: 16px; font-weight: 600; }
+  }
+  .agent-desc { color: $text-secondary; font-size: 13px; margin-bottom: 16px; line-height: 1.5; }
+  .agent-stats {
+    display: flex; gap: 24px; margin-bottom: 16px;
+    .agent-stat-item {
+      text-align: center;
+      .agent-stat-val { font-size: 22px; font-weight: 600; }
+      .agent-stat-label { font-size: 12px; color: $text-muted; }
+    }
+  }
+  .agent-actions { display: flex; gap: 8px; }
+}
+
+// 页面容器
+.page-container {
+  padding: 24px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.page-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: $text-primary;
+}
+
+// 状态标签
+.status-dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  &.online { background: $primary; }
+  &.running { background: $secondary; animation: pulse-dot 1.5s infinite; }
+  &.error { background: $danger; }
+  &.idle { background: $text-muted; }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+// 滚动条美化
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #c0c4cc; border-radius: 3px; }

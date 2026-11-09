@@ -1,0 +1,73 @@
+# ============================================================
+# 本仓库仅管理 agent/ 代码目录
+# 业务文档（项目材料、输出材料等）不纳入版本管理
+# ============================================================
+
+# ===== 忽略根目录下所有非 agent 内容 =====
+/*
+!/agent/
+!/.gitignore
+!/README.md
+
+# ===== 依赖 =====
+node_modules/
+.pnp
+.pnp.js
+
+# ===== 构建产物 =====
+dist/
+dist-package/
+*.tgz
+*.zip
+
+# ===== 临时调试文件 =====
+_*.txt
+_*.json
+_*.log
+_*.py
+_docgen/
+build_output*.txt
+serve_log.txt
+_check_serve.js
+check-serve.js
+check_tpl*.js
+test_*.png
+99_output_*.png
+
+# ===== 日志 =====
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ===== 编辑器 / 系统 =====
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+*.bak
+*.bak2
+
+# ===== IDE / 工具目录 =====
+.codebuddy/
+.vscode/
+.workbuddy/
+
+# ===== 环境变量 =====
+.env.local
+.env.*.local
+
+# ===== 缓存 =====
+.cache/
+.eslintcache
+.stylelintcache
+
+# ===== 备份 / 归档 / 参考 =====
+**/_backup_*/
+**/_archive/
+**/_docx_backup_*/
+UI参考/
+_ocr_img/

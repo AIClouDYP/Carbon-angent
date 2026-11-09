@@ -1,0 +1,39 @@
+{
+  "name": "zcip-footprint-accounting",
+  "version": "1.0.0",
+  "description": "产品碳足迹核算智能体前端页面（Mock数据演示版）",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve --port 8080",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint",
+    "pack": "powershell -ExecutionPolicy Bypass -File scripts/pack.ps1"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "core-js": "^3.8.3",
+    "docx": "^9.7.1",
+    "echarts": "^5.4.0",
+    "element-ui": "^2.15.14",
+    "mockjs": "^1.1.0",
+    "vue": "^2.6.14",
+    "vue-router": "^3.5.4",
+    "vuex": "^3.6.2",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-router": "~5.0.0",
+    "@vue/cli-service": "~5.0.0",
+    "less": "^4.0.0",
+    "less-loader": "^8.0.0",
+    "sass": "^1.56.0",
+    "sass-loader": "^13.2.0",
+    "vue-template-compiler": "^2.6.14"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}

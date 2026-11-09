@@ -1,0 +1,130 @@
+
+sequenceDiagram
+    autonumber
+    actor User as 用户/前端
+    participant Session as 会话管理
+    participant Runtime as 智能体运行时
+    participant LLM as LLM大脑
+    participant Skills as Skills引擎
+    participant Tools as Tool引擎
+    participant Memory as Memory(记忆)
+    participant Rules as 规则库
+    participant MCP as MCP/数据源
+
+    Note over User, MCP: 阶段一：标准选择与核算方案确定 (Standard & Boundary - 强交互)
+    User->>Session: 发起核算请求 (指定组织名称、核算年度)
+    Session->>Runtime: 路由并创建会话
+    Note over Runtime: 创建执行上下文 (org_id, period, session_id)
+    
+    Runtime->>Memory: 读取历史核算数据及组织基准
+    Memory-->>Runtime: 返回：2025年同组织碳排放数据摘要
+    Runtime->>LLM: 注入组织信息与历史基准，启动核算方案推理
+    LLM->>Skills: 调用 Skill: oca-standard-selector (标准推荐)
+    Skills->>Rules: 查询 oca-standard-catalog 获取适用标准列表
+    Rules-->>Skills: 返回：ISO 14064-1 / GHG Protocol / GB/T 32150
+    Note over Skills: 根据组织行业属性筛选适用标准，生成推荐方案
+    Skills-->>LLM: 返回：推荐核算标准组合及差异对比说明
+    LLM-->>User: 推送标准推荐卡片 (含推荐理由与适用场景)
+    
+    Note over User: 用户确认标准选择：ISO 14064-1 + GHG Protocol
+    User->>LLM: 提交选定的核算标准
+    
+    LLM->>Skills: 调用 Skill: oca-boundary-guide (边界引导)
+    Note over Skills: 生成引导式配置问卷：组织边界+范围边界+维度
+    Skills-->>LLM: 返回：引导式配置菜单 (含默认推荐值)
+    LLM-->>User: 推送边界配置表单 (组织边界/范围3/核算维度)
+    
+    Note over User: 强交互选择：运营控制边界+范围3(运输/外购/通勤)+企业级+车间级
+    User->>LLM: 提交边界与维度配置参数
+    
+    Note over LLM: 结合用户配置，二次推理构建最终核算方案
+    LLM->>Skills: 提交配置，生成核算方案与数据采集清单
+    Skills-->>LLM: 返回：最终核算方案及各范围数据收集清单
+    LLM-->>User: 呈现最终核算方案与边界明细，请用户最终确认
+    User->>Session: 最终确认方案，正式启动数据采集流程
+
+    loop 迭代循环：直至数据完整性+因子匹配+合规校验全部通过
+        
+        Note over User, MCP: 阶段二：活动数据采集 (AI对话引导)
+        Session->>Runtime: 进入本轮数据采集阶段
+        Runtime->>Tools: 调用 Tool: oca-data-importer
+        Tools->>MCP: 调用 erp-mcp 获取能源消耗数据
+        MCP-->>Tools: 返回 ERP 能耗数据 JSON
+        Tools->>MCP: 调用 ems-mcp 获取实时能耗数据
+        MCP-->>Tools: 返回 EMS 监测数据 JSON
+        Tools-->>Runtime: 本轮自动采集数据完成
+        Runtime->>Memory: 保存本轮数据到短期记忆
+        
+        LLM->>Skills: 调用 Skill: oca-data-collector (AI对话采集)
+        Skills->>Memory: 读取当前活动数据与缺口分析
+        Memory-->>Skills: 返回已采集数据与缺口清单
+        Note over Skills: 识别缺口：范围3员工通勤缺失、柴油数据不一致
+        Skills-->>LLM: 返回：缺口清单与AI预填建议值
+        LLM-->>User: AI对话推送缺失数据补录卡片
+        
+        Note over User: 对话确认：员工通勤12000km、柴油修正18.5吨
+        User->>LLM: 对话提交补充数据与修正
+        LLM->>Memory: 更新短期记忆：补录活动数据
+
+        Note over User, MCP: 阶段三：排放因子匹配
+        LLM->>Skills: 调用 Skill: oca-ef-matcher (因子智能匹配)
+        Skills->>Rules: 查询 emission-factor-db
+        Rules-->>Skills: 返回候选排放因子列表
+        Note over Skills: 三级匹配：地区因子→行业因子→国际因子
+        Skills-->>LLM: 返回：最优因子组合与选择理由
+        LLM-->>User: 推送因子匹配结果卡片
+        User->>LLM: 确认因子选择
+        LLM->>Memory: 写入短期记忆：因子选择记录
+
+        Note over User, MCP: 阶段四：碳排放计算
+        LLM->>Skills: 调用 Skill: oca-emission-calculator (碳排放计算)
+        Skills->>Tools: 调用 Tool: oca-emission-calculator-tool
+        Note over Tools: 范围1: 燃料直接排放(57.78tCO2e)<br/>范围2: 外购电力间接(16,528.5tCO2e)<br/>范围3: 上游运输+外购+通勤
+        Tools-->>Skills: 返回各范围计算明细与分项汇总
+        Note over Skills: 汇总计算 (合计 18,254.3 tCO2e)
+        Skills-->>LLM: 返回碳排放计算结果
+        LLM->>Memory: 写入短期记忆：计算结果与明细
+        
+        Note over User, MCP: 阶段五：数据质量与合规校验
+        LLM->>Skills: 调用 Skill: oca-compliance-inspector (合规校验)
+        Skills->>Memory: 读取当期核算数据
+        Memory-->>Skills: 返回完整核算数据
+        Skills->>Rules: 查询 oca-compliance-rules
+        Rules-->>Skills: 返回校验规则集
+        Note over Skills: 执行完整性/一致性/阈值/逻辑校验
+        Skills-->>LLM: 返回：合规校验报告 (含 2 项 Warning)
+        LLM-->>User: 推送合规校验结果卡片
+        
+        alt 判定：合规校验不通过 (返回迭代)
+            User->>LLM: 补充说明/修正数据
+            Note over LLM: 触发回溯，退回阶段二或阶段三重新执行
+        else 判定：合规校验完全通过并经用户确认
+            User->>LLM: 确认核算结果与合规评级
+            Note over LLM: 合规通过，核算结果固化 (跳出循环)
+            LLM->>Memory: 写入短期记忆：合规通过日志
+        end
+        
+    end
+
+    Note over User, MCP: 阶段六：不确定度分析与减排洞察
+    LLM->>Skills: 调用 Skill: oca-uncertainty-analyzer (不确定度分析)
+    Skills->>Memory: 读取计算结果与因子不确定度
+    Memory-->>Skills: 返回核算结果与因子信息
+    Note over Skills: 不确定度评估+敏感度分析+减排热点识别
+    Skills-->>LLM: 返回不确定度报告、敏感度矩阵与减排热点
+    LLM-->>User: 推送分析报告 (不确定度+减排热点+减排建议)
+    LLM->>Memory: 写入短期记忆：分析结果与热点记录
+
+    Note over User, MCP: 阶段七：报告生成与溯源
+    LLM->>Skills: 调用 Skill: oca-report-generator (报告生成)
+    LLM->>Tools: 调用 Tool: oca-traceability-builder (七级溯源链)
+    Note over Tools: 总结果→范围→类别→排放源→活动数据→排放因子→原始凭证
+    Tools-->>LLM: 返回溯源链结构
+    LLM->>Tools: 调用 Tool: oca-chart-generator (可视化图表)
+    Tools-->>LLM: 返回图表 SVG/PNG
+    LLM->>Tools: 调用 Tool: oca-report-exporter (导出Word/PDF)
+    Tools-->>LLM: 返回报告文件下载 URL
+    LLM-->>User: 推送核算结果及报告下载链接
+    LLM->>Memory: 写入长期记忆：本次核算摘要 (oca_calculation_context)
+    Note over Runtime: 上报监控指标 (Token: 12800, 耗时 4.5min)
+    Note over Runtime: 写入审计日志，更新会话状态为完成
