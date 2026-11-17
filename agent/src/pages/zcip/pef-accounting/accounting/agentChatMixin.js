@@ -412,7 +412,7 @@ export default {
     },
     goBackToUpper() {
       this.saveStageSnapshot()
-      this.$router.go(-1)
+      this.$router.push('/agent-center/apps/pef-accounting').catch(() => {})
     },
     showCmdHint() {
       this.messages.push({

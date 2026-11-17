@@ -131,7 +131,7 @@ export default {
             { key: 'pef-footprint', label: '产品环境足迹', icon: 'el-icon-data-analysis', route: '/agent-center/apps/pef-accounting', pageTitle: '产品环境足迹' },
             { key: 'org-carbon', label: '组织碳核算', icon: 'el-icon-office-building', route: '/agent-center/apps/org-accounting', pageTitle: '组织碳核算' },
             { key: 'beijing-carbon', label: '北京碳市场', icon: 'el-icon-s-flag', route: '/beijing-carbon/accounting/agent', pageTitle: '北京碳市场' },
-            { key: 'zero-carbon-park', label: '园区碳核算', icon: 'el-icon-school', route: '/park-accounting/accounting/agent', pageTitle: '园区碳核算' },
+            { key: 'zero-carbon-park', label: '园区碳核算', icon: 'el-icon-school', route: '/park-accounting/workspace', pageTitle: '园区碳核算' },
             { key: 'zero-carbon-factory', label: '零碳工厂', icon: 'el-icon-sunny', route: '/agent-center/apps/zero-carbon-factory', pageTitle: '零碳工厂' },
             { key: 'green-factory', label: '绿色工厂', icon: 'el-icon-grape', route: '/green-factory/agent', pageTitle: '绿色工厂' },
             { key: 'report-submission', label: '智慧报告', icon: 'el-icon-document-checked', route: '/agent-center/apps/report-submission', pageTitle: '智慧报告' }
@@ -298,9 +298,12 @@ export default {
       if (path === '/beijing-carbon/accounting/agent' || path === '/bj-carbon/accounting/agent') {
         path = '/agent-center/apps/beijing-carbon';
       }
-      // 园区碳核算九阶段工作台复用工作台页签
-      if (path === '/park-carbon/accounting/agent' || path === '/park-accounting/accounting/agent') {
-        path = '/agent-center/apps/park-carbon';
+      // 园区碳核算工作台/三步/九阶段共用同一页签
+      if (path === '/park-carbon/accounting/agent' ||
+          path === '/park-accounting/accounting/agent' ||
+          path === '/park-accounting/accounting/stages9' ||
+          path === '/park-accounting/workspace') {
+        path = '/park-accounting/workspace';
       }
       // 检查是否已存在
       const exists = this.openedTabs.find(tab => tab.path === path);
@@ -330,8 +333,10 @@ export default {
       if (currentPath === '/beijing-carbon/accounting/agent' || currentPath === '/bj-carbon/accounting/agent') {
         currentPath = '/agent-center/apps/beijing-carbon';
       }
-      if (currentPath === '/park-carbon/accounting/agent' || currentPath === '/park-accounting/accounting/agent') {
-        currentPath = '/agent-center/apps/park-carbon';
+      if (currentPath === '/park-carbon/accounting/agent' ||
+          currentPath === '/park-accounting/accounting/agent' ||
+          currentPath === '/park-accounting/accounting/stages9') {
+        currentPath = '/park-accounting/workspace';
       }
       return currentPath === path;
     },

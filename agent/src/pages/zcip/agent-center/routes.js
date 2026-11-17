@@ -93,10 +93,10 @@ export const agentCenterRoutes = [
   },
 
 
-  // 园区碳核算 — 重定向到新路由（兼容旧链接）
+  // 园区碳核算 — 重定向到工作台（兼容旧链接）
   {
     path: '/agent-center/apps/zero-carbon-park',
-    redirect: '/park-accounting/accounting/agent',
+    redirect: '/park-accounting/workspace',
     name: 'ZeroCarbonPark',
     meta: { title: '园区碳核算', hideBreadcrumb: true, theme: 'light' }
   },

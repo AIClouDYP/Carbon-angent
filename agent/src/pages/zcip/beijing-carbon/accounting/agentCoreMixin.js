@@ -124,7 +124,7 @@ import { loadOrgStandardsForAgent, loadBjStandardsForAgent, ensureSeed } from '@
       currentStepIndex: 0,
       selectedStandard: 'DB11/T 1787-2020',
       standardPickerOpen: false,   // 标准切换列表展开态
-      selectedUnit: 'scope123',
+      selectedUnit: 'scope12',
       boundarySubStep: 0, // 阶段二内5个子步骤: 0-4
       isModelBuilt: false, // 是否构建了核算模型
       modelValidated: false, // 模型是否已通过结构校验
@@ -137,8 +137,8 @@ import { loadOrgStandardsForAgent, loadBjStandardsForAgent, ensureSeed } from '@
       emissionExpandedNodes: {}, // 树表的展开/折叠状态映射表
       boundaryConfig: {
         lifecycleScope: 'operational',   // 组织边界方法
-        unitType: 'scope123',            // 核算范围口径
-        unitDetail: '覆盖范围1（直接排放）、范围2（外购能源间接）、范围3（价值链其他间接）',
+        unitType: 'scope12',            // 核算范围口径（北京试点不含范围3）
+        unitDetail: '化石燃料燃烧排放 + 工业生产过程排放 + 外购电力、热力隐含排放（DB11/T 1787 口径）',
         allocationRule: 'facility',      // 数据归集方式
         cutoffThreshold: '1%/5%',
         cutoffItemThreshold: '1%',
@@ -210,12 +210,171 @@ import { loadOrgStandardsForAgent, loadBjStandardsForAgent, ensureSeed } from '@
       ],
       modelStages: this.createInitialModelStages(),
       validationStep: 0,
-      validationActiveTab: 'validation',
+      validationActiveTab: 'quality',
       validationItems: this.createDefaultValidationItems(),
       supplementFiles: []
     }
   },
   computed: {
+    /** 待处理项列表（阶段4：AD 未填/未确认；阶段5：EF 未匹配/未确认） */
+    pendingItems() {
+      if (this.currentStepIndex !== 3 && this.currentStepIndex !== 4) return []
+      const isAD = this.currentStepIndex === 3
+      const key = isAD ? 'AD' : 'EF'
+      const items = []
+      ;(this.modelStages || []).forEach(stage => {
+        ;(stage.processes || []).forEach(proc => {
+          ;(proc.units || []).forEach(u => {
+            const p = (u.params || []).find(x => x.key === key)
+            if (!p) return
+            const empty = !p.value || String(p.value).trim() === ''
+            const unverified = !p.verified
+            if (empty || unverified) {
+              items.push({
+                issueId: this.paramIssueId ? this.paramIssueId(proc, u, key) : ('PI-' + proc.name + '-' + u.name + '-' + key),
+                procName: proc.name,
+                unitName: u.name,
+                reason: empty ? '待补充' : '待确认',
+                empty: empty
+              })
+            }
+          })
+        })
+      })
+      return items
+    },
+
+    /** 待处理项总数 */
+    pendingCount() {
+      return this.pendingItems.length
+    },
+
+    /** 待补充数量 */
+    pendingEmptyCount() {
+      return this.pendingItems.filter(x => x.empty).length
+    },
+
+    /** 待确认数量 */
+    pendingUnverifiedCount() {
+      return this.pendingItems.filter(x => !x.empty).length
+    },
+
+    /** 是否存在待处理项 */
+    hasPending() {
+      return this.pendingCount > 0
+    },
+
+    /** 阶段6：整体数据质量评估 */
+    qualityAssessment() {
+      const list = []
+      ;(this.modelStages || []).forEach(stage => {
+        ;(stage.processes || []).forEach(proc => {
+          ;(proc.units || []).forEach(u => {
+            ;(u.params || []).forEach(p => {
+              if (!p.value) return
+              const r = this.validateParam ? this.validateParam(proc, u, p) : { level: '' }
+              const ad = parseFloat(p.value) || 0
+              const ef = parseFloat((u.params || []).find(x => x.key === 'EF')?.value) || 0
+              const emission = (p.key === 'AD') ? ad * ef : 0
+              list.push({
+                proc: proc.name, unit: u.name, key: p.key,
+                value: p.value, unitText: p.unit,
+                source: p.source || '',
+                verified: p.verified,
+                level: r.level,
+                emission,
+                isPrimary: /台账|结算|计量|实测|记录/.test(p.source || '')
+              })
+            })
+          })
+        })
+      })
+
+      const total = list.length
+      if (!total) {
+        return { total: 0, dqrDist: {}, weightedScore: '—', weightedGrade: '—',
+                 primaryCount: 0, primaryRatio: 0, primaryEmissionRatio: 0,
+                 sourceCoverage: 0, emissionCoverage: 0,
+                 confDist: [], ageInfo: {}, lowQuality: [] }
+      }
+
+      // ① DQR 分布（用校验级别映射）
+      const dqrDist = { A: 0, B: 0, C: 0, D: 0, E: 0 }
+      list.forEach(x => {
+        let g = 'C'
+        if (x.level === 'hint') g = 'A'
+        else if (x.level === '') g = 'B'
+        else if (x.level === 'warn') g = 'D'
+        else if (x.level === 'block') g = 'E'
+        dqrDist[g]++
+      })
+
+      // ② 加权质量分
+      const scoreMap = { A: 1.4, B: 2.2, C: 3.0, D: 3.8, E: 4.6 }
+      let sumE = 0, sumW = 0
+      list.forEach(x => {
+        let g = 'C'
+        if (x.level === 'hint') g = 'A'
+        else if (x.level === '') g = 'B'
+        else if (x.level === 'warn') g = 'D'
+        else if (x.level === 'block') g = 'E'
+        const w = x.emission > 0 ? x.emission : 1
+        sumE += w
+        sumW += w * scoreMap[g]
+      })
+      const ws = sumE > 0 ? (sumW / sumE) : 3.0
+      const wg = ws <= 1.8 ? 'A' : ws <= 2.6 ? 'B' : ws <= 3.4 ? 'C' : ws <= 4.2 ? 'D' : 'E'
+
+      // ③ 数据来源结构
+      const primary = list.filter(x => x.isPrimary)
+      const primaryRatio = Math.round(primary.length / total * 100)
+      const totalEm = list.reduce((a, b) => a + b.emission, 0)
+      const primaryEm = primary.reduce((a, b) => a + b.emission, 0)
+      const primaryEmissionRatio = totalEm > 0 ? Math.round(primaryEm / totalEm * 100) : 0
+
+      // ④ 覆盖率
+      let srcTotal = 0, srcFilled = 0
+      ;(this.modelStages || []).forEach(stage => {
+        ;(stage.processes || []).forEach(proc => {
+          srcTotal++
+          if ((proc.units || []).some(u => (u.params || []).some(p => p.value))) srcFilled++
+        })
+      })
+      const sourceCoverage = srcTotal ? Math.round(srcFilled / srcTotal * 100) : 0
+      const emissionCoverage = 96  // 演示值：实际应由总排放对比得出
+
+      // ⑤ 置信度分布
+      const confDist = [
+        { label: 'P-1 企业实测', count: list.filter(x => x.level === '' && x.isPrimary).length, color: '#15803d' },
+        { label: 'P0 企业记忆', count: 0, color: '#0369a1' },
+        { label: '规则表命中', count: list.filter(x => x.key === 'EF' && x.level === '').length, color: '#7c3aed' },
+        { label: '兜底缺省', count: list.filter(x => x.key === 'EF' && x.level !== '').length, color: '#b45309' }
+      ]
+
+      // ⑥ 时效性
+      const ageInfo = {
+        dataYear: this.baselineYear || new Date().getFullYear(),
+        dataGap: 0,
+        factorVersion: 'IPCC 2006',
+        factorGap: 18,
+        factorLevel: 'warn'
+      }
+
+      // ⑦ 低质量项
+      const lowQuality = list.filter(x => x.level === 'warn' || x.level === 'block')
+        .sort((a, b) => b.emission - a.emission)
+        .slice(0, 20)
+        .map(x => ({ proc: x.proc, unit: x.unit, key: x.key, level: x.level, emission: x.emission }))
+
+      return {
+        total, dqrDist,
+        weightedScore: ws.toFixed(2), weightedGrade: wg,
+        primaryCount: primary.length, primaryRatio, primaryEmissionRatio,
+        sourceCoverage, emissionCoverage,
+        confDist, ageInfo, lowQuality
+      }
+    },
+
     stageConfirmConfig() {
       const configs = {
         1: { label: '确认边界配置，进入核算模型', icon: 'el-icon-check', hint: '确认边界配置无误后进入核算模型阶段', action: () => this.sendSuggestion('确认边界配置') },
@@ -314,7 +473,6 @@ import { loadOrgStandardsForAgent, loadBjStandardsForAgent, ensureSeed } from '@
       if (im && (im.note || im.mode)) {
         let h = ''
         if (im.note) h += '<p>' + esc(im.note) + '</p>'
-        if (im.mode) h += '<p>组织方式：<b>' + esc(im.mode) + '</b></p>'
         blocks.push({ key: 'category', icon: 'boundary-icon', title: '排放源分类', html: h })
       }
 
@@ -393,7 +551,7 @@ import { loadOrgStandardsForAgent, loadBjStandardsForAgent, ensureSeed } from '@
         scope3: '范围3 · 价值链间接排放'
       }
       const ORDER = ['scope1', 'scope2', 'scope3']
-      const range = (this.boundaryConfig && this.boundaryConfig.unitType) || 'scope123'
+      const range = (this.boundaryConfig && this.boundaryConfig.unitType) || 'scope12'
       const allow = range === 'scope12' ? ['scope1', 'scope2'] : ORDER
       return allow.map(k => ({
         key: k,
@@ -478,7 +636,7 @@ import { loadOrgStandardsForAgent, loadBjStandardsForAgent, ensureSeed } from '@
       return map[this.boundaryConfig.lifecycleScope] || this.boundaryConfig.lifecycleScope
     },
     unitTypeLabel() {
-      const map = { scope12: '范围1+2', scope123: '范围1+2+3', full: '全口径（含类别1~6）' }
+      const map = { scope12: '范围1+2（化石燃料燃烧 + 工业过程 + 外购电力热力）', full: '全口径（含类别1~6）' }
       return map[this.boundaryConfig.unitType] || this.boundaryConfig.unitType
     },
     allocationRuleLabel() {
@@ -1023,6 +1181,198 @@ import { loadOrgStandardsForAgent, loadBjStandardsForAgent, ensureSeed } from '@
   },
 
   methods: {
+    /** 按阶段过滤参数：阶段4（活动数据）只显示 AD，其余阶段显示全部 */
+    paramsForStep(u) {
+      const list = (u && u.params) || []
+      // 阶段4（活动数据）只关注 AD；阶段5（排放因子）只关注 EF
+      if (this.currentStepIndex === 3) {
+        return list.filter(p => p.key === 'AD')
+      }
+      if (this.currentStepIndex === 4) {
+        return list.filter(p => p.key === 'EF')
+      }
+      return list
+    },
+
+    validateParam(proc, unit, p) {
+      if (!p) return { level: '', issues: [] }
+      const issues = []
+      const val = p.value
+      const num = parseFloat(val)
+      const hasVal = val !== undefined && val !== null && String(val).trim() !== ''
+      const key = p.key || ''
+
+      // ===== A 类：完整性 =====
+      if (!hasVal) {
+        issues.push({ level: 'block', code: 'A-1', msg: '活动数据未填写' })
+      } else {
+        // 来源 / 佐证材料二选一，有一个即可
+        if (!p.source && !p.proof) {
+          issues.push({ level: 'warn', code: 'A-2', msg: '未填写数据来源或佐证材料，无法追溯' })
+        }
+        if (!p.unit) issues.push({ level: 'block', code: 'A-4', msg: '活动数据缺少单位' })
+      }
+
+      // ===== B 类：合理性 =====
+      if (hasVal) {
+        if (isNaN(num)) {
+          issues.push({ level: 'block', code: 'B-0', msg: '数值格式无效' })
+        } else {
+          if (num <= 0) issues.push({ level: 'block', code: 'B-1', msg: '活动数据必须大于 0' })
+          // B-2 量级检查（简化：超 1e9 视为可疑）
+          if (num > 1e9) issues.push({ level: 'warn', code: 'B-2', msg: '数值过大，请确认单位是否正确' })
+          // B-4 精度
+          const dec = (String(val).split('.')[1] || '').length
+          if (dec > 4) issues.push({ level: 'hint', code: 'B-4', msg: '数值精度过高，建议保留 2 位小数' })
+          // B-5 原始值偏差
+          const raw = parseFloat(p.rawValue)
+          if (!isNaN(raw) && raw > 0) {
+            const diff = Math.abs(raw - num) / raw
+            if (diff > 0.05) {
+              issues.push({ level: 'warn', code: 'B-5', msg: '原始值与当前值偏差 ' + (diff * 100).toFixed(1) + '%，请确认换算' })
+            }
+          }
+          // B-6 换算系数无说明
+          if (p.convertFactor && String(p.convertFactor) !== '1' && !p.convertNote) {
+            issues.push({ level: 'hint', code: 'B-6', msg: '发生了单位换算，建议补充换算说明' })
+          }
+        }
+      }
+
+      // ===== C 类：一致性 =====
+      if (hasVal && !isNaN(num)) {
+        // C-1 同期同类项重复
+        const units = (proc && proc.units) || []
+        const sameVals = units.filter(u => {
+          const q = (u.params || []).find(x => x.key === key)
+          return q && String(q.value) === String(val)
+        })
+        if (sameVals.length > 1) {
+          issues.push({ level: 'warn', code: 'C-1', msg: '同一排放源下有 ' + sameVals.length + ' 个单元数值相同，请确认是否重复' })
+        }
+      }
+
+      // 汇总级别（取最严重）
+      const order = { block: 3, warn: 2, hint: 1 }
+      let level = ''
+      issues.forEach(i => {
+        if (!level || order[i.level] > order[level]) level = i.level
+      })
+
+      return { level, issues }
+    },
+
+    /** 参数行 class（用于背景色） */
+    paramRowClass(proc, unit, p) {
+      const r = this.validateParam(proc, unit, p)
+      const cls = {}
+      if (r.level === 'block') cls['has-block'] = true
+      else if (r.level === 'warn') cls['has-warn'] = true
+      else if (r.level === 'hint') cls['has-hint'] = true
+      // 待确认（有值但未确认）
+      if (p && p.value && !p.verified) cls['is-pending-confirm'] = true
+      return cls
+    },
+
+    /** 参数问题图标样式类 */
+    paramIssueClass(proc, unit, p) {
+      const r = this.validateParam(proc, unit, p)
+      if (r.level === 'block') return 'is-block'
+      if (r.level === 'warn') return 'is-warn'
+      if (r.level === 'hint') return 'is-hint'
+      return ''
+    },
+
+    /** 参数行问题提示文本 */
+    paramIssueTip(proc, unit, p) {
+      const r = this.validateParam(proc, unit, p)
+      if (!r.issues.length) return ''
+      return r.issues.map(i => '【' + i.code + '】' + i.msg).join('\n')
+    },
+
+    /** 汇总表：判断排放源下所有单元的某参数是否有值 */
+    procHasValue(proc, key) {
+      const units = (proc && proc.units) || []
+      for (let i = 0; i < units.length; i++) {
+        const p = (units[i].params || []).find(x => x.key === key)
+        if (p && p.value && String(p.value).trim() !== '') return true
+      }
+      // 若无 units，退化为聚合字段
+      if (!units.length) {
+        return key === 'AD' ? !!proc.activityData : !!proc.factor
+      }
+      return false
+    },
+
+    /** 汇总表：判断排放源下所有单元的某参数是否全部已确认 */
+    procIsVerified(proc, key) {
+      const units = (proc && proc.units) || []
+      let hasAny = false
+      for (let i = 0; i < units.length; i++) {
+        const p = (units[i].params || []).find(x => x.key === key)
+        if (p && p.value && String(p.value).trim() !== '') {
+          hasAny = true
+          if (!p.verified) return false
+        }
+      }
+      return hasAny
+    },
+
+    /** 汇总表：批量设置确认状态 */
+    setProcVerified(proc, key, val) {
+      const units = (proc && proc.units) || []
+      units.forEach(u => {
+        const p = (u.params || []).find(x => x.key === key)
+        if (p) this.$set(p, 'verified', val)
+      })
+      this.$forceUpdate()
+    },
+
+    /** 汇总表：取排放源下最严重的校验级别 */
+    procIssueLevel(proc, key) {
+      const units = (proc && proc.units) || []
+      const order = { block: 3, warn: 2, hint: 1 }
+      let level = ''
+      units.forEach(u => {
+        const p = (u.params || []).find(x => x.key === key)
+        if (!p) return
+        const r = this.validateParam(proc, u, p)
+        if (r.level && (!level || order[r.level] > order[level])) level = r.level
+      })
+      return level
+    },
+
+    /** 定位下一个待处理项（循环） */
+    locateNextPending() {
+      const list = this.pendingItems
+      if (!list.length) {
+        this.$message.success('全部数据已处理完成')
+        this.pendingCursor = 0
+        return
+      }
+      // 循环取下一个
+      if (this.pendingCursor >= list.length) this.pendingCursor = 0
+      const target = list[this.pendingCursor]
+      const idx = this.pendingCursor + 1
+      this.pendingCursor = this.pendingCursor + 1
+
+      this.$nextTick(() => {
+        const el = document.querySelector('[data-issue-id="' + target.issueId + '"]')
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          this.pendingFlashId = target.issueId
+          setTimeout(() => { this.pendingFlashId = '' }, 2000)
+        }
+      })
+      this.$message.info('第 ' + idx + ' / ' + list.length + ' 项：' + target.procName + ' · ' + target.unitName + '（' + target.reason + '）')
+    },
+
+    /** 判断某参数是否当前高亮 */
+    isPendingFlash(proc, unit, key) {
+      if (!this.pendingFlashId) return false
+      const id = this.paramIssueId ? this.paramIssueId(proc, unit, key) : ('PI-' + proc.name + '-' + unit.name + '-' + key)
+      return id === this.pendingFlashId
+    },
     /** 渲染常规分析图表（趋势 + 饼图） */
     renderRoutineCharts() {
       const echarts = (typeof window !== 'undefined' && window.__ECHARTS__) ? window.__ECHARTS__ : null
@@ -1961,14 +2311,14 @@ import { loadOrgStandardsForAgent, loadBjStandardsForAgent, ensureSeed } from '@
       // 组织碳核算默认画像（非组织碳排放）
       this.selectedStandard = 'GHG Protocol'
       this.boundaryConfig.lifecycleScope = 'operational'
-      this.boundaryConfig.unitType = 'scope123'
-      this.boundaryConfig.unitDetail = '覆盖范围1（直接排放）、范围2（外购能源间接）、范围3（价值链其他间接）'
+      this.boundaryConfig.unitType = 'scope12'
+      this.boundaryConfig.unitDetail = '化石燃料燃烧排放 + 工业生产过程排放 + 外购电力、热力隐含排放（DB11/T 1787 口径）'
       this.boundaryConfig.allocationRule = 'facility'
       // 数据所属期自动继承核算期间（阶段1 只读展示）
       if (this.periodRange && this.periodRange.length === 2) {
         this.boundaryConfig.timeBoundary = this.periodRange[0] + ' - ' + this.periodRange[1]
       }
-      this.selectedUnit = 'scope123'
+      this.selectedUnit = 'scope12'
       this.modelStages = this.createInitialModelStages()
       this.validationItems = this.createDefaultValidationItems()
     },
@@ -2106,88 +2456,43 @@ import { loadOrgStandardsForAgent, loadBjStandardsForAgent, ensureSeed } from '@
       ]
     },
     createInitialModelStages() {
-      // 排放源清单（参考封存版三层结构：分类 → 排放源 → 计算口径）
-      const mk = (name, formula) => ({ name, formula, allocation: '设施直接归集', units: [], activityData: '', unit: '', factor: '', factorUnit: '', emission: 0, dataSource: '', factorSource: '', proof: '', inputs: [{ name: '消耗量', value: '', unit: '', factor: '', factorUnit: '', flowType: 'elementary', listType: 'activity' }], outputs: [] })
+      // 北京碳市场：按 DB11/T 1787 口径组织清单（化石燃料燃烧 + 工业过程 + 外购电力热力）
+      const mk = (name, formula) => ({
+        name, formula, allocation: '设施直接归集',
+        units: [],
+        activityData: '', unit: '', factor: '', factorUnit: '', emission: 0,
+        dataSource: '', factorSource: '', proof: '', verifiedAD: false, verifiedEF: false,
+        inputs: [{ name: '消耗量', value: '', unit: '', factor: '', factorUnit: '', flowType: 'elementary', listType: 'activity' }],
+        outputs: []
+      })
+
       return [
         {
-          key: 'fuel',
-          scope: 'scope1', scopeName: '范围1 · 直接排放',
-          scope: 'scope1', scopeName: '范围1 · 直接排放',
-          title: '化石燃料燃烧',
-          dotClass: 'sd-raw',
+          key: 'fuel', title: '化石燃料燃烧排放', scope: 'scope1', dotClass: 'is-blue',
           processes: [
-            mk('燃煤', '消耗量 × 低位发热量 × 单位热值含碳量 × 碳氧化率 × 44/12'),
-            mk('天然气', '消耗量 × 低位发热量 × 单位热值含碳量 × 碳氧化率 × 44/12'),
-            mk('柴油', '消耗量 × 低位发热量 × 单位热值含碳量 × 碳氧化率 × 44/12'),
-            mk('汽油', '消耗量 × 低位发热量 × 单位热值含碳量 × 碳氧化率 × 44/12'),
-            mk('燃料油', '消耗量 × 低位发热量 × 单位热值含碳量 × 碳氧化率 × 44/12'),
-            mk('焦炭', '消耗量 × 低位发热量 × 单位热值含碳量 × 碳氧化率 × 44/12')
+            mk('燃煤', '排放量 = 燃煤消耗量 × 低位发热量 × 单位热值含碳量 × 碳氧化率 × 44/12'),
+            mk('天然气', '排放量 = 天然气消耗量 × 低位发热量 × 单位热值含碳量 × 碳氧化率 × 44/12'),
+            mk('柴油', '排放量 = 柴油消耗量 × 低位发热量 × 单位热值含碳量 × 碳氧化率 × 44/12'),
+            mk('汽油', '排放量 = 汽油消耗量 × 低位发热量 × 单位热值含碳量 × 碳氧化率 × 44/12'),
+            mk('燃料油', '排放量 = 燃料油消耗量 × 低位发热量 × 单位热值含碳量 × 碳氧化率 × 44/12'),
+            mk('焦炭', '排放量 = 焦炭消耗量 × 低位发热量 × 单位热值含碳量 × 碳氧化率 × 44/12')
           ]
         },
         {
-          key: 'process',
-          scope: 'scope1', scopeName: '范围1 · 直接排放',
-          scope: 'scope1', scopeName: '范围1 · 直接排放',
-          title: '工业生产过程排放',
-          dotClass: 'sd-manu',
+          key: 'process', title: '工业生产过程排放', scope: 'scope1', dotClass: 'is-blue',
           processes: [
-            mk('化学反应过程', '原材料消耗量 × 工艺排放因子'),
-            mk('金属冶炼', '产量 × 工艺排放因子'),
-            mk('水泥熟料生产', '熟料产量 × 工艺排放因子'),
-            mk('化工合成', '产量 × 工艺排放因子')
+            mk('水泥熟料生产', '排放量 = 熟料产量 × 排放因子'),
+            mk('钢铁冶炼', '排放量 = 粗钢产量 × 排放因子'),
+            mk('化工合成', '排放量 = 产品产量 × 排放因子'),
+            mk('其他工艺排放', '排放量 = 产量 × 排放因子')
           ]
         },
         {
-          key: 'fugitive',
-          scope: 'scope1', scopeName: '范围1 · 直接排放',
-          scope: 'scope1', scopeName: '范围1 · 直接排放',
-          title: '逃逸排放',
-          dotClass: 'sd-trans',
+          key: 'energy', title: '外购电力、热力隐含排放', scope: 'scope2', dotClass: 'is-green',
           processes: [
-            mk('制冷剂逃逸', '逃逸量 × GWP'),
-            mk('灭火剂逃逸', '逃逸量 × GWP'),
-            mk('SF6 逃逸', '逃逸量 × GWP'),
-            mk('甲烷逃逸', '逃逸量 × GWP')
-          ]
-        },
-        {
-          key: 'energy',
-          scope: 'scope2', scopeName: '范围2 · 外购能源间接排放',
-          scope: 'scope2', scopeName: '范围2 · 外购能源间接排放',
-          title: '净购入电力、热力排放',
-          dotClass: 'sd-use',
-          processes: [
-            mk('净购入电力', '净购入电量 × 电网排放因子（区域因子 / 市场因子双口径）'),
-            mk('净购入热力（蒸汽）', '净购入热量 × 热力排放因子'),
-            mk('净购入热力（热水）', '净购入热量 × 热力排放因子'),
-            mk('外购冷力', '外购冷量 × 冷力排放因子')
-          ]
-        },
-        {
-          key: 'transport',
-          scope: 'scope3', scopeName: '范围3 · 价值链间接排放',
-          title: '运输与配送（范围3）',
-          dotClass: 'sd-recycle',
-          processes: [
-            mk('上游运输与配送', '运输量 × 里程 × 排放因子'),
-            mk('下游运输与配送', '运输量 × 里程 × 排放因子'),
-            mk('员工通勤', '通勤人次 × 里程 × 排放因子'),
-            mk('商务差旅', '差旅量 × 排放因子')
-          ]
-        },
-        {
-          key: 'valuechain',
-          scope: 'scope3', scopeName: '范围3 · 价值链间接排放',
-          scope: 'scope3', scopeName: '范围3 · 价值链间接排放',
-          title: '上下游产品与服务（范围3）',
-          dotClass: 'sd-recycle',
-          processes: [
-            mk('外购商品与服务', '采购额 / 用量 × 排放因子'),
-            mk('资本商品', '采购额 × 排放因子'),
-            mk('燃料上游（WTT）', '燃料消耗量 × 上游排放因子'),
-            mk('售出产品加工', '加工量 × 排放因子'),
-            mk('售出产品使用', '使用量 × 排放因子'),
-            mk('售出产品报废处理', '报废量 × 排放因子')
+            mk('净购入电力', '排放量 = 净购入电量 × 区域电网排放因子'),
+            mk('净购入热力（蒸汽）', '排放量 = 净购入蒸汽量 × 热力排放因子'),
+            mk('净购入热力（热水）', '排放量 = 净购入热水量 × 热力排放因子')
           ]
         }
       ]
@@ -2521,6 +2826,7 @@ import { loadOrgStandardsForAgent, loadBjStandardsForAgent, ensureSeed } from '@
     openTrace(proc, unit, paramType, catTitle) {
       const isAD = paramType === 'AD'
       const adVal = unit.activityData || ''
+      const adParam = isAD ? ((unit.params || []).find(x => x.key === 'AD') || {}) : {}
       const efVal = unit.factor || ''
       const em = (parseFloat(adVal) || 0) * (parseFloat(efVal) || 0)
       const fSrc = unit.factorSource || ''
@@ -2546,8 +2852,72 @@ import { loadOrgStandardsForAgent, loadBjStandardsForAgent, ensureSeed } from '@
         efVal: efVal || '—',
         efUnit: unit.factorUnit || '',
         emission: em ? em.toLocaleString('zh-CN', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '0.0',
+        // 数据来源（AD 专用：原始值 + 换算链路）
+        rawValue: adParam ? (adParam.rawValue || '') : '',
+        rawUnitText: adParam ? (adParam.rawUnit || '') : '',
+        convertFactor: adParam ? (adParam.convertFactor || '') : '',
+        convertFormula: adParam ? (adParam.convertFormula || '') : '',
+        convertNote: adParam ? (adParam.convertNote || '') : '',
+        sourceDetail: adParam ? (adParam.sourceDetail || '') : '',
+        // 因子来源（EF 专用：因子库 + 权威池 + 匹配链路 + T-G-T + 置信度）
+        factorLibrary: isAD ? '' : (() => {
+          if (/IPCC/.test(fSrc)) return 'IPCC 2006 温室气体清单'
+          if (/GHG/i.test(fSrc)) return 'GHG Protocol 缺省值库'
+          if (/DB11/i.test(fSrc)) return 'DB11/T 1787 附录推荐值'
+          if (/区域电网|生态环境部/.test(fSrc)) return '中国区域电网排放因子库'
+          if (/实测|企业/.test(fSrc)) return '企业实测因子库'
+          return fSrc || '—'
+        })(),
+        sourceTier: isAD ? null : (() => {
+          if (/IPCC|GHG|DB11|区域电网|国家|生态环境部/.test(fSrc)) return 1
+          if (/EPD/.test(fSrc)) return 2
+          if (/Ecoinvent/i.test(fSrc)) return 3
+          if (/实测|企业|行业/.test(fSrc)) return 4
+          return 1
+        })(),
+        tierName: isAD ? '' : (() => {
+          if (/IPCC|GHG|DB11|区域电网|国家|生态环境部/.test(fSrc)) return '国家官方 / 国际通用'
+          if (/EPD/.test(fSrc)) return '经核查 EPD'
+          if (/Ecoinvent/i.test(fSrc)) return '主流商业 LCA'
+          if (/实测|企业|行业/.test(fSrc)) return '文献 / 行业 / 企业自建'
+          return ''
+        })(),
+        hitLevel: isAD ? '' : (() => {
+          if (/实测/.test(fSrc)) return 'P-1 企业实测'
+          if (/企业记忆|纠偏/.test(fSrc)) return 'P0 企业记忆'
+          if (/DB11|区域电网|国家|生态环境部/.test(fSrc)) return '规则表命中'
+          return '兜底缺省'
+        })(),
+        hitLevelClass: isAD ? '' : (() => {
+          if (/实测/.test(fSrc)) return 'is-p1'
+          if (/企业记忆|纠偏/.test(fSrc)) return 'is-p0'
+          if (/DB11|区域电网|国家|生态环境部/.test(fSrc)) return 'is-rule'
+          return 'is-fallback'
+        })(),
+        confidence: isAD ? null : (() => {
+          if (/实测/.test(fSrc)) return '1.00'
+          if (/企业记忆|纠偏/.test(fSrc)) return '0.99'
+          if (/DB11|区域电网|国家|生态环境部/.test(fSrc)) return '0.90'
+          return '0.82'
+        })(),
+        techMatch: isAD ? '' : ('T 层：' + (proc && proc.name ? proc.name : '—') + ' → ' + (catTitle || '—') + ' 缺省值'),
+        geoMatch: isAD ? '' : 'G 层：中国（national 0.70）',
+        timeMatch: isAD ? '' : (() => {
+          if (/IPCC 2006/.test(fSrc)) return 'T 层：因子年份 2006，时效衰减 0.80'
+          if (/DB11\/T 1787/.test(fSrc)) return 'T 层：因子年份 2020，时效衰减 0.95'
+          if (/GHG/i.test(fSrc)) return 'T 层：因子年份 2015，时效衰减 0.90'
+          return 'T 层：时效系数 0.90'
+        })(),
+        factorVersion: isAD ? '' : (() => {
+          if (/IPCC/.test(fSrc)) return 'IPCC 2006（2019 修订）'
+          if (/GHG/i.test(fSrc)) return 'GHG Protocol v2'
+          if (/DB11/.test(fSrc)) return 'DB11/T 1787-2020'
+          return '—'
+        })(),
+        matchModeAD: isAD ? '按排放源品种匹配' : '规则表关键词匹配',
+
         // 匹配策略
-        matchMode: '按排放源品种匹配',
+        matchMode: isAD ? '按排放源品种匹配' : '规则表关键词匹配',
         matchBasis: (proc && proc.name ? proc.name : '—') + ' → ' + (catTitle || '—'),
         factorSource: fSrc || '未匹配',
         // 数据质量
@@ -2596,11 +2966,34 @@ import { loadOrgStandardsForAgent, loadBjStandardsForAgent, ensureSeed } from '@
     buildUnitParams(demo) {
       if (!demo) return []
       const list = [
-        { key: 'AD', label: '活动数据', value: demo.ad || '', unit: demo.unit || '', source: demo.adSrc || '', proof: demo.adSrc ? demo.adSrc + '.pdf' : '', verified: true },
-        { key: 'EF', label: '排放因子', value: demo.ef || '', unit: demo.efUnit || '', source: demo.efSrc || '', proof: '', verified: true }
+        {
+          key: 'AD', label: '活动数据',
+          value: demo.ad || '', unit: demo.unit || '',
+          rawValue: demo.rawValue !== undefined ? demo.rawValue : '',
+          rawUnit: demo.rawUnit || '',
+          convertFactor: demo.convertFactor || '',
+          convertFormula: demo.convertFormula || '',
+          convertNote: demo.convertNote || '',
+          // 来源 / 佐证材料二选一：有凭证文件用 proof，无凭证用 source
+          source: demo.hasProof ? '' : (demo.adSrc || ''),
+          proof: demo.hasProof ? (demo.proofName || demo.adSrcDetail || '') : '',
+          sourceDetail: demo.adSrcDetail || '',
+          verified: true
+        },
+        {
+          key: 'EF', label: '排放因子',
+          value: demo.ef || '', unit: demo.efUnit || '',
+          source: demo.efSrc || '', proof: '',
+          verified: true
+        }
       ]
       ;(demo.extra || []).forEach(e => {
-        list.push({ key: e.key, label: e.label, value: e.value || '', unit: e.unit || '', source: e.source || '', proof: '', verified: true })
+        list.push({
+          key: e.key, label: e.label,
+          value: e.value || '', unit: e.unit || '',
+          source: e.source || '', proof: '',
+          verified: true
+        })
       })
       return list
     },
@@ -2713,30 +3106,182 @@ import { loadOrgStandardsForAgent, loadBjStandardsForAgent, ensureSeed } from '@
     /** 演示数据：排放源品种 → 活动数据 / 单位 / 排放因子 / 来源 */
     getDemoParam(typeName) {
       const DEMO = {
-        '燃煤': { ad: '1200', unit: 't', ef: '2.64', efUnit: 'tCO₂/t', adSrc: '能源台账（1号锅炉）', efSrc: 'IPCC 缺省值', extra: [{ key: 'OX', label: '碳氧化率', value: '0.99', unit: '-', source: '缺省值' }] },
-        '天然气': { ad: '85', unit: '万m³', ef: '21.62', efUnit: 'tCO₂/万m³', adSrc: '燃气结算单', efSrc: 'GHG Protocol 缺省值', extra: [{ key: 'OX', label: '碳氧化率', value: '0.995', unit: '-', source: '缺省值' }] },
-        '柴油': { ad: '35', unit: 't', ef: '3.096', efUnit: 'tCO₂/t', adSrc: '燃料采购台账', efSrc: 'IPCC 缺省值' },
-        '汽油': { ad: '12', unit: 't', ef: '2.925', efUnit: 'tCO₂/t', adSrc: '加油记录', efSrc: 'IPCC 缺省值' },
-        '燃料油': { ad: '8', unit: 't', ef: '3.17', efUnit: 'tCO₂/t', adSrc: '燃料采购台账', efSrc: 'IPCC 缺省值' },
-        '焦炭': { ad: '50', unit: 't', ef: '3.14', efUnit: 'tCO₂/t', adSrc: '原料领用单', efSrc: 'IPCC 缺省值' },
-        '净购入电力': { ad: '12000', unit: 'MWh', ef: '0.5703', efUnit: 'tCO₂/MWh', adSrc: '电费结算单', efSrc: '生态环境部区域电网因子' },
-        '净购入热力（蒸汽）': { ad: '8500', unit: 'GJ', ef: '0.11', efUnit: 'tCO₂/GJ', adSrc: '热力结算单', efSrc: 'GHG Protocol 缺省值' },
-        '净购入热力（热水）': { ad: '3200', unit: 'GJ', ef: '0.11', efUnit: 'tCO₂/GJ', adSrc: '热力结算单', efSrc: 'GHG Protocol 缺省值' },
-        '外购冷力': { ad: '1500', unit: 'GJ', ef: '0.08', efUnit: 'tCO₂/GJ', adSrc: '冷力结算单', efSrc: '行业平均' },
-        '员工通勤': { ad: '120000', unit: '人·km', ef: '0.00021', efUnit: 'tCO₂/人·km', adSrc: '通勤统计', efSrc: '行业平均' },
-        '上游运输与配送': { ad: '850000', unit: 't·km', ef: '0.0001', efUnit: 'tCO₂/t·km', adSrc: '物流台账', efSrc: '行业平均', extra: [{ key: 'DIST', label: '运输距离', value: '500', unit: 'km', source: '物流台账' }] },
-        '下游运输与配送': { ad: '320000', unit: 't·km', ef: '0.0001', efUnit: 'tCO₂/t·km', adSrc: '物流台账', efSrc: '行业平均' },
-        '商务差旅': { ad: '85000', unit: '人·km', ef: '0.00018', efUnit: 'tCO₂/人·km', adSrc: '差旅系统', efSrc: '行业平均' },
-        '运营废弃物处理': { ad: '280', unit: 't', ef: '0.486', efUnit: 'tCO₂/t', adSrc: '危废转移单', efSrc: 'IPCC 缺省值' },
-        '废水处理': { ad: '950', unit: 'm³', ef: '0.000296', efUnit: 'tCO₂/m³', adSrc: '废水监测报告', efSrc: 'IPCC 缺省值' },
-        '固废填埋': { ad: '150', unit: 't', ef: '0.42', efUnit: 'tCO₂/t', adSrc: '固废台账', efSrc: 'IPCC 缺省值' },
-        '外购商品与服务': { ad: '5000', unit: '万元', ef: '0.32', efUnit: 'tCO₂/万元', adSrc: '采购台账', efSrc: '投入产出法' },
-        '资本商品': { ad: '1200', unit: '万元', ef: '0.28', efUnit: 'tCO₂/万元', adSrc: '固定资产台账', efSrc: '投入产出法' },
-        '制冷剂逃逸': { ad: '45', unit: 'kg', ef: '0.002088', efUnit: 'tCO₂/kg', adSrc: '空调维保记录', efSrc: 'IPCC AR5 GWP（R410A）', extra: [{ key: 'GWP', label: 'GWP 值', value: '2088', unit: '-', source: 'IPCC AR5' }] },
-        '灭火剂逃逸': { ad: '12', unit: 'kg', ef: '0.00322', efUnit: 'tCO₂/kg', adSrc: '消防维保记录', efSrc: 'IPCC AR5 GWP' },
-        'SF6 逃逸': { ad: '0.5', unit: 'kg', ef: '0.0252', efUnit: 'tCO₂/kg', adSrc: '电气设备检修记录', efSrc: 'IPCC AR5 GWP（SF6）' },
-        '甲烷逃逸': { ad: '800', unit: 'kg', ef: '0.000028', efUnit: 'tCO₂/kg', adSrc: '工艺监测', efSrc: 'IPCC AR5 GWP' }
-      }
+        // ===== 化石燃料燃烧 =====
+        '燃煤': {
+          ad: '1200', unit: 't',
+          rawValue: '1200.5', rawUnit: 't',
+          convertNote: '原始值 1200.5 t 四舍五入至个位得 1200 t，单位一致无需换算',
+          ef: '2.64', efUnit: 'tCO₂/t',
+          adSrc: '能源台账（1号锅炉）', adSrcDetail: '2026年1月-12月燃煤消耗台账',
+           hasProof: true, proofName: '燃煤消耗台账（扫描件）.pdf',
+          efSrc: 'IPCC 2006 缺省值',
+          extra: [{ key: 'OX', label: '碳氧化率', value: '0.99', unit: '', source: 'DB11/T 1787 缺省值' }]
+        },
+        '天然气': {
+          ad: '85', unit: '万m³',
+          rawValue: '852340', rawUnit: 'm³',
+          convertNote: '原始值 852,340 m³ 按 1 万m³ = 10,000 m³ 换算得 85.234 万m³，四舍五入至个位得 85 万m³',
+          ef: '21.62', efUnit: 'tCO₂/万m³',
+          adSrc: '燃气结算单', adSrcDetail: '北京市燃气集团 2026年度结算单',
+           hasProof: true, proofName: '燃气结算单（北京市燃气集团）.pdf',
+          efSrc: 'GHG Protocol 缺省值',
+          extra: [{ key: 'OX', label: '碳氧化率', value: '0.995', unit: '', source: 'DB11/T 1787 缺省值' }]
+        },
+        '柴油': {
+          ad: '35', unit: 't',
+          rawValue: '35420', rawUnit: 'L',
+          convertNote: '原始值 35,420 L 按柴油密度 0.84 kg/L 换算得 29,752.8 kg = 29.75 t；结合库存调整后为 35 t',
+          ef: '3.096', efUnit: 'tCO₂/t',
+          adSrc: '燃料采购台账', adSrcDetail: '厂内车辆加油记录汇总',
+           hasProof: false, proofName: '',
+          efSrc: 'IPCC 2006 缺省值'
+        },
+        '汽油': {
+          ad: '12', unit: 't',
+          rawValue: '16280', rawUnit: 'L',
+          convertNote: '原始值 16,280 L 按汽油密度 0.73 kg/L 换算得 11,884.4 kg = 11.88 t，四舍五入得 12 t',
+          ef: '2.925', efUnit: 'tCO₂/t',
+          adSrc: '加油记录', adSrcDetail: '公务车辆加油卡消费明细',
+           hasProof: false, proofName: '',
+          efSrc: 'IPCC 2006 缺省值'
+        },
+        '燃料油': {
+          ad: '8', unit: 't',
+          rawValue: '7980', rawUnit: 'kg',
+          convertNote: '原始值 7,980 kg 换算得 7.98 t，四舍五入得 8 t',
+          ef: '3.17', efUnit: 'tCO₂/t',
+          adSrc: '燃料采购台账', adSrcDetail: '备用发电机燃料油采购单',
+           hasProof: true, proofName: '燃料油采购合同及发票.pdf',
+          efSrc: 'IPCC 2006 缺省值'
+        },
+        '焦炭': {
+          ad: '50', unit: 't',
+          rawValue: '49.6', rawUnit: 't',
+          convertNote: '原始值 49.6 t 四舍五入至个位得 50 t，单位一致无需换算',
+          ef: '3.14', efUnit: 'tCO₂/t',
+          adSrc: '原料领用单', adSrcDetail: '铸造车间焦炭领用记录',
+           hasProof: true, proofName: '焦炭领用单（扫描件）.pdf',
+          efSrc: 'IPCC 2006 缺省值'
+        },
+
+        // ===== 工业生产过程 =====
+        '水泥熟料生产': {
+          ad: '52000', unit: 't',
+          rawValue: '51986', rawUnit: 't',
+          convertNote: '原始值 51,986 t 四舍五入至百位得 52,000 t，单位一致无需换算',
+          ef: '0.5272', efUnit: 'tCO₂/t',
+          adSrc: '生产统计报表', adSrcDetail: '2026年度熟料产量统计',
+           hasProof: true, proofName: '熟料产量统计报表（盖章版）.pdf',
+          efSrc: 'DB11/T 1787 附录推荐值'
+        },
+        '钢铁冶炼': {
+          ad: '38000', unit: 't',
+          rawValue: '37850', rawUnit: 't',
+          convertNote: '原始值 37,850 t 四舍五入至百位得 38,000 t，单位一致无需换算',
+          ef: '1.46', efUnit: 'tCO₂/t',
+          adSrc: '生产统计报表', adSrcDetail: '2026年度粗钢产量统计',
+           hasProof: true, proofName: '粗钢产量统计报表（盖章版）.pdf',
+          efSrc: 'DB11/T 1787 附录推荐值'
+        },
+        '化工合成': {
+          ad: '15600', unit: 't',
+          rawValue: '15640', rawUnit: 't',
+          convertNote: '原始值 15,640 t 四舍五入至百位得 15,600 t，单位一致无需换算',
+          ef: '2.1', efUnit: 'tCO₂/t',
+          adSrc: '生产统计报表', adSrcDetail: '合成氨产量统计',
+           hasProof: true, proofName: '合成氨产量统计报表（盖章版）.pdf',
+          efSrc: 'DB11/T 1787 附录推荐值'
+        },
+        '其他工艺排放': {
+          ad: '2800', unit: 't',
+          rawValue: '2786', rawUnit: 't',
+          convertNote: '原始值 2,786 t 四舍五入至百位得 2,800 t，单位一致无需换算',
+          ef: '0.85', efUnit: 'tCO₂/t',
+          adSrc: '工艺记录表', adSrcDetail: '其他工艺产品产量记录',
+           hasProof: false, proofName: '',
+          efSrc: '行业平均'
+        },
+
+        // ===== 外购电力、热力 =====
+        '净购入电力': {
+          ad: '12000', unit: 'MWh',
+          rawValue: '12045800', rawUnit: 'kWh',
+          convertNote: '原始值 12,045,800 kWh 按 1 MWh = 1,000 kWh 换算得 12,045.8 MWh，四舍五入至百位得 12,000 MWh',
+          ef: '0.5703', efUnit: 'tCO₂/MWh',
+          adSrc: '电费结算单', adSrcDetail: '国网北京市电力公司 2026年度电费结算单',
+           hasProof: true, proofName: '电费结算单（国网北京电力）.pdf',
+          efSrc: '生态环境部区域电网因子（华北区域）'
+        },
+        '净购入热力（蒸汽）': {
+          ad: '8500', unit: 'GJ',
+          rawValue: '8462', rawUnit: 'GJ',
+          convertNote: '原始值 8,462 GJ 四舍五入至百位得 8,500 GJ，单位一致无需换算',
+          ef: '0.11', efUnit: 'tCO₂/GJ',
+          adSrc: '热力结算单', adSrcDetail: '北京市热力集团蒸汽结算单',
+           hasProof: true, proofName: '蒸汽结算单（北京市热力集团）.pdf',
+          efSrc: 'DB11/T 1787 附录推荐值'
+        },
+        '净购入热力（热水）': {
+          ad: '3200', unit: 'GJ',
+          rawValue: '3186', rawUnit: 'GJ',
+          convertNote: '原始值 3,186 GJ 四舍五入至百位得 3,200 GJ，单位一致无需换算',
+          ef: '0.11', efUnit: 'tCO₂/GJ',
+          adSrc: '热力结算单', adSrcDetail: '北京市热力集团热水结算单',
+           hasProof: true, proofName: '热水结算单（北京市热力集团）.pdf',
+          efSrc: 'DB11/T 1787 附录推荐值'
+        },
+
+        // ===== 其他（保留兼容）=====
+        '外购冷力': {
+          ad: '1500', unit: 'GJ',
+          rawValue: '1498', rawUnit: 'GJ',
+          convertNote: '原始值 1,498 GJ 四舍五入至百位得 1,500 GJ，单位一致无需换算',
+          ef: '0.08', efUnit: 'tCO₂/GJ',
+          adSrc: '冷力结算单', efSrc: '行业平均',
+           hasProof: true, proofName: '冷力结算单.pdf',
+        },
+        '员工通勤': {
+          ad: '120000', unit: '人·km',
+          rawValue: '119850', rawUnit: '人·km',
+          convertNote: '原始值 119,850 人·km 四舍五入至千位得 120,000 人·km',
+          ef: '0.00021', efUnit: 'tCO₂/人·km',
+          adSrc: '通勤统计', efSrc: '行业平均',
+           hasProof: false, proofName: '',
+        },
+        '上游运输与配送': {
+          ad: '850000', unit: 't·km',
+          rawValue: '848600', rawUnit: 't·km',
+          convertNote: '原始值 848,600 t·km 四舍五入至万位得 850,000 t·km',
+          ef: '0.0001', efUnit: 'tCO₂/t·km',
+          adSrc: '物流台账', efSrc: '行业平均',
+           hasProof: false, proofName: '',
+          extra: [{ key: 'DIST', label: '运输距离', value: '520', unit: 'km', source: '物流单' }]
+        },
+        '下游运输与配送': {
+          ad: '320000', unit: 't·km',
+          rawValue: '319400', rawUnit: 't·km',
+          convertNote: '原始值 319,400 t·km 四舍五入至万位得 320,000 t·km',
+          ef: '0.0001', efUnit: 'tCO₂/t·km',
+          adSrc: '物流台账', efSrc: '行业平均',
+           hasProof: false, proofName: '',
+        },
+        '商务差旅': {
+          ad: '85000', unit: '人·km',
+          rawValue: '84720', rawUnit: '人·km',
+          convertNote: '原始值 84,720 人·km 四舍五入至千位得 85,000 人·km',
+          ef: '0.00018', efUnit: 'tCO₂/人·km',
+          adSrc: '差旅系统', efSrc: '行业平均',
+           hasProof: false, proofName: '',
+        },
+        '运营废弃物处理': {
+          ad: '280', unit: 't',
+          rawValue: '276.4', rawUnit: 't',
+          convertNote: '原始值 276.4 t 四舍五入至个位得 280 t，单位一致无需换算',
+          ef: '0.486', efUnit: 'tCO₂/t',
+          adSrc: '危废转移单', efSrc: 'IPCC 2006 缺省值',
+           hasProof: true, proofName: '危废转移单（扫描件）.pdf',
+        }
+      };
       return DEMO[typeName] || null
     },
     /** 范围排放量汇总 */
@@ -2947,14 +3492,67 @@ import { loadOrgStandardsForAgent, loadBjStandardsForAgent, ensureSeed } from '@
         '锂离子动力电池制造': {
           scope1: [
             { name: '天然气', why: '极片烘干 / 化成工序' },
-            { name: '柴油', why: '厂内物流' },
-            { name: '制冷剂逃逸', why: '车间空调 / 老化房冷却' }
+            { name: '柴油', why: '厂内物流' }
           ],
           scope2: [
             { name: '净购入电力', why: '涂布 / 辊压 / 分容化成高耗电工序' }
+          ]
+        },
+        '电力生产': {
+          scope1: [
+            { name: '燃煤', why: '燃煤发电机组锅炉' },
+            { name: '天然气', why: '燃气轮机 / 启停锅炉' }
           ],
-          scope3: [
-            { name: '上游运输与配送', why: '正负极材料 / 隔膜运输' }
+          scope2: [
+            { name: '净购入电力', why: '厂用电外购部分' }
+          ]
+        },
+        '热力生产': {
+          scope1: [
+            { name: '天然气', why: '燃气锅炉' },
+            { name: '燃煤', why: '燃煤锅炉' }
+          ],
+          scope2: [
+            { name: '净购入电力', why: '锅炉房辅机用电' }
+          ]
+        },
+        '水泥制造': {
+          scope1: [
+            { name: '燃煤', why: '窑炉燃料' },
+            { name: '水泥熟料生产', why: '碳酸盐分解过程排放' }
+          ],
+          scope2: [
+            { name: '净购入电力', why: '生料磨 / 水泥磨 / 风机' }
+          ]
+        },
+        '石油化工': {
+          scope1: [
+            { name: '天然气', why: '加热炉 / 裂解炉' },
+            { name: '燃料油', why: '工艺加热' },
+            { name: '化工合成', why: '化学反应过程排放' }
+          ],
+          scope2: [
+            { name: '净购入电力', why: '压缩 / 精馏 / 泵送' },
+            { name: '净购入热力（蒸汽）', why: '工艺蒸汽' }
+          ]
+        },
+        '道路运输': {
+          scope1: [
+            { name: '柴油', why: '营运车辆燃料' },
+            { name: '汽油', why: '小型营运车辆' }
+          ],
+          scope2: [
+            { name: '净购入电力', why: '场站 / 充电桩用电' }
+          ]
+        },
+        '服务业': {
+          scope1: [
+            { name: '天然气', why: '厨房 / 供暖锅炉' },
+            { name: '柴油', why: '备用发电机' }
+          ],
+          scope2: [
+            { name: '净购入电力', why: '照明 / 空调 / 办公设备' },
+            { name: '净购入热力（热水）', why: '生活热水' }
           ]
         }
       }
@@ -2964,9 +3562,7 @@ import { loadOrgStandardsForAgent, loadBjStandardsForAgent, ensureSeed } from '@
     onBoundaryEdit(field) {
       // 核算范围变化 → 自动生成说明（说明只读，不允许手工编辑）
       if (field === 'unitType') {
-        this.boundaryConfig.unitDetail = this.boundaryConfig.unitType === 'scope12'
-          ? '覆盖范围1（直接排放）、范围2（外购能源间接），范围3 暂不纳入'
-          : '覆盖范围1（直接排放）、范围2（外购能源间接）、范围3（价值链其他间接）'
+        this.boundaryConfig.unitDetail = '化石燃料燃烧排放 + 工业生产过程排放 + 外购电力、热力隐含排放（DB11/T 1787 口径）'
       }
       // 更新重要性阈值汇总值
       if (field === 'cutoffItemThreshold' || field === 'cutoffTotalThreshold') {

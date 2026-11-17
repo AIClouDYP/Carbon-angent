@@ -138,7 +138,7 @@ export default {
           image: imgBase + '园区.png',
           bgColor: '#001429',
           status: '可用',
-          route: '/park-accounting/accounting/agent'
+          route: '/park-accounting/workspace'
         },
         {
           title: '绿色工厂',

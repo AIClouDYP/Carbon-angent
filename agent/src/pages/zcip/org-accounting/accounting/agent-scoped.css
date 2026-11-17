@@ -4512,7 +4512,6 @@ src-formula-icon {
   color: #94a3b8;
   font-size: 11px;
   margin-left: 2px;
-  min-width: 32px;
   display: inline;
   flex-shrink: 0;
 }
@@ -6709,4 +6708,1008 @@ src-formula-icon {
   top: 0 !important;
   z-index: 5 !important;
   background: #f8fafc !important;
+}
+
+/* ===== 数据转换卡片样式 ===== */
+.trace-conv-formula {
+  font-size: 11.5px;
+  color: #94a3b8;
+  margin-left: 2px;
+}
+.trace-v-conv {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: #475569;
+  font-variant-numeric: tabular-nums;
+}
+.trace-conv-arrow {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+/* ===== 底部栏：待处理项提示 ===== */
+.stage-confirm-hint.is-warn {
+  color: #d97706 !important;
+  font-weight: 600;
+}
+.stage-confirm-hint.is-warn i {
+  color: #f59e0b;
+}
+
+/* ===== 待处理项闪烁定位 ===== */
+.param-tr.pending-flash {
+  animation: pendingFlash 2s ease-in-out;
+}
+@keyframes pendingFlash {
+  0%   { background: transparent; box-shadow: none; }
+  15%  { background: #fef3c7; box-shadow: inset 0 0 0 2px #f59e0b; }
+  50%  { background: #fef3c7; box-shadow: inset 0 0 0 2px #f59e0b; }
+  85%  { background: #fef3c7; box-shadow: inset 0 0 0 2px #f59e0b; }
+  100% { background: transparent; box-shadow: none; }
+}
+
+/* ===== 状态列（独立一列） ===== */
+.parsing-section .col-status {
+  flex: 0 0 90px !important;
+  min-width: 0 !important;
+  text-align: center !important;
+}
+.parsing-section .param-th .col-status {
+  flex: 0 0 90px !important;
+  text-align: center !important;
+  font-size: 11.5px !important;
+  color: #64748b !important;
+}
+
+/* 状态标签 */
+.parsing-section .param-tag-confirmed {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #15803d;
+  background: #dcfce7;
+  border-radius: 10px;
+}
+.parsing-section .param-tag-missing {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #b45309;
+  background: #fef3c7;
+  border-radius: 10px;
+}
+.parsing-section .param-tag-pending {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #b45309;
+  background: #fef3c7;
+  border-radius: 10px;
+}
+
+/* 调整其他列宽（给状态列留出空间） */
+.parsing-section .param-tr > span:nth-child(1) {
+  flex: 0 0 118px !important;
+}
+.parsing-section .param-tr > span:nth-child(2) {
+  flex: 0 0 118px !important;
+}
+.parsing-section .param-tr > span:nth-child(3) {
+  flex: 0 0 82px !important;
+}
+.parsing-section .param-tr > span:nth-child(4) {
+  flex: 1 1 auto !important;
+}
+.parsing-section .param-tr > span:nth-child(5) {
+  flex: 0 0 90px !important;
+}
+
+/* 表头列宽 */
+.parsing-section .param-th > span:nth-child(1) {
+  flex: 0 0 118px !important;
+}
+.parsing-section .param-th > span:nth-child(2) {
+  flex: 0 0 118px !important;
+}
+.parsing-section .param-th > span:nth-child(3) {
+  flex: 0 0 82px !important;
+}
+.parsing-section .param-th > span:nth-child(4) {
+  flex: 1 1 auto !important;
+}
+.parsing-section .param-th > span:nth-child(5) {
+  flex: 0 0 90px !important;
+}
+
+/* ===== 状态列标签（弱化版） ===== */
+.parsing-section .col-status {
+  flex: 0 0 86px !important;
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.parsing-section .param-th .col-status {
+  font-size: 11.5px !important;
+  color: #64748b !important;
+  font-weight: 600 !important;
+}
+
+/* 已确认：弱化绿色（浅底 + 灰绿字） */
+.parsing-section .param-tag-confirmed {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #6b8e7f;
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+}
+.parsing-section .param-tag-confirmed i {
+  font-size: 11px;
+  color: #86b39b;
+}
+
+/* 待补充：浅灰提示 */
+.parsing-section .param-tag-missing {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #b0b7c3;
+  background: transparent;
+  border-radius: 3px;
+}
+
+/* 待确认：浅橙 */
+.parsing-section .param-tag-pending {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #d4a373;
+  background: transparent;
+  border-radius: 3px;
+}
+
+/* 可点击态 */
+.parsing-section .param-tag-confirmed.is-clickable,
+.parsing-section .param-tag-pending.is-clickable {
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.parsing-section .param-tag-confirmed.is-clickable:hover {
+  background: #f0f7f3;
+  color: #4b7c66;
+}
+.parsing-section .param-tag-pending.is-clickable:hover {
+  background: #fdf6ec;
+  color: #c08850;
+}
+
+/* ===== 状态列统一显示（覆盖冲突） ===== */
+.parsing-section .param-tr .col-status,
+.parsing-section .param-th .col-status {
+  flex: 0 0 86px !important;
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: visible !important;
+}
+.parsing-section .col-status > span {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 2px !important;
+  padding: 1px 6px !important;
+  font-size: 11px !important;
+  white-space: nowrap !important;
+}
+
+/* ===== 数值与单位间距统一（紧凑显示） ===== */
+.parsing-section .param-tr .col-value {
+  display: flex !important;
+  align-items: baseline !important;
+  justify-content: flex-end !important;
+  gap: 0 !important;
+}
+.parsing-section .param-tr .col-value .param-text,
+.parsing-section .param-tr .col-value .param-input {
+  margin-right: 0 !important;
+}
+.parsing-section .param-tr .col-value .param-unit {
+  margin-left: 1px !important;
+  min-width: 0 !important;
+  font-size: 11.5px !important;
+}
+
+/* 原始值：数值+单位同样紧凑 */
+.parsing-section .param-tr .col-raw {
+  display: flex !important;
+  align-items: baseline !important;
+  justify-content: center !important;
+  gap: 0 !important;
+}
+.parsing-section .param-tr .col-raw .param-raw-unit {
+  margin-left: 1px !important;
+  min-width: 0 !important;
+}
+
+/* ===== 列宽优化：阶段4(5列) 与 阶段5(4列) 分别适配 ===== */
+
+/* 通用：列对齐 */
+.parsing-section .param-tr,
+.parsing-section .param-th {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+/* 阶段4：5 列（含原始值） */
+/* 参数名称 110 | 参数值 110 | 原始值 80 | 来源 弹性 | 状态 82 */
+.parsing-section .param-tr > span:nth-child(1),
+.parsing-section .param-th > span:nth-child(1) {
+  flex: 0 0 110px !important;
+}
+.parsing-section .param-tr > span:nth-child(2),
+.parsing-section .param-th > span:nth-child(2) {
+  flex: 0 0 110px !important;
+}
+.parsing-section .param-tr > span:nth-child(3),
+.parsing-section .param-th > span:nth-child(3) {
+  flex: 0 0 80px !important;
+}
+.parsing-section .param-tr > span:nth-child(4),
+.parsing-section .param-th > span:nth-child(4) {
+  flex: 1 1 auto !important;
+}
+.parsing-section .param-tr > span:nth-child(5),
+.parsing-section .param-th > span:nth-child(5) {
+  flex: 0 0 82px !important;
+}
+
+/* 阶段5：4 列（无原始值）—— 参数名称 120 | 参数值 130 | 来源 弹性 | 状态 82 */
+/* 用 nth-child(3) 对应来源，(4) 对应状态 */
+.parsing-section .param-tr > span.col-src,
+.parsing-section .param-th > span.col-src {
+  flex: 1 1 auto !important;
+}
+.parsing-section .param-tr > span.col-status,
+.parsing-section .param-th > span.col-status {
+  flex: 0 0 82px !important;
+}
+.parsing-section .param-tr > span.col-name,
+.parsing-section .param-th > span.col-name {
+  flex: 0 0 110px !important;
+}
+.parsing-section .param-tr > span.col-value,
+.parsing-section .param-th > span.col-value {
+  flex: 0 0 110px !important;
+}
+
+/* 表头不换行 */
+.parsing-section .param-th > span {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+.parsing-section .param-th .col-src {
+  flex: 1 1 auto !important;
+}
+
+/* 参数值右对齐 */
+.parsing-section .param-tr .col-value {
+  justify-content: flex-end !important;
+}
+
+/* ===== 阶段4 校验视觉规范（三级区分） ===== */
+
+/* ① 待确认：浅黄背景（与状态列一致） */
+.parsing-section .param-tr.param-row.is-pending-confirm {
+  background: #fffbeb !important;
+}
+.parsing-section .param-tr.param-row.is-pending-confirm .param-sym {
+  box-shadow: 0 0 0 2px rgba(230, 162, 60, 0.25);
+}
+
+/* ② 阻断级：浅红背景 + 左红边 */
+.parsing-section .param-tr.param-row.has-block {
+  background: #fef2f2 !important;
+  box-shadow: inset 3px 0 0 #ef4444;
+}
+.parsing-section .param-tr.param-row.has-block .param-sym {
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.3);
+}
+
+/* ③ 警告级：浅橙背景 + 左橙边 */
+.parsing-section .param-tr.param-row.has-warn {
+  background: #fff7ed !important;
+  box-shadow: inset 3px 0 0 #f59e0b;
+}
+
+/* ④ 提示级：无背景，仅左侧蓝虚边 */
+.parsing-section .param-tr.param-row.has-hint {
+  box-shadow: inset 2px 0 0 #93c5fd;
+}
+
+/* ⑤ 校验问题图标 */
+.param-issue-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  margin-left: 3px;
+  font-size: 11px;
+  border-radius: 50%;
+  cursor: help;
+  flex-shrink: 0;
+}
+.param-issue-icon.is-block {
+  color: #dc2626;
+  background: #fee2e2;
+}
+.param-issue-icon.is-warn {
+  color: #d97706;
+  background: #fef3c7;
+}
+.param-issue-icon.is-hint {
+  color: #2563eb;
+  background: #dbeafe;
+}
+
+/* ===== 参数名称列：不换行 + 图标紧凑 ===== */
+.parsing-section .param-tr .col-name,
+.parsing-section .param-th .col-name {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  flex: 0 0 132px !important;
+  min-width: 0 !important;
+}
+.parsing-section .param-tr .col-name .param-sym {
+  flex-shrink: 0;
+  margin-right: 2px;
+}
+
+/* 问题图标：绝对定位不占宽度 */
+.parsing-section .param-issue-icon {
+  position: absolute;
+  top: -3px;
+  right: -2px;
+  width: 13px !important;
+  height: 13px !important;
+  font-size: 9px !important;
+}
+.parsing-section .param-tr .col-name {
+  position: relative;
+}
+
+/* 其他列也不换行 */
+.parsing-section .param-tr .col-value,
+.parsing-section .param-tr .col-raw,
+.parsing-section .param-tr .col-status {
+  white-space: nowrap !important;
+}
+.parsing-section .param-tr .col-src {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* ===== 待修正 / 已确认带警告 ===== */
+.parsing-section .param-tag-blocked {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #dc2626;
+  background: #fee2e2;
+  border-radius: 3px;
+  cursor: not-allowed;
+}
+.parsing-section .param-status-warn {
+  font-size: 11px;
+  color: #d97706;
+  margin-left: 2px;
+}
+
+/* ===== 问题图标：行内跟在状态后 ===== */
+.parsing-section .param-tr .col-status {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 4px !important;
+  flex: 0 0 108px !important;
+}
+.parsing-section .param-th .col-status {
+  flex: 0 0 108px !important;
+  justify-content: center !important;
+}
+
+/* 图标：行内紧凑，不再绝对定位 */
+.parsing-section .param-issue-icon {
+  position: static !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 14px !important;
+  height: 14px !important;
+  font-size: 10px !important;
+  border-radius: 50% !important;
+  flex-shrink: 0 !important;
+  top: auto !important;
+  right: auto !important;
+}
+
+/* 参数名称列恢复常规宽度（不再需要容纳图标） */
+.parsing-section .param-tr .col-name,
+.parsing-section .param-th .col-name {
+  flex: 0 0 118px !important;
+}
+
+/* ===== 因子来源卡片样式 ===== */
+.trace-tier {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 9px;
+  margin-right: 6px;
+}
+.trace-tier.is-pool1 { color: #15803d; background: #dcfce7; }
+.trace-tier.is-pool2 { color: #0369a1; background: #e0f2fe; }
+.trace-tier.is-pool3 { color: #b45309; background: #fef3c7; }
+.trace-tier.is-pool4 { color: #6b7280; background: #f3f4f6; }
+.trace-tier-name {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.trace-hit {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  font-size: 11.5px;
+  font-weight: 500;
+  border-radius: 9px;
+}
+.trace-hit.is-p1 { color: #15803d; background: #dcfce7; }
+.trace-hit.is-p0 { color: #0369a1; background: #e0f2fe; }
+.trace-hit.is-rule { color: #7c3aed; background: #ede9fe; }
+.trace-hit.is-fallback { color: #b45309; background: #fef3c7; }
+
+/* ===== 阶段6 整体质量评估 ===== */
+.quality-tab {
+  padding: 12px !important;
+  overflow-y: auto !important;
+}
+
+/* 加权质量分 Hero */
+.qa-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  background: linear-gradient(135deg, #f0f7ff 0%, #f8fafc 100%);
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+.qa-hero-score {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+}
+.qa-score-num {
+  font-size: 34px;
+  font-weight: 700;
+  color: #0067fe;
+  line-height: 1;
+}
+.qa-score-max {
+  font-size: 13px;
+  color: #94a3b8;
+}
+.qa-hero-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.qa-grade {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 2px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 10px;
+}
+.qa-grade.is-a { color: #15803d; background: #dcfce7; }
+.qa-grade.is-b { color: #0369a1; background: #e0f2fe; }
+.qa-grade.is-c { color: #b45309; background: #fef3c7; }
+.qa-grade.is-d { color: #c2410c; background: #ffedd5; }
+.qa-grade.is-e { color: #b91c1c; background: #fee2e2; }
+.qa-hero-label {
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+/* 卡片 */
+.qa-card {
+  padding: 12px 14px;
+  background: #fff;
+  border: 1px solid #eef2f7;
+  border-radius: 9px;
+  margin-bottom: 10px;
+}
+.qa-card-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 10px;
+}
+.qa-card-title i {
+  color: #0067fe;
+  font-size: 14px;
+}
+.qa-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 17px;
+  padding: 0 5px;
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  color: #b45309;
+  background: #fef3c7;
+  border-radius: 9px;
+}
+
+/* DQR 条 */
+.qa-dqr-bar {
+  display: flex;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  background: #f1f5f9;
+  margin-bottom: 8px;
+}
+.qa-dqr-seg.is-a { background: #22c55e; }
+.qa-dqr-seg.is-b { background: #3b82f6; }
+.qa-dqr-seg.is-c { background: #f59e0b; }
+.qa-dqr-seg.is-d { background: #f97316; }
+.qa-dqr-seg.is-e { background: #ef4444; }
+.qa-dqr-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.qa-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  color: #64748b;
+}
+.qa-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.qa-dot.is-a { background: #22c55e; }
+.qa-dot.is-b { background: #3b82f6; }
+.qa-dot.is-c { background: #f59e0b; }
+.qa-dot.is-d { background: #f97316; }
+.qa-dot.is-e { background: #ef4444; }
+
+/* KV 行 */
+.qa-kv {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 12.5px;
+}
+.qa-k { color: #64748b; }
+.qa-v { color: #1e293b; font-weight: 500; }
+.qa-v-em {
+  color: #0067fe;
+  font-weight: 700;
+}
+.qa-pass { color: #15803d; font-size: 11.5px; }
+.qa-warn { color: #d97706; font-size: 11.5px; }
+.qa-fail { color: #dc2626; font-size: 11.5px; }
+
+/* 置信度行 */
+.qa-conf-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 0;
+  font-size: 12.5px;
+}
+.qa-conf-label {
+  flex: 1;
+  color: #475569;
+}
+.qa-conf-count {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+/* 低质量项 */
+.qa-empty {
+  font-size: 12px;
+  color: #94a3b8;
+  text-align: center;
+  padding: 10px 0;
+}
+.qa-low-list {
+  max-height: 240px;
+  overflow-y: auto;
+}
+.qa-low-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 0;
+  font-size: 12px;
+  border-bottom: 1px solid #f8fafc;
+}
+.qa-low-item:last-child { border-bottom: none; }
+.qa-low-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.qa-low-dot.is-warn { background: #f59e0b; }
+.qa-low-dot.is-block { background: #ef4444; }
+.qa-low-name {
+  flex: 1;
+  color: #334155;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.qa-low-level {
+  font-size: 11px;
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+/* ===== 全局字号统一放大（提升可读性） ===== */
+
+/* 页头标题 13 → 15 */
+.org-agent-scope .content-header-title,
+.parsing-section .content-header-title {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+}
+
+/* 页签 12 → 13.5 */
+.parsing-section .val-tab-btn {
+  font-size: 13.5px !important;
+}
+.parsing-section .val-tab-btn span {
+  font-size: 13.5px !important;
+}
+
+/* 质量评估：卡片标题 13 → 14 */
+.parsing-section .qa-card-title {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+}
+.parsing-section .qa-card-title i {
+  font-size: 15px !important;
+}
+
+/* 质量评估：键名/值 12.5 → 13.5 */
+.parsing-section .qa-k,
+.parsing-section .qa-v {
+  font-size: 13.5px !important;
+}
+.parsing-section .qa-v {
+  font-weight: 500 !important;
+}
+
+/* 质量评估：图例 11.5 → 12.5 */
+.parsing-section .qa-legend-item {
+  font-size: 12.5px !important;
+}
+
+/* 质量评估：质量分说明 11.5 → 12.5 */
+.parsing-section .qa-hero-label {
+  font-size: 12.5px !important;
+}
+
+/* 质量评估：等级 13 → 14 */
+.parsing-section .qa-grade {
+  font-size: 14px !important;
+}
+
+/* 质量评估：置信度 12.5 → 13 */
+.parsing-section .qa-conf-label,
+.parsing-section .qa-conf-count {
+  font-size: 13px !important;
+}
+
+/* 质量评估：低质量项 12 → 13 */
+.parsing-section .qa-low-name {
+  font-size: 13px !important;
+}
+.parsing-section .qa-low-level {
+  font-size: 12px !important;
+}
+.parsing-section .qa-empty {
+  font-size: 13px !important;
+}
+
+/* 质量评估：徽章 */
+.parsing-section .qa-badge {
+  font-size: 12px !important;
+}
+
+/* 阶段3 排放源清单 */
+.parsing-section .src-scope-name {
+  font-size: 15px !important;
+}
+.parsing-section .src-group-name {
+  font-size: 14px !important;
+}
+.parsing-section .src-name-text {
+  font-size: 13.5px !important;
+}
+.parsing-section .src-count {
+  font-size: 12.5px !important;
+}
+
+/* 阶段4/5 参数表 */
+.parsing-section .param-th span {
+  font-size: 12.5px !important;
+}
+.parsing-section .param-text,
+.parsing-section .param-input {
+  font-size: 13.5px !important;
+}
+.parsing-section .param-src {
+  font-size: 12.5px !important;
+}
+.parsing-section .param-unit-name {
+  font-size: 13.5px !important;
+}
+
+/* 参数详情抽屉 */
+.trace-card-title {
+  font-size: 14px !important;
+}
+.trace-k {
+  font-size: 13px !important;
+}
+.trace-v {
+  font-size: 13px !important;
+}
+.trace-title {
+  font-size: 15px !important;
+}
+.trace-sub {
+  font-size: 12.5px !important;
+}
+
+/* 底部确认栏 */
+.parsing-section .stage-confirm-hint {
+  font-size: 13px !important;
+}
+.stage-confirm-bar button span {
+  font-size: 13px !important;
+}
+
+/* ===== 质量评估图表布局 ===== */
+.parsing-section .quality-tab .qa-row-2 {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.parsing-section .quality-tab .qa-row-2 > * {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.parsing-section .quality-tab .qa-hero {
+  margin-bottom: 0;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+.parsing-section .quality-tab .qa-card {
+  margin-bottom: 0;
+  padding: 10px 12px;
+}
+.parsing-section .quality-tab .qa-card-chart {
+  display: flex;
+  flex-direction: column;
+}
+.parsing-section .quality-tab .qa-chart {
+  width: 100%;
+  flex: 1;
+}
+.parsing-section .quality-tab .qa-card-title {
+  margin-bottom: 4px;
+}
+
+/* ===== 图表可点击提示 ===== */
+.parsing-section .qa-chart-clickable {
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.parsing-section .qa-chart-clickable:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+.parsing-section .qa-card-chart:hover {
+  border-color: #dbeafe;
+  box-shadow: 0 2px 8px rgba(0, 103, 254, 0.08);
+}
+
+/* ===== 加权质量分卡片可点击 ===== */
+.parsing-section .qa-hero-clickable {
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.parsing-section .qa-hero-clickable:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 12px rgba(0, 103, 254, 0.12);
+}
+
+/* ===== 整体字号再放大一档（提升可读性） ===== */
+
+/* 页头标题 15 → 16 */
+.parsing-section .content-header-title,
+.org-agent-scope .content-header-title {
+  font-size: 16px !important;
+}
+
+/* 页签 13.5 → 14.5 */
+.parsing-section .val-tab-btn,
+.parsing-section .val-tab-btn span {
+  font-size: 14.5px !important;
+}
+
+/* 质量评估卡片标题 14 → 15 */
+.parsing-section .qa-card-title {
+  font-size: 15px !important;
+}
+.parsing-section .qa-card-title i {
+  font-size: 16px !important;
+}
+
+/* 键名/值 13.5 → 14.5 */
+.parsing-section .qa-k,
+.parsing-section .qa-v {
+  font-size: 14.5px !important;
+}
+
+/* 图例 12.5 → 13.5 */
+.parsing-section .qa-legend-item {
+  font-size: 13.5px !important;
+}
+
+/* 质量分说明 12.5 → 13.5 */
+.parsing-section .qa-hero-label {
+  font-size: 13.5px !important;
+}
+
+/* 质量等级 14 → 15 */
+.parsing-section .qa-grade {
+  font-size: 15px !important;
+}
+
+/* 置信度 13 → 14 */
+.parsing-section .qa-conf-label,
+.parsing-section .qa-conf-count {
+  font-size: 14px !important;
+}
+
+/* 低质量项 13 → 14 */
+.parsing-section .qa-low-name {
+  font-size: 14px !important;
+}
+.parsing-section .qa-low-level {
+  font-size: 13px !important;
+}
+.parsing-section .qa-empty {
+  font-size: 14px !important;
+}
+
+/* 阶段3 范围/大类/排放源名 */
+.parsing-section .src-scope-name,
+.parsing-section .activity-scope-name {
+  font-size: 16px !important;
+}
+.parsing-section .src-group-name,
+.parsing-section .activity-stage-header strong {
+  font-size: 15px !important;
+}
+.parsing-section .src-name-text,
+.parsing-section .param-unit-name {
+  font-size: 14.5px !important;
+}
+
+/* 参数表 */
+.parsing-section .param-th span {
+  font-size: 13.5px !important;
+}
+.parsing-section .param-text,
+.parsing-section .param-input,
+.parsing-section .param-src,
+.parsing-section .param-proof {
+  font-size: 14px !important;
+}
+.parsing-section .param-raw,
+.parsing-section .param-raw-unit {
+  font-size: 13px !important;
+}
+
+/* 状态徽章 11 → 12.5 */
+.parsing-section .param-tag-confirmed,
+.parsing-section .param-tag-missing,
+.parsing-section .param-tag-pending,
+.parsing-section .param-tag-blocked {
+  font-size: 12.5px !important;
+  padding: 2px 9px !important;
+}
+
+/* 参数详情抽屉 */
+.trace-card-title {
+  font-size: 15px !important;
+}
+.trace-k,
+.trace-v {
+  font-size: 14px !important;
+}
+.trace-title {
+  font-size: 16px !important;
+}
+.trace-sub {
+  font-size: 13.5px !important;
+}
+
+/* 底部栏 */
+.parsing-section .stage-confirm-hint {
+  font-size: 14px !important;
+}
+.stage-confirm-bar button span {
+  font-size: 14px !important;
+}
+
+/* 对话区文字 */
+.msg-content,
+.bubble-text {
+  font-size: 14.5px !important;
+  line-height: 1.75 !important;
 }

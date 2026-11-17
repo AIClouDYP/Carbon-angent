@@ -211,12 +211,171 @@ import { loadOrgStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
       ],
       modelStages: this.createInitialModelStages(),
       validationStep: 0,
-      validationActiveTab: 'validation',
+      validationActiveTab: 'quality',
       validationItems: this.createDefaultValidationItems(),
-      supplementFiles: []
+      supplementFiles: [],
+      // 待处理项循环定位游标
+      pendingCursor: 0,
+      pendingLocateKey: '',
+      pendingFlashId: ''
     }
   },
   computed: {
+
+    /** 阶段6：整体数据质量评估 */
+    qualityAssessment() {
+      const list = []
+      ;(this.modelStages || []).forEach(stage => {
+        ;(stage.processes || []).forEach(proc => {
+          ;(proc.units || []).forEach(u => {
+            ;(u.params || []).forEach(p => {
+              if (!p.value) return
+              const r = this.validateParam ? this.validateParam(proc, u, p) : { level: '' }
+              const ad = parseFloat(p.value) || 0
+              const ef = parseFloat((u.params || []).find(x => x.key === 'EF')?.value) || 0
+              const emission = (p.key === 'AD') ? ad * ef : 0
+              list.push({
+                proc: proc.name, unit: u.name, key: p.key,
+                value: p.value, unitText: p.unit,
+                source: p.source || '',
+                verified: p.verified,
+                level: r.level,
+                emission,
+                isPrimary: /台账|结算|计量|实测|记录/.test(p.source || '')
+              })
+            })
+          })
+        })
+      })
+
+      const total = list.length
+      if (!total) {
+        return { total: 0, dqrDist: {}, weightedScore: '—', weightedGrade: '—',
+                 primaryCount: 0, primaryRatio: 0, primaryEmissionRatio: 0,
+                 sourceCoverage: 0, emissionCoverage: 0,
+                 confDist: [], ageInfo: {}, lowQuality: [] }
+      }
+
+      // ① DQR 分布（用校验级别映射）
+      const dqrDist = { A: 0, B: 0, C: 0, D: 0, E: 0 }
+      list.forEach(x => {
+        let g = 'C'
+        if (x.level === 'hint') g = 'A'
+        else if (x.level === '') g = 'B'
+        else if (x.level === 'warn') g = 'D'
+        else if (x.level === 'block') g = 'E'
+        dqrDist[g]++
+      })
+
+      // ② 加权质量分
+      const scoreMap = { A: 1.4, B: 2.2, C: 3.0, D: 3.8, E: 4.6 }
+      let sumE = 0, sumW = 0
+      list.forEach(x => {
+        let g = 'C'
+        if (x.level === 'hint') g = 'A'
+        else if (x.level === '') g = 'B'
+        else if (x.level === 'warn') g = 'D'
+        else if (x.level === 'block') g = 'E'
+        const w = x.emission > 0 ? x.emission : 1
+        sumE += w
+        sumW += w * scoreMap[g]
+      })
+      const ws = sumE > 0 ? (sumW / sumE) : 3.0
+      const wg = ws <= 1.8 ? 'A' : ws <= 2.6 ? 'B' : ws <= 3.4 ? 'C' : ws <= 4.2 ? 'D' : 'E'
+
+      // ③ 数据来源结构
+      const primary = list.filter(x => x.isPrimary)
+      const primaryRatio = Math.round(primary.length / total * 100)
+      const totalEm = list.reduce((a, b) => a + b.emission, 0)
+      const primaryEm = primary.reduce((a, b) => a + b.emission, 0)
+      const primaryEmissionRatio = totalEm > 0 ? Math.round(primaryEm / totalEm * 100) : 0
+
+      // ④ 覆盖率
+      let srcTotal = 0, srcFilled = 0
+      ;(this.modelStages || []).forEach(stage => {
+        ;(stage.processes || []).forEach(proc => {
+          srcTotal++
+          if ((proc.units || []).some(u => (u.params || []).some(p => p.value))) srcFilled++
+        })
+      })
+      const sourceCoverage = srcTotal ? Math.round(srcFilled / srcTotal * 100) : 0
+      const emissionCoverage = 96  // 演示值：实际应由总排放对比得出
+
+      // ⑤ 置信度分布
+      const confDist = [
+        { label: 'P-1 企业实测', count: list.filter(x => x.level === '' && x.isPrimary).length, color: '#15803d' },
+        { label: 'P0 企业记忆', count: 0, color: '#0369a1' },
+        { label: '规则表命中', count: list.filter(x => x.key === 'EF' && x.level === '').length, color: '#7c3aed' },
+        { label: '兜底缺省', count: list.filter(x => x.key === 'EF' && x.level !== '').length, color: '#b45309' }
+      ]
+
+      // ⑥ 时效性
+      const ageInfo = {
+        dataYear: this.baselineYear || new Date().getFullYear(),
+        dataGap: 0,
+        factorVersion: 'IPCC 2006',
+        factorGap: 18,
+        factorLevel: 'warn'
+      }
+
+      // ⑦ 低质量项
+      const lowQuality = list.filter(x => x.level === 'warn' || x.level === 'block')
+        .sort((a, b) => b.emission - a.emission)
+        .slice(0, 20)
+        .map(x => ({ proc: x.proc, unit: x.unit, key: x.key, level: x.level, emission: x.emission }))
+
+      return {
+        total, dqrDist,
+        weightedScore: ws.toFixed(2), weightedGrade: wg,
+        primaryCount: primary.length, primaryRatio, primaryEmissionRatio,
+        sourceCoverage, emissionCoverage,
+        confDist, ageInfo, lowQuality
+      }
+    },
+
+    /** 待处理项列表（阶段4：AD 未填/未确认；阶段5：EF 未匹配/未确认） */
+    pendingItems() {
+      if (this.currentStepIndex !== 3 && this.currentStepIndex !== 4) return []
+      const isAD = this.currentStepIndex === 3
+      const key = isAD ? 'AD' : 'EF'
+      const items = []
+      ;(this.modelStages || []).forEach(stage => {
+        ;(stage.processes || []).forEach(proc => {
+          ;(proc.units || []).forEach(u => {
+            const p = (u.params || []).find(x => x.key === key)
+            if (!p) return
+            const empty = !p.value || String(p.value).trim() === ''
+            const unverified = !p.verified
+            if (empty || unverified) {
+              items.push({
+                issueId: this.paramIssueId ? this.paramIssueId(proc, u, key) : ('PI-' + proc.name + '-' + u.name + '-' + key),
+                procName: proc.name,
+                unitName: u.name,
+                reason: empty ? '待补充' : '待确认',
+                empty: empty
+              })
+            }
+          })
+        })
+      })
+      return items
+    },
+    /** 待处理项总数 */
+    pendingCount() {
+      return this.pendingItems.length
+    },
+    /** 待补充数量 */
+    pendingEmptyCount() {
+      return this.pendingItems.filter(x => x.empty).length
+    },
+    /** 待确认数量 */
+    pendingUnverifiedCount() {
+      return this.pendingItems.filter(x => !x.empty).length
+    },
+    /** 是否存在待处理项 */
+    hasPending() {
+      return this.pendingCount > 0
+    },
     stageConfirmConfig() {
       const configs = {
         1: { label: '确认边界配置，进入核算模型', icon: 'el-icon-check', hint: '确认边界配置无误后进入核算模型阶段', action: () => this.sendSuggestion('确认边界配置') },
@@ -315,7 +474,6 @@ import { loadOrgStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
       if (im && (im.note || im.mode)) {
         let h = ''
         if (im.note) h += '<p>' + esc(im.note) + '</p>'
-        if (im.mode) h += '<p>组织方式：<b>' + esc(im.mode) + '</b></p>'
         blocks.push({ key: 'category', icon: 'boundary-icon', title: '排放源分类', html: h })
       }
 
@@ -1025,6 +1183,181 @@ import { loadOrgStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
   },
 
   methods: {
+
+    /**
+     * 阶段4 参数校验：完整性 / 合理性 / 一致性
+     * @returns {{level: 'block'|'warn'|'hint'|'', issues: Array}}
+     */
+    validateParam(proc, unit, p) {
+      if (!p) return { level: '', issues: [] }
+      const issues = []
+      const val = p.value
+      const num = parseFloat(val)
+      const hasVal = val !== undefined && val !== null && String(val).trim() !== ''
+      const key = p.key || ''
+
+      // ===== A 类：完整性 =====
+      if (!hasVal) {
+        issues.push({ level: 'block', code: 'A-1', msg: '活动数据未填写' })
+      } else {
+        if (!p.source) issues.push({ level: 'warn', code: 'A-2', msg: '未填写数据来源，无法追溯' })
+        if (!p.proof) issues.push({ level: 'hint', code: 'A-3', msg: '建议上传佐证材料' })
+        if (!p.unit) issues.push({ level: 'block', code: 'A-4', msg: '活动数据缺少单位' })
+      }
+
+      // ===== B 类：合理性 =====
+      if (hasVal) {
+        if (isNaN(num)) {
+          issues.push({ level: 'block', code: 'B-0', msg: '数值格式无效' })
+        } else {
+          if (num <= 0) issues.push({ level: 'block', code: 'B-1', msg: '活动数据必须大于 0' })
+          // B-2 量级检查（简化：超 1e9 视为可疑）
+          if (num > 1e9) issues.push({ level: 'warn', code: 'B-2', msg: '数值过大，请确认单位是否正确' })
+          // B-4 精度
+          const dec = (String(val).split('.')[1] || '').length
+          if (dec > 4) issues.push({ level: 'hint', code: 'B-4', msg: '数值精度过高，建议保留 2 位小数' })
+          // B-5 原始值偏差
+          const raw = parseFloat(p.rawValue)
+          if (!isNaN(raw) && raw > 0) {
+            const diff = Math.abs(raw - num) / raw
+            if (diff > 0.05) {
+              issues.push({ level: 'warn', code: 'B-5', msg: '原始值与当前值偏差 ' + (diff * 100).toFixed(1) + '%，请确认换算' })
+            }
+          }
+          // B-6 换算系数无说明
+          if (p.convertFactor && String(p.convertFactor) !== '1' && !p.convertNote) {
+            issues.push({ level: 'hint', code: 'B-6', msg: '发生了单位换算，建议补充换算说明' })
+          }
+        }
+      }
+
+      // ===== C 类：一致性 =====
+      if (hasVal && !isNaN(num)) {
+        // C-1 同期同类项重复
+        const units = (proc && proc.units) || []
+        const sameVals = units.filter(u => {
+          const q = (u.params || []).find(x => x.key === key)
+          return q && String(q.value) === String(val)
+        })
+        if (sameVals.length > 1) {
+          issues.push({ level: 'warn', code: 'C-1', msg: '同一排放源下有 ' + sameVals.length + ' 个单元数值相同，请确认是否重复' })
+        }
+      }
+
+      // 汇总级别（取最严重）
+      const order = { block: 3, warn: 2, hint: 1 }
+      let level = ''
+      issues.forEach(i => {
+        if (!level || order[i.level] > order[level]) level = i.level
+      })
+
+      return { level, issues }
+    },
+    /** 参数行 class（用于背景色） */
+    paramRowClass(proc, unit, p) {
+      const r = this.validateParam(proc, unit, p)
+      const cls = {}
+      if (r.level === 'block') cls['has-block'] = true
+      else if (r.level === 'warn') cls['has-warn'] = true
+      else if (r.level === 'hint') cls['has-hint'] = true
+      // 待确认（有值但未确认）
+      if (p && p.value && !p.verified) cls['is-pending-confirm'] = true
+      return cls
+    },
+    /** 汇总表：取排放源下最严重的校验级别 */
+    procIssueLevel(proc, key) {
+      const units = (proc && proc.units) || []
+      const order = { block: 3, warn: 2, hint: 1 }
+      let level = ''
+      units.forEach(u => {
+        const p = (u.params || []).find(x => x.key === key)
+        if (!p) return
+        const r = this.validateParam(proc, u, p)
+        if (r.level && (!level || order[r.level] > order[level])) level = r.level
+      })
+      return level
+    },
+    /** 参数问题图标样式类 */
+    paramIssueClass(proc, unit, p) {
+      const r = this.validateParam(proc, unit, p)
+      if (r.level === 'block') return 'is-block'
+      if (r.level === 'warn') return 'is-warn'
+      if (r.level === 'hint') return 'is-hint'
+      return ''
+    },
+    /** 参数行问题提示文本 */
+    paramIssueTip(proc, unit, p) {
+      const r = this.validateParam(proc, unit, p)
+      if (!r.issues.length) return ''
+      return r.issues.map(i => '【' + i.code + '】' + i.msg).join('\n')
+    },
+
+    /** 汇总表：判断排放源下所有单元的某参数是否有值 */
+    procHasValue(proc, key) {
+      const units = (proc && proc.units) || []
+      for (let i = 0; i < units.length; i++) {
+        const p = (units[i].params || []).find(x => x.key === key)
+        if (p && p.value && String(p.value).trim() !== '') return true
+      }
+      // 若无 units，退化为聚合字段
+      if (!units.length) {
+        return key === 'AD' ? !!proc.activityData : !!proc.factor
+      }
+      return false
+    },
+    /** 汇总表：判断排放源下所有单元的某参数是否全部已确认 */
+    procIsVerified(proc, key) {
+      const units = (proc && proc.units) || []
+      let hasAny = false
+      for (let i = 0; i < units.length; i++) {
+        const p = (units[i].params || []).find(x => x.key === key)
+        if (p && p.value && String(p.value).trim() !== '') {
+          hasAny = true
+          if (!p.verified) return false
+        }
+      }
+      return hasAny
+    },
+    /** 汇总表：批量设置确认状态 */
+    setProcVerified(proc, key, val) {
+      const units = (proc && proc.units) || []
+      units.forEach(u => {
+        const p = (u.params || []).find(x => x.key === key)
+        if (p) this.$set(p, 'verified', val)
+      })
+      this.$forceUpdate()
+    },
+
+    /** 定位下一个待处理项（循环） */
+    locateNextPending() {
+      const list = this.pendingItems
+      if (!list.length) {
+        this.$message.success('全部数据已处理完成')
+        this.pendingCursor = 0
+        return
+      }
+      // 循环取下一个
+      if (this.pendingCursor >= list.length) this.pendingCursor = 0
+      const target = list[this.pendingCursor]
+      const idx = this.pendingCursor + 1
+      this.pendingCursor = this.pendingCursor + 1
+
+      this.$nextTick(() => {
+        const el = document.querySelector('[data-issue-id="' + target.issueId + '"]')
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          this.pendingFlashId = target.issueId
+          setTimeout(() => { this.pendingFlashId = '' }, 2000)
+        }
+      })
+      this.$message.info('第 ' + idx + ' / ' + list.length + ' 项：' + target.procName + ' · ' + target.unitName + '（' + target.reason + '）')
+    },
+    /** 判断某参数是否当前高亮 */
+    isPendingFlash(proc, unit, key) {
+      if (!this.pendingFlashId) return false
+      const id = this.paramIssueId ? this.paramIssueId(proc, unit, key) : ('PI-' + proc.name + '-' + unit.name + '-' + key)
+      return id === this.pendingFlashId
+    },
     /** 渲染常规分析图表（趋势 + 饼图） */
     renderRoutineCharts() {
       const echarts = (typeof window !== 'undefined' && window.__ECHARTS__) ? window.__ECHARTS__ : null
@@ -2466,7 +2799,7 @@ import { loadOrgStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
           this.$message.info('定位到：' + item.process + ' · ' + item.ioName)
         } else {
           // 参数行不存在（可能不在当前页签）→ 切到数据清单
-          this.validationActiveTab = 'activity'
+          this.validationActiveTab = 'quality'
           this.$nextTick(() => {
             const el2 = document.querySelector('[data-issue-id="' + item.id + '"]')
             if (el2) {
@@ -2549,6 +2882,28 @@ import { loadOrgStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
           const p = ps.find(x => x.key === paramType)
           return p ? (p.rawUnit || p.unit || '') : ''
         })(),
+        // 转换系数 / 公式 / 说明
+        convertFactor: (() => {
+          const ps = (unit && unit.params) || []
+          const p = ps.find(x => x.key === paramType)
+          return p ? (p.convertFactor || '') : ''
+        })(),
+        convertFormula: (() => {
+          const ps = (unit && unit.params) || []
+          const p = ps.find(x => x.key === paramType)
+          return p ? (p.convertFormula || '') : ''
+        })(),
+        convertNote: (() => {
+          const ps = (unit && unit.params) || []
+          const p = ps.find(x => x.key === paramType)
+          if (!p) return ''
+          if (p.convertNote) return p.convertNote
+          const rv = p.rawValue
+          const v = p.value
+          if (rv === undefined || rv === '' || !v) return '原始值与计算值一致，未做换算'
+          if (String(rv) === String(v)) return '原始值与计算值一致，未做换算'
+          return '按单位换算与有效位处理，原始值转换为计算值'
+        })(),
         source: isAD ? (unit.dataSource || '') : fSrc,
         proof: unit.proof || '',
         history: (unit.history || []).slice(-8).reverse(),
@@ -2560,9 +2915,60 @@ import { loadOrgStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
         efUnit: unit.factorUnit || '',
         emission: em ? em.toLocaleString('zh-CN', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '0.0',
         // 匹配策略
-        matchMode: '按排放源品种匹配',
+        matchMode: isAD ? '按排放源品种匹配' : '规则表关键词匹配',
         matchBasis: (proc && proc.name ? proc.name : '—') + ' → ' + (catTitle || '—'),
         factorSource: fSrc || '未匹配',
+        // 因子来源详情（EF 专用）
+        factorLibrary: (() => {
+          if (isAD) return ''
+          if (/IPCC/.test(fSrc)) return 'IPCC 2006 温室气体清单'
+          if (/GHG/i.test(fSrc)) return 'GHG Protocol 缺省值库'
+          if (/CPCD/i.test(fSrc)) return 'CPCD 中国产品碳足迹数据库'
+          if (/电网|区域/.test(fSrc)) return '中国区域电网排放因子库'
+          if (/实测|企业/.test(fSrc)) return '企业实测因子库'
+          return fSrc || '—'
+        })(),
+        sourceTier: isAD ? null : (() => {
+          if (/IPCC|GHG|CPCD|电网|国家/.test(fSrc)) return 1
+          if (/EPD/.test(fSrc)) return 2
+          if (/Ecoinvent/i.test(fSrc)) return 3
+          if (/实测|企业|行业/.test(fSrc)) return 4
+          return 1
+        })(),
+        tierName: isAD ? '' : (() => {
+          if (/IPCC|GHG|CPCD|电网|国家/.test(fSrc)) return '国家官方 / 国际通用'
+          if (/EPD/.test(fSrc)) return '经核查 EPD'
+          if (/Ecoinvent/i.test(fSrc)) return '主流商业 LCA'
+          if (/实测|企业|行业/.test(fSrc)) return '文献 / 行业 / 企业自建'
+          return ''
+        })(),
+        hitLevel: isAD ? '' : (() => {
+          if (/实测/.test(fSrc)) return 'P-1 企业实测'
+          if (/企业记忆|纠偏/.test(fSrc)) return 'P0 企业记忆'
+          if (/CPCD|国家|电网/.test(fSrc)) return '规则表命中'
+          return '兜底缺省'
+        })(),
+        hitLevelClass: isAD ? '' : (() => {
+          if (/实测/.test(fSrc)) return 'is-p1'
+          if (/企业记忆|纠偏/.test(fSrc)) return 'is-p0'
+          if (/CPCD|国家|电网/.test(fSrc)) return 'is-rule'
+          return 'is-fallback'
+        })(),
+        confidence: isAD ? null : (() => {
+          if (/实测/.test(fSrc)) return '1.00'
+          if (/企业记忆|纠偏/.test(fSrc)) return '0.99'
+          if (/CPCD|国家|电网/.test(fSrc)) return '0.90'
+          return '0.82'
+        })(),
+        techMatch: isAD ? '' : ('T 层：' + (proc && proc.name ? proc.name : '—') + ' → ' + (catTitle || '—') + ' 缺省值'),
+        geoMatch: isAD ? '' : 'G 层：中国（national 0.70）',
+        timeMatch: isAD ? '' : 'T 层：因子年份 2006，时效衰减 0.80',
+        factorVersion: isAD ? '' : (() => {
+          if (/IPCC/.test(fSrc)) return 'IPCC 2006（2019 修订）'
+          if (/GHG/i.test(fSrc)) return 'GHG Protocol v2'
+          if (/CPCD/i.test(fSrc)) return 'CPCD 2026 版'
+          return '—'
+        })(),
         // 数据质量
         dqrLevel,
         dqrNote,
@@ -2611,9 +3017,12 @@ import { loadOrgStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
       const list = [
         { key: 'AD', label: '活动数据', value: demo.ad || '', rawValue: demo.adRaw || demo.ad || '',
           unit: demo.unit || '', rawUnit: demo.rawUnit || demo.unit || '',
+          convertFactor: demo.convertFactor || '', convertFormula: demo.convertFormula || '',
+          convertNote: demo.convertNote || '',
           source: demo.adSrc || '', proof: '', verified: true },
         { key: 'EF', label: '排放因子', value: demo.ef || '', unit: demo.efUnit || '',
           rawUnit: demo.efRawUnit || demo.efUnit || '',
+          convertFactor: '', convertFormula: '', convertNote: '排放因子直接引用因子库，无需换算',
           source: demo.efSrc || '', proof: '', verified: true }
       ]
       ;(demo.extra || []).forEach(e => {
@@ -2731,8 +3140,12 @@ import { loadOrgStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
     /** 按阶段过滤参数：阶段4（活动数据）只显示 AD，其余阶段显示全部 */
     paramsForStep(u) {
       const list = (u && u.params) || []
+      // 阶段4（活动数据）只关注 AD；阶段5（排放因子）只关注 EF
       if (this.currentStepIndex === 3) {
         return list.filter(p => p.key === 'AD')
+      }
+      if (this.currentStepIndex === 4) {
+        return list.filter(p => p.key === 'EF')
       }
       return list
     },
@@ -2740,9 +3153,14 @@ import { loadOrgStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
     /** 演示数据：排放源品种 → 活动数据 / 单位 / 排放因子 / 来源 */
     getDemoParam(typeName) {
       const DEMO = {
-        '燃煤': { ad: '1200', adRaw: '1198.6', unit: 't', ef: '2.64', efUnit: 'tCO₂/t', adSrc: '能源台账（1号锅炉）', efSrc: 'IPCC 缺省值', extra: [{ key: 'OX', label: '碳氧化率', value: '0.99', unit: '-', source: '缺省值' }] },
-        '天然气': { ad: '85', adRaw: '84.72', unit: '万m³', ef: '21.62', efUnit: 'tCO₂/万m³', adSrc: '燃气结算单', efSrc: 'GHG Protocol 缺省值', extra: [{ key: 'OX', label: '碳氧化率', value: '0.995', unit: '-', source: '缺省值' }] },
-        '柴油': { ad: '35', adRaw: '34.8', unit: 't', ef: '3.096', efUnit: 'tCO₂/t', adSrc: '燃料采购台账', efSrc: 'IPCC 缺省值' },
+        '燃煤': { ad: '1199', adRaw: '1198.6', unit: 't', ef: '2.64', efUnit: 'tCO₂/t', adSrc: '能源台账（1号锅炉）', efSrc: 'IPCC 缺省值',
+          convertFactor: '1', convertFormula: '1 t = 1 t', convertNote: '原始值 1198.6 t 四舍五入至个位得 1199 t，单位一致无需换算',
+          extra: [{ key: 'OX', label: '碳氧化率', value: '0.99', unit: '-', source: '缺省值' }] },
+        '天然气': { ad: '85', adRaw: '84.72', unit: '万m³', ef: '21.62', efUnit: 'tCO₂/万m³', adSrc: '燃气结算单', efSrc: 'GHG Protocol 缺省值',
+           convertFactor: '1', convertFormula: '1 万m³ = 1 万m³', convertNote: '原始值 84.72 万m³ 四舍五入至个位得 85 万m³，单位一致无需换算',
+           extra: [{ key: 'OX', label: '碳氧化率', value: '0.995', unit: '-', source: '缺省值' }] },
+        '柴油': { ad: '35', adRaw: '34.8', unit: 't', ef: '3.096', efUnit: 'tCO₂/t', adSrc: '燃料采购台账', efSrc: 'IPCC 缺省值',
+          convertFactor: '1', convertFormula: '1 t = 1 t', convertNote: '原始值 34.8 t 四舍五入至个位得 35 t' },
         '汽油': { ad: '12', unit: 't', ef: '2.925', efUnit: 'tCO₂/t', adSrc: '加油记录', efSrc: 'IPCC 缺省值' },
         '燃料油': { ad: '8', unit: 't', ef: '3.17', efUnit: 'tCO₂/t', adSrc: '燃料采购台账', efSrc: 'IPCC 缺省值' },
         '焦炭': { ad: '50', unit: 't', ef: '3.14', efUnit: 'tCO₂/t', adSrc: '原料领用单', efSrc: 'IPCC 缺省值' },

@@ -71,3 +71,11 @@ Thumbs.db
 **/_docx_backup_*/
 UI参考/
 _ocr_img/
+
+# ===== 临时备份文件（编辑器/人工备份）=====
+*.cur
+*.bak3
+*.bak4
+*.bak5
+*.orig
+*.rej

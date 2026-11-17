@@ -252,21 +252,18 @@
               <!-- ① 组织边界 -->
               <div class="boundary-edit-row">
                 <span class="boundary-edit-label">组织边界</span>
-                <el-select v-model="boundaryConfig.lifecycleScope" size="mini" class="boundary-edit-control" @change="onBoundaryEdit('lifecycleScope')">
-                  <el-option label="运营控制权法" value="operational"></el-option>
-                  <el-option label="财务控制权法" value="financial"></el-option>
-                  <el-option label="股权比例法" value="equity"></el-option>
+                <el-select value="operational" size="mini" class="boundary-edit-control" disabled>
+                  <el-option label="法人边界（运营控制权法）" value="operational"></el-option>
                 </el-select>
               </div>
               <!-- ② 核算范围 -->
               <div class="boundary-edit-row">
                 <span class="boundary-edit-label">核算范围</span>
                 <div class="boundary-edit-group">
-                  <el-select v-model="boundaryConfig.unitType" size="mini" class="boundary-edit-type" @change="onBoundaryEdit('unitType')">
+                  <el-select v-model="boundaryConfig.unitType" size="mini" class="boundary-edit-type" disabled>
                     <el-option label="范围1+2" value="scope12"></el-option>
-                    <el-option label="范围1+2+3" value="scope123"></el-option>
-                  </el-select>
-                  <el-input v-model="boundaryConfig.unitDetail" size="mini" class="boundary-edit-detail" readonly title="按选定范围自动生成"></el-input>
+                                      </el-select>
+                  <span class="boundary-edit-detail-text">{{ boundaryConfig.unitDetail }}</span>
                 </div>
               </div>
               <!-- ③ 数据所属期 -->
@@ -314,98 +311,81 @@
             </div>
 
 
-            <div v-if="currentStepIndex === 5" class="val-tab-header">
-              <div :class="['val-tab-btn', { active: validationActiveTab === 'validation' }]" @click="validationActiveTab = 'validation'">
-                <i class="el-icon-warning-outline"></i>
-                <span>待补充 / 待确认</span>
-                <em class="val-tab-badge" v-if="validationItems.filter(v => v.status !== 'resolved' && v.status !== 'skipped').length">{{ validationItems.filter(v => v.status !== 'resolved' && v.status !== 'skipped').length }}</em>
+          <div v-if="currentStepIndex === 5" class="val-tab-header">
+            <div :class="['val-tab-btn', { active: validationActiveTab === 'quality' }]" @click="validationActiveTab = 'quality'">
+              <i class="el-icon-data-analysis"></i>
+              <span>整体质量评估</span>
+            </div>
+
+            <div :class="['val-tab-btn', { active: validationActiveTab === 'activity' }]" @click="validationActiveTab = 'activity'">
+              <i class="el-icon-document-copy"></i>
+              <span>数据清单</span>
+            </div>
+          </div>
+
+          <!-- 页签0：整体质量评估（仅阶段6） -->
+          <div v-if="currentStepIndex === 5 && validationActiveTab === 'quality'" class="val-tab-content quality-tab">
+            <!-- 加权质量分 + DQR 环形图 -->
+            <div class="qa-row-2">
+              <div class="qa-hero qa-hero-clickable" title="点击查看质量分解读" @click="onQaChartClick('score')">
+                <div class="qa-hero-score">
+                  <span class="qa-score-num">{{ qualityAssessment.weightedScore }}</span>
+                  <span class="qa-score-max">/ 5.0</span>
+                </div>
+                <div class="qa-hero-meta">
+                  <span :class="['qa-grade', 'is-' + qualityAssessment.weightedGrade.toLowerCase()]">{{ qualityAssessment.weightedGrade }} 级</span>
+                  <span class="qa-hero-label">加权质量分</span>
+                </div>
               </div>
-              <div :class="['val-tab-btn', { active: validationActiveTab === 'activity' }]" @click="validationActiveTab = 'activity'">
-                <i class="el-icon-document-copy"></i>
-                <span>数据清单</span>
+              <div class="qa-card qa-card-chart">
+                <div class="qa-card-title"><i class="el-icon-pie-chart"></i> DQR 分布</div>
+                <div ref="qaDqrChart" class="qa-chart qa-chart-clickable" style="height:152px" title="点击查看解读" @click="onQaChartClick('dqr')"></div>
               </div>
             </div>
 
-            <!-- 页签1：校验项列表（仅阶段6显示）— 上下三段式 -->
-            <div v-if="currentStepIndex === 5 && validationActiveTab === 'validation'" class="val-tab-content val-tab-fixed">
-
-              <!-- ① 补充/确认清单（全宽，可下载） -->
-              <div class="val-section val-checklist-section">
-                <div class="val-section-header">
-                  <div class="val-section-title">
-                    <i class="el-icon-warning-outline"></i>
-                    <span>补充 / 确认清单</span>
-                    <el-tag size="mini" type="danger" effect="plain" v-if="validationItems.filter(v => v.status === 'missing').length">
-                      缺失 {{ validationItems.filter(v => v.status === 'missing').length }}
-                    </el-tag>
-                    <el-tag size="mini" type="warning" effect="plain" v-if="validationItems.filter(v => v.status === 'pending').length">
-                      待确认 {{ validationItems.filter(v => v.status === 'pending').length }}
-                    </el-tag>
-                  </div>
-                  <el-button size="mini" type="text" icon="el-icon-download" @click="downloadMissingChecklist">下载清单</el-button>
-                </div>
-                <div class="val-checklist-body">
-                  <div v-for="item in validationItems.filter(v => v.status !== 'resolved' && v.status !== 'skipped')" :key="'ck-' + item.id" class="checklist-item">
-                    <div class="checklist-item-info">
-                      <i :class="item.status === 'missing' ? 'el-icon-error' : 'el-icon-question'" :style="{ color: item.status === 'missing' ? '#f56c6c' : '#e6a23c', fontSize: '14px' }"></i>
-                      <span class="checklist-item-name">{{ item.ioName }}</span>
-                      <el-tag size="mini" :type="item.status === 'missing' ? 'danger' : 'warning'" effect="plain">{{ item.stage }}</el-tag>
-                      <el-tag size="mini" type="info" effect="plain">{{ item.statusLabel }}</el-tag>
-                    </div>
-                    <div class="checklist-item-desc">{{ item.label }}</div>
-                    <div class="checklist-item-suggest">
-                      <i class="el-icon-paperclip"></i>
-                      <span>建议上传：{{ item.supplementHint || '相关数据台账/清单文件' }}</span>
-                    </div>
-                  </div>
-                  <div v-if="validationItems.filter(v => v.status === 'resolved').length > 0" class="checklist-resolved-tip">
-                    <i class="el-icon-circle-check" style="color:#67c23a"></i>
-                    已处理 {{ validationItems.filter(v => v.status === 'resolved').length }} 项
-                  </div>
-                </div>
+            <!-- 数据来源结构（环形） + 覆盖率（仪表盘） -->
+            <div class="qa-row-2">
+              <div class="qa-card qa-card-chart">
+                <div class="qa-card-title"><i class="el-icon-coin"></i> 数据来源结构</div>
+                <div ref="qaSourceChart" class="qa-chart qa-chart-clickable" style="height:172px" title="点击查看解读" @click="onQaChartClick('source')"></div>
               </div>
-
-              <!-- ② 文件上传（全宽） -->
-              <div class="val-section val-upload-section">
-                <div class="val-section-header">
-                  <div class="val-section-title">
-                    <i class="el-icon-upload2"></i>
-                    <span>材料上传</span>
-                  </div>
-                </div>
-                <div class="val-upload-body">
-                  <el-upload
-                    action="#"
-                    :auto-upload="false"
-                    :show-file-list="false"
-                    :on-change="handleSupplementFile"
-                    multiple
-                    drag
-                    accept=".xlsx,.xls,.csv,.pdf,.jpg,.png"
-                  >
-                    <i class="el-icon-upload"></i>
-                    <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-                    <div class="el-upload__tip" slot="tip">支持 Excel / PDF / 图片格式</div>
-                  </el-upload>
-                  <div class="supplement-file-list" v-if="supplementFiles.length > 0">
-                    <div v-for="(f, i) in supplementFiles" :key="i" class="supplement-file-item">
-                      <i :class="getFileIcon(f.name)"></i>
-                      <span class="supplement-file-name">{{ f.name }}</span>
-                      <span class="supplement-file-status" v-if="f.parsed"><i class="el-icon-circle-check"></i> 已解析</span>
-                    </div>
-                  </div>
-                </div>
+              <div class="qa-card qa-card-chart">
+                <div class="qa-card-title"><i class="el-icon-aim"></i> 覆盖率</div>
+                <div ref="qaCoverChart" class="qa-chart qa-chart-clickable" style="height:172px" title="点击查看解读" @click="onQaChartClick('coverage')"></div>
               </div>
-
-
-              <!-- 全部校验项处理完毕后的下一步入口 -->
-              <div class="val-next-bar" v-if="currentStepIndex === 5 && validationActiveTab === 'validation'">
-                <el-button type="primary" size="small" @click="finishValidation"><i class="el-icon-right"></i> 确认数据，进入下一步</el-button>
-              </div>
-
             </div>
 
-            <!-- 页签2：活动数据与因子（范围 → 大类 → 排放源 → 排放单元） -->
+            <!-- 因子置信度（横向条形） + 时效性（柱状对比） -->
+            <div class="qa-row-2">
+              <div class="qa-card qa-card-chart">
+                <div class="qa-card-title"><i class="el-icon-medal"></i> 因子匹配置信度</div>
+                <div ref="qaConfChart" class="qa-chart qa-chart-clickable" style="height:172px" title="点击查看解读" @click="onQaChartClick('conf')"></div>
+              </div>
+              <div class="qa-card qa-card-chart">
+                <div class="qa-card-title"><i class="el-icon-time"></i> 时效性</div>
+                <div ref="qaTimeChart" class="qa-chart qa-chart-clickable" style="height:172px" title="点击查看解读" @click="onQaChartClick('time')"></div>
+              </div>
+            </div>
+
+            <!-- 低质量项清单 -->
+            <div class="qa-card">
+              <div class="qa-card-title">
+                <i class="el-icon-warning-outline"></i> 低质量项
+                <span class="qa-badge">{{ qualityAssessment.lowQuality.length }}</span>
+              </div>
+              <div v-if="!qualityAssessment.lowQuality.length" class="qa-empty">无低质量项</div>
+              <div v-else class="qa-low-list">
+                <div v-for="(x, i) in qualityAssessment.lowQuality" :key="i" class="qa-low-item">
+                  <span :class="['qa-low-dot', x.level === 'block' ? 'is-block' : 'is-warn']"></span>
+                  <span class="qa-low-name">{{ x.proc }} · {{ x.unit }} · {{ x.key }}</span>
+                  <span class="qa-low-level">{{ x.level === 'block' ? '阻断' : '警告' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- 页签2：活动数据与因子（范围 → 大类 → 排放源 → 排放单元） -->
             <div v-if="currentStepIndex < 5 || validationActiveTab === 'activity'" class="val-tab-content">
                 <div v-for="scope in modelTree" :key="scope.key" class="activity-scope-group">
                   <!-- ① 范围 -->
@@ -439,23 +419,25 @@
                         <div class="param-block-head">
                           <i class="el-icon-location-outline"></i>
                           <span class="param-unit-name">{{ u.name }}</span>
-                          <span v-if="!unitHasData(u)" class="param-tag-missing">待补录</span>
-                          <span v-else class="param-tag-confirmed">已确认</span>
                           <span v-if="currentStepIndex >= 6 && u.emission > 0" class="param-unit-emission">{{ formatEmission(u.emission) }} tCO₂e</span>
                         </div>
                         <div class="param-table">
                           <div class="param-tr param-th">
-                            <span>参数名称</span><span class="ta-r">参数值</span><span>来源 · 佐证材料</span>
+                            <span class="col-name">参数名称</span>
+                    <span class="col-value ta-r">参数值</span>
+                    <span class="col-raw ta-c" v-if="currentStepIndex === 3">原始值</span>
+                    <span class="col-src">来源 · 佐证材料</span>
+                    <span class="col-status">状态</span>
                           </div>
-                          <div v-for="p in u.params" :key="p.key" class="param-tr param-row"
+                          <div v-for="p in paramsForStep(u)" :key="p.key" class="param-tr param-row"
                             :data-issue-id="paramIssueId(proc, u, p.key)"
-                            :class="{ 'has-issue': paramIssueId(proc, u, p.key) }"
+                            :class="[paramRowClass(proc, u, p), { 'has-issue': paramIssueId(proc, u, p.key) }]"
                             @click="selectParam(proc, u, p.key, cat.title)">
-                            <span>
+                            <span class="col-name">
                               <i :class="['param-sym', paramSymCls(p.key)]">{{ p.key }}</i>
                               {{ p.label }}
                             </span>
-                            <span class="ta-r" @click.stop>
+                            <span class="col-value ta-r" @click.stop>
                               <template v-if="!p._editing">
                                 <span class="param-text" @click.stop="onParamTextClick(proc, u, p.key, cat.title)">{{ p.value || '点击填写' }}</span>
                               </template>
@@ -466,12 +448,42 @@
                                   @keyup.enter="endEdit(u, p.key)" />
                               </template>
                               <span class="param-unit">{{ p.unit || '' }}</span>
-                              <i v-if="p.verified" class="el-icon-circle-check param-verified" title="已确认（点击取消）" @click="unconfirmParam(proc, u, p.key)"></i>
-                              <el-button v-else-if="p.value" size="mini" type="text" class="param-confirm-btn" @click="confirmParam(proc, u, p.key)">确认</el-button>
                             </span>
-                            <span>
-                              <span class="param-src">{{ p.source || '—' }}</span>
-                              <span v-if="p.proof" class="param-proof"><i class="el-icon-paperclip"></i> {{ p.proof }}</span>
+                            <span class="col-raw ta-c param-raw" v-if="currentStepIndex === 3">
+                              <template v-if="p.rawValue !== undefined && p.rawValue !== ''">
+                                {{ p.rawValue }}<small class="param-raw-unit" v-if="p.rawUnit"> {{ p.rawUnit }}</small>
+                              </template>
+                              <span v-else class="param-raw-unknown">—</span>
+                            </span>
+                            <span class="col-src">
+                              <template v-if="p.source">
+                                <span class="param-src" :title="p.source">{{ p.source }}</span>
+                              </template>
+                              <template v-else-if="p.proof">
+                                <span class="param-proof" :title="p.proof"><i class="el-icon-paperclip"></i> {{ p.proof }}</span>
+                              </template>
+                              <span v-else class="param-src-empty">—</span>
+                            </span>
+                            <span class="col-status">
+                              <span v-if="paramIssueClass(proc, u, p) === 'is-block'" class="param-tag-blocked" title="存在必须修正的问题，无法确认">待修正</span>
+                              <span v-else-if="!p.value" class="param-tag-missing" title="请先填写参数值">待补充</span>
+                              <span v-else-if="p.verified" class="param-tag-confirmed is-clickable"
+                                :title="paramIssueClass(proc, u, p) === 'is-warn' ? '已确认（存在警告，点击取消确认）' : '点击取消确认'"
+                                @click.stop="unconfirmParam(proc, u, p.key)">
+                                <i class="el-icon-check"></i> 已确认
+                                <i v-if="paramIssueClass(proc, u, p) === 'is-warn'" class="el-icon-warning-outline param-status-warn"></i>
+                              </span>
+                              <span v-else class="param-tag-pending is-clickable"
+                                title="点击确认为已确认" @click.stop="confirmParam(proc, u, p.key)">
+                                待确认
+                              </span>
+                              <el-tooltip v-if="paramIssueTip(proc, u, p)" :content="paramIssueTip(proc, u, p)" placement="top">
+                                <i :class="['param-issue-icon', paramIssueClass(proc, u, p)]">
+                                  <template v-if="paramIssueClass(proc, u, p) === 'is-block'">!</template>
+                                  <template v-else-if="paramIssueClass(proc, u, p) === 'is-warn'">!</template>
+                                  <template v-else>i</template>
+                                </i>
+                              </el-tooltip>
                             </span>
                           </div>
                         </div>
@@ -489,12 +501,6 @@
                           <span class="param-unit-name">{{ proc.name }}（按排放源汇总）</span>
 
 
-                          <span v-if="!proc.activityData" class="param-tag-missing">待补录</span>
-
-
-                          <span v-else class="param-tag-confirmed">已确认</span>
-
-
                           <span v-if="proc.emission > 0" class="param-unit-emission">{{ formatEmission(proc.emission) }} tCO₂e</span>
 
 
@@ -507,7 +513,11 @@
                           <div class="param-tr param-th">
 
 
-                            <span>参数名称</span><span class="ta-r">参数值</span><span>来源 · 佐证材料</span>
+                            <span class="col-name">参数名称</span>
+                    <span class="col-value ta-r">参数值</span>
+                    <span class="col-raw ta-c" v-if="currentStepIndex === 3">原始值</span>
+                    <span class="col-src">来源 · 佐证材料</span>
+                    <span class="col-status">状态</span>
 
 
                           </div>
@@ -1274,16 +1284,6 @@
               </div>
             </div>
 
-            <!-- 阶段4：活动数据提示 -->
-            <div v-if="currentStepIndex === 3" class="stage-info-banner">
-              <i class="el-icon-circle-check"></i>
-              <span>系统已并发拉取排放源活动数据（燃料消耗、外购电量等），下方清单已显示实测数据值。</span>
-            </div>
-            <!-- 阶段5：排放因子提示 -->
-            <div v-else-if="currentStepIndex === 4" class="stage-info-banner">
-              <i class="el-icon-circle-check"></i>
-              <span>排放因子库已自动匹配各排放源对应因子，下方模型已显示因子绑定标签。</span>
-            </div>
 
             <!-- 阶段三：已构建的模型拓扑图（自动初始化） -->
             <div class="model-stage-groups">
@@ -1294,7 +1294,7 @@
                     <div class="content-header-row">
                       <i class="el-icon-finished"></i>
                       <span class="content-header-title">排放量计算结果</span>
-                      <span class="content-header-sub">范围1+2+3 汇总</span>
+                      <span class="content-header-sub">范围1+2 汇总（化石燃料燃烧 + 工业过程 + 外购电力热力）</span>
                     </div>
                   </div>
                 <div class="result-banner" style="margin-bottom: 12px;">
@@ -1485,23 +1485,25 @@
                         <div class="param-block-head">
                           <i class="el-icon-location-outline"></i>
                           <span class="param-unit-name">{{ u.name }}</span>
-                          <span v-if="!unitHasData(u)" class="param-tag-missing">待补录</span>
-                          <span v-else class="param-tag-confirmed">已确认</span>
                           <span v-if="currentStepIndex >= 6 && u.emission > 0" class="param-unit-emission">{{ formatEmission(u.emission) }} tCO₂e</span>
                         </div>
                         <div class="param-table">
                           <div class="param-tr param-th">
-                            <span>参数名称</span><span class="ta-r">参数值</span><span>来源 · 佐证材料</span>
+                            <span class="col-name">参数名称</span>
+                    <span class="col-value ta-r">参数值</span>
+                    <span class="col-raw ta-c" v-if="currentStepIndex === 3">原始值</span>
+                    <span class="col-src">来源 · 佐证材料</span>
+                    <span class="col-status">状态</span>
                           </div>
-                          <div v-for="p in u.params" :key="p.key" class="param-tr param-row"
+                          <div v-for="p in paramsForStep(u)" :key="p.key" class="param-tr param-row"
                             :data-issue-id="paramIssueId(proc, u, p.key)"
-                            :class="{ 'has-issue': paramIssueId(proc, u, p.key) }"
+                            :class="[paramRowClass(proc, u, p), { 'has-issue': paramIssueId(proc, u, p.key) }]"
                             @click="selectParam(proc, u, p.key, cat.title)">
-                            <span>
+                            <span class="col-name">
                               <i :class="['param-sym', paramSymCls(p.key)]">{{ p.key }}</i>
                               {{ p.label }}
                             </span>
-                            <span class="ta-r" @click.stop>
+                            <span class="col-value ta-r" @click.stop>
                               <template v-if="!p._editing">
                                 <span class="param-text" @click.stop="onParamTextClick(proc, u, p.key, cat.title)">{{ p.value || '点击填写' }}</span>
                               </template>
@@ -1512,12 +1514,41 @@
                                   @keyup.enter="endEdit(u, p.key)" />
                               </template>
                               <span class="param-unit">{{ p.unit || '' }}</span>
-                              <i v-if="p.verified" class="el-icon-circle-check param-verified" title="已确认（点击取消）" @click="unconfirmParam(proc, u, p.key)"></i>
-                              <el-button v-else-if="p.value" size="mini" type="text" class="param-confirm-btn" @click="confirmParam(proc, u, p.key)">确认</el-button>
                             </span>
-                            <span>
-                              <span class="param-src">{{ p.source || '—' }}</span>
-                              <span v-if="p.proof" class="param-proof"><i class="el-icon-paperclip"></i> {{ p.proof }}</span>
+                            <span class="col-raw ta-c param-raw" v-if="currentStepIndex === 3">
+                              <template v-if="p.rawValue !== undefined && p.rawValue !== ''">
+                                {{ p.rawValue }}<small class="param-raw-unit" v-if="p.rawUnit"> {{ p.rawUnit }}</small>
+                              </template>
+                              <span v-else class="param-raw-unknown">—</span>
+                            </span>
+                            <span class="col-src">
+                              <template v-if="p.source">
+                                <span class="param-src" :title="p.source">{{ p.source }}</span>
+                              </template>
+                              <template v-else-if="p.proof">
+                                <span class="param-proof" :title="p.proof"><i class="el-icon-paperclip"></i> {{ p.proof }}</span>
+                              </template>
+                              <span v-else class="param-src-empty">—</span>
+                            </span>
+                            <span class="col-status">
+                              <span v-if="paramIssueClass(proc, u, p) === 'is-block'" class="param-tag-blocked" title="存在必须修正的问题">待修正</span>
+                              <span v-else-if="!p.value" class="param-tag-missing" title="请先填写参数值">待补充</span>
+                              <span v-else-if="p.verified" class="param-tag-confirmed is-clickable"
+                                title="点击取消确认" @click.stop="unconfirmParam(proc, u, p.key)">
+                                <i class="el-icon-check"></i> 已确认
+                                <i v-if="paramIssueClass(proc, u, p) === 'is-warn'" class="el-icon-warning-outline param-status-warn"></i>
+                              </span>
+                              <span v-else class="param-tag-pending is-clickable"
+                                title="点击确认为已确认" @click.stop="confirmParam(proc, u, p.key)">
+                                待确认
+                              </span>
+                              <el-tooltip v-if="paramIssueTip(proc, u, p)" :content="paramIssueTip(proc, u, p)" placement="top">
+                                <i :class="['param-issue-icon', paramIssueClass(proc, u, p)]">
+                                  <template v-if="paramIssueClass(proc, u, p) === 'is-block'">!</template>
+                                  <template v-else-if="paramIssueClass(proc, u, p) === 'is-warn'">!</template>
+                                  <template v-else>i</template>
+                                </i>
+                              </el-tooltip>
                             </span>
                           </div>
                         </div>
@@ -1535,12 +1566,6 @@
                           <span class="param-unit-name">{{ proc.name }}（按排放源汇总）</span>
 
 
-                          <span v-if="!proc.activityData" class="param-tag-missing">待补录</span>
-
-
-                          <span v-else class="param-tag-confirmed">已确认</span>
-
-
                           <span v-if="proc.emission > 0" class="param-unit-emission">{{ formatEmission(proc.emission) }} tCO₂e</span>
 
 
@@ -1553,7 +1578,11 @@
                           <div class="param-tr param-th">
 
 
-                            <span>参数名称</span><span class="ta-r">参数值</span><span>来源 · 佐证材料</span>
+                            <span class="col-name">参数名称</span>
+                    <span class="col-value ta-r">参数值</span>
+                    <span class="col-raw ta-c" v-if="currentStepIndex === 3">原始值</span>
+                    <span class="col-src">来源 · 佐证材料</span>
+                    <span class="col-status">状态</span>
 
 
                           </div>
@@ -1687,14 +1716,117 @@
             <span class="trace-k">当前值</span>
             <span class="trace-v trace-v-em">{{ traceRow.value }}<small v-if="traceRow.unitText"> {{ traceRow.unitText }}</small></span>
           </div>
+        </div>
+
+        <!-- ② AD：数据来源（来源 + 原始值 + 转换链路） -->
+        <div v-if="traceRow.paramType === 'AD'" class="trace-card">
+          <div class="trace-card-title"><i class="el-icon-link"></i> 数据来源</div>
           <div class="trace-kv">
             <span class="trace-k">数据来源</span>
             <span class="trace-v">{{ traceRow.source || '未记录' }}</span>
           </div>
+          <div class="trace-kv">
+            <span class="trace-k">原始值</span>
+            <span class="trace-v">
+              <template v-if="traceRow.rawValue !== undefined && traceRow.rawValue !== ''">
+                {{ traceRow.rawValue }}<small v-if="traceRow.rawUnitText"> {{ traceRow.rawUnitText }}</small>
+              </template>
+              <span v-else class="trace-v-warn">未识别</span>
+            </span>
+          </div>
+          <div class="trace-kv">
+            <span class="trace-k">转换系数</span>
+            <span class="trace-v">
+              <template v-if="traceRow.convertFactor">
+                {{ traceRow.convertFactor }}<small v-if="traceRow.convertFormula" class="trace-conv-formula"> （{{ traceRow.convertFormula }}）</small>
+              </template>
+              <span v-else class="trace-v-note">无需换算</span>
+            </span>
+          </div>
+          <div class="trace-kv">
+            <span class="trace-k">转换说明</span>
+            <span class="trace-v trace-v-note">{{ traceRow.convertNote || '原始值与计算值一致，未做换算' }}</span>
+          </div>
+          <div class="trace-kv" v-if="traceRow.rawValue !== undefined && traceRow.rawValue !== ''">
+            <span class="trace-k">换算链路</span>
+            <span class="trace-v trace-v-conv">
+              {{ traceRow.rawValue }} {{ traceRow.rawUnitText }}
+              <i class="el-icon-right trace-conv-arrow"></i>
+              {{ traceRow.value }} {{ traceRow.unitText }}
+            </span>
+          </div>
         </div>
 
 
-        <!-- ③ 数据质量 -->
+        <!-- ② EF：因子来源（因子库 + 权威池 + 匹配链路 + T-G-T + 置信度） -->
+        <div v-if="traceRow.paramType === 'EF'" class="trace-card">
+          <div class="trace-card-title"><i class="el-icon-connection"></i> 因子来源</div>
+          <div class="trace-kv">
+            <span class="trace-k">因子库</span>
+            <span class="trace-v">{{ traceRow.factorLibrary || '—' }}</span>
+          </div>
+          <div class="trace-kv">
+            <span class="trace-k">权威池</span>
+            <span class="trace-v">
+              <span v-if="traceRow.sourceTier" :class="['trace-tier', 'is-pool' + traceRow.sourceTier]">池{{ traceRow.sourceTier }}</span>
+              <span v-if="traceRow.tierName" class="trace-tier-name">{{ traceRow.tierName }}</span>
+              <span v-else>—</span>
+            </span>
+          </div>
+          <div class="trace-kv">
+            <span class="trace-k">匹配链路</span>
+            <span class="trace-v trace-v-note">P-1 企业实测 → P0 企业记忆 → 规则表 → 兜底缺省</span>
+          </div>
+          <div class="trace-kv">
+            <span class="trace-k">命中级别</span>
+            <span class="trace-v">
+              <span :class="['trace-hit', traceRow.hitLevelClass || 'is-fallback']">{{ traceRow.hitLevel || '—' }}</span>
+            </span>
+          </div>
+          <div class="trace-kv">
+            <span class="trace-k">置信度</span>
+            <span class="trace-v">{{ traceRow.confidence !== undefined ? traceRow.confidence : '—' }}</span>
+          </div>
+          <div class="trace-kv">
+            <span class="trace-k">匹配方式</span>
+            <span class="trace-v">{{ traceRow.matchMode }}</span>
+          </div>
+          <div class="trace-kv">
+            <span class="trace-k">匹配依据</span>
+            <span class="trace-v">{{ traceRow.matchBasis }}</span>
+          </div>
+          <div class="trace-kv">
+            <span class="trace-k">技术匹配（T）</span>
+            <span class="trace-v trace-v-note">{{ traceRow.techMatch || '—' }}</span>
+          </div>
+          <div class="trace-kv">
+            <span class="trace-k">地理匹配（G）</span>
+            <span class="trace-v trace-v-note">{{ traceRow.geoMatch || '—' }}</span>
+          </div>
+          <div class="trace-kv">
+            <span class="trace-k">时间匹配（T）</span>
+            <span class="trace-v trace-v-note">{{ traceRow.timeMatch || '—' }}</span>
+          </div>
+          <div class="trace-kv">
+            <span class="trace-k">因子版本</span>
+            <span class="trace-v">{{ traceRow.factorVersion || '—' }}</span>
+          </div>
+        </div>
+
+        <!-- ③ 匹配策略（仅 AD，EF 已在因子来源中体现） -->
+        <div v-if="traceRow.paramType === 'AD'" class="trace-card">
+          <div class="trace-card-title"><i class="el-icon-connection"></i> 匹配策略</div>
+          <div class="trace-kv">
+            <span class="trace-k">匹配方式</span>
+            <span class="trace-v">{{ traceRow.matchMode }}</span>
+          </div>
+          <div class="trace-kv">
+            <span class="trace-k">匹配依据</span>
+            <span class="trace-v">{{ traceRow.matchBasis }}</span>
+          </div>
+        </div>
+
+        <!-- ④ 数据质量 -->
         <div class="trace-card">
           <div class="trace-card-title"><i class="el-icon-medal"></i> 数据质量</div>
           <div class="trace-kv">
@@ -1706,23 +1838,6 @@
           <div class="trace-kv">
             <span class="trace-k">评级依据</span>
             <span class="trace-v trace-v-note">{{ traceRow.dqrNote }}</span>
-          </div>
-        </div>
-
-        <!-- ④ 匹配策略 -->
-        <div class="trace-card">
-          <div class="trace-card-title"><i class="el-icon-connection"></i> 匹配策略</div>
-          <div class="trace-kv">
-            <span class="trace-k">匹配方式</span>
-            <span class="trace-v">{{ traceRow.matchMode }}</span>
-          </div>
-          <div class="trace-kv">
-            <span class="trace-k">匹配依据</span>
-            <span class="trace-v">{{ traceRow.matchBasis }}</span>
-          </div>
-          <div class="trace-kv">
-            <span class="trace-k">因子来源</span>
-            <span class="trace-v">{{ traceRow.factorSource }}</span>
           </div>
         </div>
 
@@ -2040,7 +2155,7 @@ export default {
       this.showOnboarding = false
     },
     goBackHome() {
-      this.$router.go(-1)
+      this.$router.push('/agent-center/apps/beijing-carbon').catch(() => {})
     },
     // 新建对话：脱离当前会话，回到欢迎态
     newConversation() {

@@ -228,6 +228,22 @@ export function loadBjStandardsForAgent() {
   return dedupeByCode(ordered.concat(rest)).map(toStandardConfig)
 }
 
+export function loadParkStandardsForAgent() {
+  ensureSeed()
+  // 园区碳核算：只返回标注适用 PARK 场景的标准
+  // 首选《零碳园区碳排放核算方法（试行）》（附件4）
+  const prefer = ['零碳园区碳排放核算方法（试行）']
+  const list = loadStandards().filter(x => {
+    const sc = x.scenarios || []
+    return sc.indexOf('PARK') > -1 || String(x.code || '').indexOf('零碳园区') > -1
+  })
+  const ordered = prefer
+    .map(code => list.find(s => s.code === code))
+    .filter(Boolean)
+  const rest = list.filter(s => prefer.indexOf(s.code) === -1)
+  return dedupeByCode(ordered.concat(rest)).map(toStandardConfig)
+}
+
 export function loadOrgStandardsForAgent() {
   ensureSeed()
   const list = queryStandardsByScenario('ORG').filter(s => ORG_ALLOWED_CODES.indexOf(s.code) > -1)
@@ -317,8 +333,13 @@ export function toStandardConfig(std) {
   cfg.calcRule = p.calcRule || null
   cfg.granularity = p.granularity || null
   cfg.dataQuality = p.dataQuality || null
-  cfg.mappings = (std.structured && std.structured.mappings) || []
+  // mappings 兼容两种来源：structured.mappings 或 params 里的 key='mappings'
+  cfg.mappings = (std.structured && std.structured.mappings) || p.mappings || []
   cfg.dimensions = (std.structured && std.structured.dimensions) || []
+  // 园区（PARK）专用字段
+  cfg.applicability = p.applicability || null
+  cfg.indicatorSystem = p.indicatorSystem || null
+  cfg.specialRule = p.specialRule || null
   // 汇总依据条款
   const _refs = []
   ;(std.structured && std.structured.params || []).forEach(it => {
@@ -522,7 +543,126 @@ export const PARK_SEEDS = [
         { key: 'wasteHeatUtilRatio', name: '工业余能利用率', type: 'guided', target: 50.0, unit: '%', op: '≥', desc: '余热、余冷、余压等余能资源回收利用比例（无余能产生可申请豁免）' },
         { key: 'waterRecycleRatio', name: '中水回用率', type: 'guided', target: 80.0, unit: '%', op: '≥', desc: '园区再生水（中水）利用量占具备回用条件总用水量的比例（无中水管网可申请豁免）' }
       ],
-      params: []
+      params: [
+        // ① 适用范围与边界
+        {
+          key: 'scopeRule',
+          label: '适用范围与边界',
+          value: {
+            boundary: '园区法定地理边界',
+            scope: '化石燃料燃烧排放 + 能源加工转换排放 + 净购入电力热力隐含排放 + 工业过程排放',
+            gasScope: '仅核算二氧化碳（CO₂）',
+            note: '适用于国家级、省级零碳园区的碳排放核算与指标评价。边界内所有企业、公共设施、能源供应的排放均纳入核算。'
+          },
+          clauseRefs: ['附件4 第一条', '附件4 第二条']
+        },
+        // ② 排放源分类（四大法定分类）
+        {
+          key: 'indicatorMapping',
+          label: '排放源分类',
+          value: {
+            mode: 'categoryBased',
+            note: '按化石燃料燃烧排放、能源加工转换排放、净购入电力热力隐含排放、工业生产过程排放四大法定分类组织清单（以二氧化碳为主）',
+            categories: [
+              { key: 'fuel', name: '化石燃料燃烧排放', desc: '园区内燃煤、天然气、柴油、汽油、燃料油、焦炭等化石燃料燃烧产生的排放' },
+              { key: 'conversion', name: '能源加工转换排放', desc: '园区内发电、供热、炼焦、制气等能源加工转换过程的净排放' },
+              { key: 'electricity', name: '净购入电力热力隐含排放', desc: '园区净购入电力和热力对应的间接排放（绿电绿证部分核减）' },
+              { key: 'process', name: '工业过程排放', desc: '园区工业企业生产工艺过程的排放（水泥熟料、钢铁冶炼、化工合成等），按产品产量归口' }
+            ]
+          },
+          clauseRefs: ['附件4 第四条']
+        },
+        // ③ 量化方法
+        {
+          key: 'calcRule',
+          label: '量化方法',
+          value: {
+            method: '排放因子法',
+            formula: 'E_园区 = E_能源活动 + E_工业过程',
+            subFormulas: [
+              { name: '能源活动排放', formula: 'E_能源活动 = E_用作燃料 + E_加工转换 + E_净受入' },
+              { name: '化石燃料燃烧', formula: 'E_用作燃料 = Σ(燃料消耗量 × 低位发热量 × 单位热值含碳量 × 碳氧化率 × 44/12)' },
+              { name: '能源加工转换', formula: 'E_加工转换 = Σ(投入量 × 因子) - Σ(产出量 × 因子)' },
+              { name: '净受入电力热力', formula: 'E_净受入 = (净购入电量 × 电网因子) + (净购入热量 × 热力因子) - 绿电绿证核减' },
+              { name: '工业生产过程', formula: 'E_工业过程 = Σ(产品产量 × 过程排放因子)' }
+            ],
+            note: '仅核算二氧化碳，单位统一折算为万吨 CO₂。'
+          },
+          clauseRefs: ['附件4 第五条', '附件4 第六条']
+        },
+        // ④ 数据与质量要求
+        {
+          key: 'granularity',
+          label: '核算粒度',
+          value: {
+            time: '年度',
+            space: '园区级（大类 → 品种/过程/产品两级）',
+            note: '按年度核算；清单粒度到大类下的品种/过程/产品，不强制落到具体设施。'
+          },
+          clauseRefs: ['附件4 第七条']
+        },
+        {
+          key: 'dataQuality',
+          label: '数据质量要求',
+          value: {
+            requireVoucher: true,
+            traceLevel: 2,
+            note: '活动数据须留存原始凭证（能源台账、结算单、计量记录），可追溯至凭证。数据采集双渠道：底座数据识别 + 材料识别。'
+          },
+          clauseRefs: ['附件4 第八条']
+        },
+        // ⑤ 指标体系（1 核心 + 5 引导）
+        {
+          key: 'indicatorSystem',
+          label: '指标体系',
+          value: {
+            name: '国家级零碳园区建设指标体系（试行）',
+            core: {
+              name: '单位能耗碳排放',
+              formula: '园区碳排放总量 / 年综合能源消费量',
+              unit: 'tCO₂/tce',
+              op: '≤',
+              threshold: '年综合能源消费量 ≤ 100 万 tce 时 ≤ 0.20；> 100 万 tce 时 ≤ 0.25',
+              note: '核心强制考核指标，一票否决'
+            },
+            guided: [
+              { name: '清洁能源消费比重', target: 90, unit: '%', op: '≥' },
+              { name: '产品能效达标比例', target: 90, unit: '%', op: '≥' },
+              { name: '工业固废综合利用率', target: 80, unit: '%', op: '≥' },
+              { name: '工业余能利用率', target: 50, unit: '%', op: '≥' },
+              { name: '中水回用率', target: 80, unit: '%', op: '≥' }
+            ],
+            note: '1 项核心指标 + 5 项引导指标；引导指标可按园区实际裁剪并说明豁免理由。'
+          },
+          clauseRefs: ['附件3 指标体系', '附件4 第九条']
+        },
+        // ⑥ 排放源与数据映射
+        {
+          key: 'mappings',
+          label: '排放源与数据映射',
+          value: [
+            { indicator: '化石燃料燃烧排放', dataSource: '能源台账 / 燃料采购与结算凭证', factorCategory: '低位发热量 × 单位热值含碳量 × 碳氧化率', formula: 'Σ(燃料量 × 低位发热量 × 含碳量 × 氧化率 × 44/12)' },
+            { indicator: '能源加工转换排放', dataSource: '能源加工转换装置运行记录 / 结算单', factorCategory: '投入产出因子', formula: 'Σ(投入量 × 因子) - Σ(产出量 × 因子)' },
+            { indicator: '净购入电力隐含排放', dataSource: '电费结算单', factorCategory: '区域电网排放因子（华北区域）', formula: '净购入电量 × 电网排放因子' },
+            { indicator: '净购入热力隐含排放', dataSource: '热力结算单', factorCategory: '热力排放因子', formula: '净购入热量 × 热力排放因子' },
+            { indicator: '工业过程排放', dataSource: '产品产量统计报表', factorCategory: '过程排放因子（按产品）', formula: 'Σ(产品产量 × 过程排放因子)' }
+          ],
+          clauseRefs: ['附件4 第四条']
+        },
+        // ⑦ 特殊规则
+        {
+          key: 'specialRule',
+          label: '特殊规则',
+          value: {
+            rules: [
+              { name: '绿电绿证核减', desc: '园区自建分布式光伏自用电量、购买绿电和绿证对应的电量，按 0 因子核减' },
+              { name: '气体范围', desc: '仅核算二氧化碳（CO₂），不含 CH₄、N₂O、HFCs 等其他温室气体' },
+              { name: '计量单位', desc: '碳排放总量单位：万吨 CO₂；强度指标单位：tCO₂/tce' }
+            ]
+          },
+          clauseRefs: ['附件4 第一条', '附件4 第十条']
+        }
+      ]
     }
   }
 ]

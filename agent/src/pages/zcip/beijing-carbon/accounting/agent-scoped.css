@@ -6399,3 +6399,650 @@ src-formula-icon {
   font-size: 12px;
   color: #64748b;
 }
+
+/* ===== 核算范围说明（纯文本，非输入框） ===== */
+.boundary-edit-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+.boundary-edit-detail-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ===== 参数表：对齐组织碳（列宽/对齐/状态） ===== */
+
+/* 行基础布局 */
+.parsing-section .param-tr {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  padding: 8px 0 !important;
+}
+.parsing-section .param-th {
+  padding: 8px 10px !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* ① 参数值列：宽 152px，右对齐 */
+.parsing-section .param-tr .col-value {
+  flex: 0 0 152px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 0 !important;
+  padding-right: 12px !important;
+  min-width: 0 !important;
+}
+.parsing-section .param-th .col-value {
+  flex: 0 0 152px !important;
+  justify-content: flex-end !important;
+}
+.parsing-section .param-text {
+  flex: 0 0 auto !important;
+  min-width: 56px !important;
+  text-align: right !important;
+  font-family: 'SF Mono', Consolas, monospace !important;
+  font-size: 11.5px !important;
+  color: #334155 !important;
+}
+
+/* ② 原始值列：宽 100px，右对齐，等宽字体 */
+.parsing-section .param-tr .col-raw {
+  flex: 0 0 100px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 1px !important;
+  padding-right: 12px !important;
+  min-width: 0 !important;
+  color: #94a3b8 !important;
+  font-family: 'SF Mono', Consolas, monospace !important;
+  font-size: 11.5px !important;
+  border-right: 1px dashed #eef2f7 !important;
+}
+.parsing-section .param-th .col-raw {
+  flex: 0 0 100px !important;
+  justify-content: flex-end !important;
+  color: #94a3b8 !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 11px !important;
+}
+.parsing-section .param-raw-unit {
+  color: #b0b7c3 !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 11px !important;
+  margin-left: 1px !important;
+}
+
+/* ③ 来源列：弹性，居中 */
+.parsing-section .param-tr .col-src {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  overflow: hidden !important;
+}
+.parsing-section .param-th .col-src {
+  flex: 1 1 auto !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+.parsing-section .param-src {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+.parsing-section .param-proof {
+  flex-shrink: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  max-width: 60% !important;
+  color: #0067fe !important;
+}
+.parsing-section .param-src-empty {
+  color: #cbd5e1 !important;
+}
+
+/* ④ 状态列：宽 88px */
+.parsing-section .param-tr .col-status {
+  flex: 0 0 88px !important;
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.parsing-section .param-th .col-status {
+  flex: 0 0 88px !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+/* ⑤ 状态徽章（对齐组织碳视觉） */
+.parsing-section .param-tag-confirmed {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 2px !important;
+  padding: 1px 7px !important;
+  font-size: 11px !important;
+  color: #67c23a !important;
+  background: #f0f9eb !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+}
+.parsing-section .param-tag-confirmed i {
+  font-size: 11px !important;
+  color: #67c23a !important;
+}
+.parsing-section .param-tag-missing {
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 1px 7px !important;
+  font-size: 11px !important;
+  color: #e6a23c !important;
+  background: #fdf6ec !important;
+  border-radius: 8px !important;
+}
+.parsing-section .param-tag-pending {
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 1px 7px !important;
+  font-size: 11px !important;
+  color: #e6a23c !important;
+  background: #fdf6ec !important;
+  border-radius: 8px !important;
+}
+.parsing-section .param-tag-blocked {
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 1px 7px !important;
+  font-size: 11px !important;
+  color: #f56c6c !important;
+  background: #fef0f0 !important;
+  border-radius: 8px !important;
+}
+.parsing-section .param-status-warn {
+  font-size: 11px !important;
+  color: #e6a23c !important;
+  margin-left: 1px !important;
+}
+
+/* ===== 来源/佐证材料列：二选一时占满显示 ===== */
+.parsing-section .param-tr .col-src {
+  min-width: 0 !important;
+}
+.parsing-section .param-src,
+.parsing-section .param-proof {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* 二选一时证明可占满（不再被 60% 限制） */
+.parsing-section .param-proof {
+  max-width: none !important;
+  flex: 1 1 auto !important;
+}
+
+/* 表头标题完整显示，不换行 */
+.parsing-section .param-th .col-src {
+  white-space: nowrap !important;
+  overflow: visible !important;
+}
+
+/* 状态列不挤压来源列 */
+.parsing-section .param-tr .col-status {
+  flex-shrink: 0 !important;
+}
+.parsing-section .param-issue-icon {
+  flex-shrink: 0 !important;
+}
+
+/* ===== 质量评估样式（从组织碳复制） ===== */
+.quality-tab {
+  padding: 12px !important;
+  overflow-y: auto !important;
+}
+
+.qa-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  background: linear-gradient(135deg, #f0f7ff 0%, #f8fafc 100%);
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+
+.qa-hero-score {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+}
+
+.qa-score-num {
+  font-size: 34px;
+  font-weight: 700;
+  color: #0067fe;
+  line-height: 1;
+}
+
+.qa-score-max {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.qa-hero-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.qa-grade {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 2px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 10px;
+}
+
+.qa-hero-label {
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+.qa-card {
+  padding: 12px 14px;
+  background: #fff;
+  border: 1px solid #eef2f7;
+  border-radius: 9px;
+  margin-bottom: 10px;
+}
+
+.qa-card-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 10px;
+}
+
+.qa-card-title i {
+  color: #0067fe;
+  font-size: 14px;
+}
+
+.qa-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 17px;
+  padding: 0 5px;
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  color: #b45309;
+  background: #fef3c7;
+  border-radius: 9px;
+}
+
+.qa-dqr-bar {
+  display: flex;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  background: #f1f5f9;
+  margin-bottom: 8px;
+}
+
+.qa-dqr-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.qa-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+.qa-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.qa-kv {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 12.5px;
+}
+
+.qa-v-em {
+  color: #0067fe;
+  font-weight: 700;
+}
+
+.qa-conf-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 0;
+  font-size: 12.5px;
+}
+
+.qa-conf-label {
+  flex: 1;
+  color: #475569;
+}
+
+.qa-conf-count {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.qa-empty {
+  font-size: 12px;
+  color: #94a3b8;
+  text-align: center;
+  padding: 10px 0;
+}
+
+.qa-low-list {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.qa-low-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 0;
+  font-size: 12px;
+  border-bottom: 1px solid #f8fafc;
+}
+
+.qa-low-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.qa-low-name {
+  flex: 1;
+  color: #334155;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qa-low-level {
+  font-size: 11px;
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.parsing-section .qa-card-title {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+}
+
+.parsing-section .qa-card-title i {
+  font-size: 15px !important;
+}
+
+.parsing-section .qa-v {
+  font-size: 13.5px !important;
+}
+
+.parsing-section .qa-v {
+  font-weight: 500 !important;
+}
+
+.parsing-section .qa-legend-item {
+  font-size: 12.5px !important;
+}
+
+.parsing-section .qa-hero-label {
+  font-size: 12.5px !important;
+}
+
+.parsing-section .qa-grade {
+  font-size: 14px !important;
+}
+
+.parsing-section .qa-conf-count {
+  font-size: 13px !important;
+}
+
+.parsing-section .qa-low-name {
+  font-size: 13px !important;
+}
+
+.parsing-section .qa-low-level {
+  font-size: 12px !important;
+}
+
+.parsing-section .qa-empty {
+  font-size: 13px !important;
+}
+
+.parsing-section .qa-badge {
+  font-size: 12px !important;
+}
+
+.parsing-section .quality-tab .qa-row-2 {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.parsing-section .quality-tab .qa-row-2 > * {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.parsing-section .quality-tab .qa-hero {
+  margin-bottom: 0;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.parsing-section .quality-tab .qa-card {
+  margin-bottom: 0;
+  padding: 10px 12px;
+}
+
+.parsing-section .quality-tab .qa-card-chart {
+  display: flex;
+  flex-direction: column;
+}
+
+.parsing-section .quality-tab .qa-chart {
+  width: 100%;
+  flex: 1;
+}
+
+.parsing-section .quality-tab .qa-card-title {
+  margin-bottom: 4px;
+}
+
+.parsing-section .qa-chart-clickable {
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.parsing-section .qa-chart-clickable:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.parsing-section .qa-card-chart:hover {
+  border-color: #dbeafe;
+  box-shadow: 0 2px 8px rgba(0, 103, 254, 0.08);
+}
+
+/* ===== 加权质量分卡片可点击 ===== */
+.parsing-section .qa-hero-clickable {
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.parsing-section .qa-hero-clickable:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 12px rgba(0, 103, 254, 0.12);
+}
+
+/* ===== 整体字号再放大一档（提升可读性） ===== */
+
+/* 页头标题 15 → 16 */
+.parsing-section .content-header-title,
+.org-agent-scope .content-header-title {
+  font-size: 16px !important;
+}
+
+/* 页签 13.5 → 14.5 */
+.parsing-section .val-tab-btn,
+.parsing-section .val-tab-btn span {
+  font-size: 14.5px !important;
+}
+
+/* 质量评估卡片标题 14 → 15 */
+.parsing-section .qa-card-title {
+  font-size: 15px !important;
+}
+.parsing-section .qa-card-title i {
+  font-size: 16px !important;
+}
+
+/* 键名/值 13.5 → 14.5 */
+.parsing-section .qa-k,
+.parsing-section .qa-v {
+  font-size: 14.5px !important;
+}
+
+/* 图例 12.5 → 13.5 */
+.parsing-section .qa-legend-item {
+  font-size: 13.5px !important;
+}
+
+/* 质量分说明 12.5 → 13.5 */
+.parsing-section .qa-hero-label {
+  font-size: 13.5px !important;
+}
+
+/* 质量等级 14 → 15 */
+.parsing-section .qa-grade {
+  font-size: 15px !important;
+}
+
+/* 置信度 13 → 14 */
+.parsing-section .qa-conf-label,
+.parsing-section .qa-conf-count {
+  font-size: 14px !important;
+}
+
+/* 低质量项 13 → 14 */
+.parsing-section .qa-low-name {
+  font-size: 14px !important;
+}
+.parsing-section .qa-low-level {
+  font-size: 13px !important;
+}
+.parsing-section .qa-empty {
+  font-size: 14px !important;
+}
+
+/* 阶段3 范围/大类/排放源名 */
+.parsing-section .src-scope-name,
+.parsing-section .activity-scope-name {
+  font-size: 16px !important;
+}
+.parsing-section .src-group-name,
+.parsing-section .activity-stage-header strong {
+  font-size: 15px !important;
+}
+.parsing-section .src-name-text,
+.parsing-section .param-unit-name {
+  font-size: 14.5px !important;
+}
+
+/* 参数表 */
+.parsing-section .param-th span {
+  font-size: 13.5px !important;
+}
+.parsing-section .param-text,
+.parsing-section .param-input,
+.parsing-section .param-src,
+.parsing-section .param-proof {
+  font-size: 14px !important;
+}
+.parsing-section .param-raw,
+.parsing-section .param-raw-unit {
+  font-size: 13px !important;
+}
+
+/* 状态徽章 11 → 12.5 */
+.parsing-section .param-tag-confirmed,
+.parsing-section .param-tag-missing,
+.parsing-section .param-tag-pending,
+.parsing-section .param-tag-blocked {
+  font-size: 12.5px !important;
+  padding: 2px 9px !important;
+}
+
+/* 参数详情抽屉 */
+.trace-card-title {
+  font-size: 15px !important;
+}
+.trace-k,
+.trace-v {
+  font-size: 14px !important;
+}
+.trace-title {
+  font-size: 16px !important;
+}
+.trace-sub {
+  font-size: 13.5px !important;
+}
+
+/* 底部栏 */
+.parsing-section .stage-confirm-hint {
+  font-size: 14px !important;
+}
+.stage-confirm-bar button span {
+  font-size: 14px !important;
+}
+
+/* 对话区文字 */
+.msg-content,
+.bubble-text {
+  font-size: 14.5px !important;
+  line-height: 1.75 !important;
+}

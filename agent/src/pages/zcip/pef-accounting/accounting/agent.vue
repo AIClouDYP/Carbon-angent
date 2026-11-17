@@ -2028,7 +2028,7 @@ export default {
       this.showOnboarding = false
     },
     goBackHome() {
-      this.$router.go(-1)
+      this.$router.push('/agent-center/apps/pef-accounting').catch(() => {})
     },
     // 新建对话：脱离当前会话，回到欢迎态
     newConversation() {

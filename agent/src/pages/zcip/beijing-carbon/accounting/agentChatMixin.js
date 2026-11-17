@@ -1,7 +1,337 @@
 ﻿import * as echarts from 'echarts'
 
 export default {
+  watch: {
+    validationActiveTab(val) {
+      if (val === 'quality' && this.currentStepIndex === 5) {
+        this.$nextTick(() => this.initQualityCharts())
+      }
+    },
+    currentStepIndex(val) {
+      if (val === 5 && this.validationActiveTab === 'quality') {
+        this.$nextTick(() => this.initQualityCharts())
+      }
+    }
+  },
+
   methods: {
+    /** 初始化阶段6 质量评估图表 */
+    initQualityCharts() {
+      this.$nextTick(() => {
+        const q = this.qualityAssessment || {}
+        if (!q.total) return
+
+        // ① DQR 环形图
+        const dqrEl = this.$refs.qaDqrChart
+        if (dqrEl) {
+          const c = echarts.init(dqrEl)
+          const d = q.dqrDist || {}
+          c.setOption({
+            tooltip: { trigger: 'item', formatter: '{b}: {c} 项 ({d}%)' },
+            legend: { bottom: 0, itemWidth: 8, itemHeight: 8, textStyle: { fontSize: 11, color: '#64748b' } },
+            series: [{
+              type: 'pie', radius: ['45%', '68%'], center: ['50%', '42%'],
+              avoidLabelOverlap: true,
+              label: { show: false },
+              data: [
+                { value: d.A || 0, name: 'A 级', itemStyle: { color: '#22c55e' } },
+                { value: d.B || 0, name: 'B 级', itemStyle: { color: '#3b82f6' } },
+                { value: d.C || 0, name: 'C 级', itemStyle: { color: '#f59e0b' } },
+                { value: d.D || 0, name: 'D 级', itemStyle: { color: '#f97316' } },
+                { value: d.E || 0, name: 'E 级', itemStyle: { color: '#ef4444' } }
+              ].filter(x => x.value > 0)
+            }]
+          })
+        }
+
+        // ② 数据来源结构环形图
+        const srcEl = this.$refs.qaSourceChart
+        if (srcEl) {
+          const c = echarts.init(srcEl)
+          c.setOption({
+            tooltip: { trigger: 'item', formatter: '{b}: {c} 项 ({d}%)' },
+            legend: { bottom: 0, itemWidth: 8, itemHeight: 8, textStyle: { fontSize: 11, color: '#64748b' } },
+            series: [{
+              type: 'pie', radius: ['45%', '68%'], center: ['50%', '42%'],
+              label: { show: false },
+              data: [
+                { value: q.primaryCount || 0, name: '一手数据', itemStyle: { color: '#0067fe' } },
+                { value: (q.total - q.primaryCount) || 0, name: '二手数据', itemStyle: { color: '#cbd5e1' } }
+              ].filter(x => x.value > 0)
+            }]
+          })
+        }
+
+        // ③ 覆盖率仪表盘
+        const coverEl = this.$refs.qaCoverChart
+        if (coverEl) {
+          const c = echarts.init(coverEl)
+          const val = q.emissionCoverage || 0
+          c.setOption({
+            series: [{
+              type: 'gauge', startAngle: 200, endAngle: -20,
+              min: 0, max: 100,
+              radius: '92%', center: ['50%', '62%'],
+              progress: { show: true, width: 14, itemStyle: { color: val >= 95 ? '#22c55e' : val >= 80 ? '#f59e0b' : '#ef4444' } },
+              axisLine: { lineStyle: { width: 14, color: [[1, '#eef2f7']] } },
+              axisTick: { show: false },
+              splitLine: { show: false },
+              axisLabel: { show: false },
+              pointer: { show: false },
+              detail: {
+                valueAnimation: true,
+                offsetCenter: [0, '-5%'],
+                fontSize: 24, fontWeight: 700,
+                color: val >= 95 ? '#15803d' : val >= 80 ? '#b45309' : '#b91c1c',
+                formatter: '{value}%'
+              },
+              title: { offsetCenter: [0, '28%'], fontSize: 11, color: '#94a3b8' },
+              data: [{ value: val, name: '排放量覆盖率' }]
+            }]
+          })
+        }
+
+        // ④ 置信度横向条形
+        const confEl = this.$refs.qaConfChart
+        if (confEl) {
+          const c = echarts.init(confEl)
+          const list = (q.confDist || []).slice().reverse()
+          c.setOption({
+            grid: { left: 78, right: 30, top: 12, bottom: 8 },
+            xAxis: { type: 'value', show: false },
+            yAxis: {
+              type: 'category',
+              data: list.map(x => x.label),
+              axisLine: { show: false },
+              axisTick: { show: false },
+              axisLabel: { fontSize: 11, color: '#64748b' }
+            },
+            series: [{
+              type: 'bar', barWidth: 12,
+              data: list.map(x => ({ value: x.count, itemStyle: { color: x.color, borderRadius: 6 } })),
+              label: { show: true, position: 'right', fontSize: 11, color: '#334155', formatter: '{c} 项' }
+            }]
+          })
+        }
+
+        // ⑤ 时效性柱状对比
+        const timeEl = this.$refs.qaTimeChart
+        if (timeEl) {
+          const c = echarts.init(timeEl)
+          const ai = q.ageInfo || {}
+          c.setOption({
+            grid: { left: 40, right: 20, top: 20, bottom: 28 },
+            xAxis: {
+              type: 'category',
+              data: ['活动数据', '排放因子'],
+              axisLine: { lineStyle: { color: '#e2e8f0' } },
+              axisTick: { show: false },
+              axisLabel: { fontSize: 11, color: '#64748b' }
+            },
+            yAxis: {
+              type: 'value', name: '年差', nameTextStyle: { fontSize: 10, color: '#94a3b8' },
+              splitLine: { lineStyle: { color: '#f1f5f9' } },
+              axisLabel: { fontSize: 10, color: '#94a3b8' }
+            },
+            series: [{
+              type: 'bar', barWidth: 26,
+              data: [
+                { value: ai.dataGap || 0, itemStyle: { color: '#22c55e', borderRadius: [4, 4, 0, 0] } },
+                { value: ai.factorGap || 18, itemStyle: { color: '#f59e0b', borderRadius: [4, 4, 0, 0] } }
+              ],
+              label: { show: true, position: 'top', fontSize: 11, color: '#334155', formatter: '{c} 年' }
+            }]
+          })
+        }
+      })
+    },
+
+    /** 阶段6：点击质量评估图表 → 左侧推送解读 */
+    onQaChartClick(type) {
+      const q = this.qualityAssessment || {}
+      if (!q.total) return
+      let lines = []
+      let title = ''
+
+      if (type === 'score') {
+        title = '加权质量分解读'
+        lines.push('**当前得分：**' + q.weightedScore + ' / 5.0（' + q.weightedGrade + ' 级）')
+        lines.push('')
+        lines.push('**计算方式：**')
+        lines.push('按排放量加权，排放量大的参数对结果影响更大')
+        lines.push('加权分 = Σ(排放量 × 单项 DQR) / Σ(排放量)')
+        lines.push('')
+        lines.push('**分级标准：**')
+        lines.push('· 1.0~1.8 → A 级（优秀）')
+        lines.push('· 1.8~2.6 → B 级（良好）')
+        lines.push('· 2.6~3.4 → C 级（合格）')
+        lines.push('· 3.4~4.2 → D 级（偏低）')
+        lines.push('· 4.2~5.0 → E 级（差）')
+        lines.push('')
+        const d = q.dqrDist || {}
+        const bad = (d.D || 0) + (d.E || 0)
+        if (bad > 0) {
+          lines.push('**拉低分数的因素：**')
+          lines.push('· ' + bad + ' 项数据质量偏低（D/E 级）')
+          lines.push('· 主要因排放因子采用标准缺省值，未使用企业实测数据')
+          lines.push('')
+          lines.push('**如何提升：**')
+          lines.push('· 将排放量占比大的因子升级为企业实测')
+          lines.push('· 优先处理「低质量项」清单中的前 3 项')
+        } else {
+          lines.push('✅ 数据质量整体优秀，无低质量项拉低分数。')
+        }
+      } else if (type === 'dqr') {
+        title = 'DQR 分布解读'
+        const d = q.dqrDist || {}
+        const total = q.total
+        const pct = n => total ? ((n / total) * 100).toFixed(0) : 0
+        lines.push('**当前 DQR 分布：**')
+        lines.push('· A 级（优秀）' + (d.A || 0) + ' 项，占 ' + pct(d.A || 0) + '%')
+        lines.push('· B 级（良好）' + (d.B || 0) + ' 项，占 ' + pct(d.B || 0) + '%')
+        lines.push('· C 级（合格）' + (d.C || 0) + ' 项，占 ' + pct(d.C || 0) + '%')
+        lines.push('· D 级（偏低）' + (d.D || 0) + ' 项，占 ' + pct(d.D || 0) + '%')
+        lines.push('· E 级（差）' + (d.E || 0) + ' 项，占 ' + pct(d.E || 0) + '%')
+        const bad = (d.D || 0) + (d.E || 0)
+        lines.push('')
+        if (bad > 0) {
+          lines.push('⚠️ **有 ' + bad + ' 项数据质量偏低**，主要原因是排放因子采用标准缺省值，未使用企业实测数据。')
+          lines.push('')
+          lines.push('**改进建议：**')
+          lines.push('· 优先将排放量占比大的排放源因子升级为企业实测')
+          lines.push('· 关注燃煤、天然气等高排放项的数据来源')
+        } else {
+          lines.push('✅ 数据质量整体良好，无低质量项。')
+        }
+      } else if (type === 'source') {
+        title = '数据来源结构解读'
+        lines.push('**当前数据来源构成：**')
+        lines.push('· 一手数据（实测/台账）' + q.primaryCount + ' 项，占 ' + q.primaryRatio + '%')
+        lines.push('· 二手数据（缺省值）' + (q.total - q.primaryCount) + ' 项，占 ' + (100 - q.primaryRatio) + '%')
+        lines.push('')
+        lines.push('**一手排放量占比：**' + q.primaryEmissionRatio + '%')
+        lines.push('')
+        if (q.primaryRatio >= 60) {
+          lines.push('✅ 一手数据占比较高，数据可追溯性良好。')
+        } else if (q.primaryRatio >= 40) {
+          lines.push('⚠️ 一手数据占比一般，建议提升实测数据比例。')
+        } else {
+          lines.push('⛔ 一手数据占比偏低，核算结果可信度受限。')
+        }
+        lines.push('')
+        lines.push('**说明：**一手数据指企业实测、计量、结算单据；二手数据指数据库与标准缺省值。')
+      } else if (type === 'coverage') {
+        title = '覆盖率解读'
+        lines.push('**当前覆盖率：**')
+        lines.push('· 排放源覆盖率：' + q.sourceCoverage + '%')
+        lines.push('· 排放量覆盖率：' + q.emissionCoverage + '%')
+        lines.push('')
+        const v = q.emissionCoverage
+        if (v >= 95) {
+          lines.push('✅ 排放量覆盖率充分（≥95%），数据覆盖完整，结果可信。')
+        } else if (v >= 80) {
+          lines.push('⚠️ 排放量覆盖率偏低（80%~95%），建议补充未覆盖的排放源数据。')
+        } else {
+          lines.push('⛔ 排放量覆盖率不足（<80%），核算结果可信度低，强烈建议补充数据。')
+        }
+        lines.push('')
+        lines.push('**说明：**排放量覆盖率是指已填数据的估算排放量占全部排放源估算排放量的比例。')
+      } else if (type === 'conf') {
+        title = '因子匹配置信度解读'
+        const list = q.confDist || []
+        lines.push('**当前匹配分布：**')
+        list.forEach(c => {
+          lines.push('· ' + c.label + '：' + c.count + ' 项')
+        })
+        const low = (list.find(c => c.label === '兜底缺省') || {}).count || 0
+        lines.push('')
+        if (low > 0) {
+          lines.push('⚠️ **' + low + ' 项因子命中「兜底缺省」**（置信度 0.82），说明未匹配到更精确的因子。')
+          lines.push('')
+          lines.push('**改进建议：**')
+          lines.push('· 补充企业实测因子（置信度 1.00）')
+          lines.push('· 完善物料规则表，提升规则表命中率')
+        } else {
+          lines.push('✅ 因子匹配质量良好，无兜底命中项。')
+        }
+        lines.push('')
+        lines.push('**说明：**匹配链路为 P-1 企业实测 → P0 企业记忆 → 规则表 → 兜底缺省。')
+      } else if (type === 'time') {
+        title = '时效性解读'
+        const ai = q.ageInfo || {}
+        lines.push('**当前时效性：**')
+        lines.push('· 活动数据年份：' + ai.dataYear + '（距基准年 ' + (ai.dataGap || 0) + ' 年）')
+        lines.push('· 排放因子版本：' + ai.factorVersion + '（距基准年 ' + (ai.factorGap || 0) + ' 年）')
+        lines.push('')
+        if ((ai.dataGap || 0) <= 1) {
+          lines.push('✅ 活动数据时效性良好。')
+        } else {
+          lines.push('⚠️ 活动数据年份较旧，建议更新为基准年数据。')
+        }
+        if ((ai.factorGap || 0) > 5) {
+          lines.push('⚠️ 排放因子版本较旧（>' + 5 + ' 年），建议升级为最新版本。')
+          lines.push('')
+          lines.push('**建议：**考虑使用 IPCC 2019 修订版或最新国家排放因子库。')
+        } else {
+          lines.push('✅ 排放因子版本较新。')
+        }
+      }
+
+      this.messages.push({
+        role: 'assistant',
+        content: '**【' + title + '】**\n\n' + lines.join('\n'),
+        timestamp: new Date().toLocaleTimeString('zh-CN')
+      })
+      this.scrollToBottom()
+    },
+
+    /** 阶段6：整体数据质量评估摘要（左侧播报） */
+    buildQualitySummary() {
+      const q = this.qualityAssessment || {}
+      if (!q.total) {
+        return '**【阶段六：数据校验】**\n\n正准备整体数据质量评估…'
+      }
+
+      const d = q.dqrDist || {}
+      const bad = (d.D || 0) + (d.E || 0)
+      const lines = []
+
+      lines.push('**【阶段六：数据校验 - 整体质量评估】**')
+      lines.push('')
+      lines.push('已对 **' + q.total + '** 项活动数据进行全局质量评估。')
+      lines.push('')
+      lines.push('**① 加权质量分**')
+      lines.push('· ' + q.weightedScore + ' / 5.0（' + q.weightedGrade + ' 级）')
+      lines.push('')
+      lines.push('**② DQR 分布**')
+      lines.push('· A 级 ' + (d.A || 0) + ' 项 · B 级 ' + (d.B || 0) + ' 项 · C 级 ' + (d.C || 0) + ' 项')
+      lines.push('· D 级 ' + (d.D || 0) + ' 项 · E 级 ' + (d.E || 0) + ' 项')
+      lines.push('')
+      lines.push('**③ 数据来源结构**')
+      lines.push('· 一手数据（实测/台账）' + q.primaryCount + ' 项，占 ' + q.primaryRatio + '%')
+      lines.push('· 一手排放量占比 ' + q.primaryEmissionRatio + '%')
+      lines.push('')
+      lines.push('**④ 覆盖率**')
+      lines.push('· 排放源覆盖率 ' + q.sourceCoverage + '%')
+      const cv = q.emissionCoverage
+      const cvTag = cv >= 95 ? '✅ 充分' : cv >= 80 ? '⚠️ 偏低' : '⛔ 不足'
+      lines.push('· 排放量覆盖率 ' + cv + '% ' + cvTag)
+      lines.push('')
+
+      if (bad > 0 || cv < 95) {
+        lines.push('**⚠️ 需要关注：**')
+        if (bad > 0) lines.push('· ' + bad + ' 项数据质量偏低（D/E 级），主要因因子采用缺省值')
+        if (cv < 95) lines.push('· 排放量覆盖率不足 95%，建议补充数据')
+        lines.push('')
+      } else {
+        lines.push('**✅ 数据质量整体良好，满足核算要求。**')
+        lines.push('')
+      }
+
+      lines.push('详细评估结果请查看右侧「整体质量评估」页签，点击图表可查看解读。')
+
+      return lines.join('\n')
+    },
     // ===== 消息操作 =====
     copyMessageContent(content) {
       // 移除 markdown 标记，保留纯文本
@@ -225,7 +555,7 @@ export default {
           suggests: ['查看结果']
         },
         6: {
-          right: '右侧为**排放量计算结果**（范围1+2+3 汇总及各排放源贡献），请核对计算结果。',
+          right: '右侧为**排放量计算结果**（范围1+2 汇总及各排放源贡献），请核对计算结果。',
           suggests: ['查看排放贡献分析', '进入排放分析']
         },
         7: {
@@ -300,7 +630,7 @@ export default {
       this.boundaryConfig = snapshot.boundaryConfig ? JSON.parse(JSON.stringify(snapshot.boundaryConfig)) : this.boundaryConfig
       this.isModelBuilt = snapshot.isModelBuilt || false
       this.validationStep = snapshot.validationStep || 0
-      this.validationActiveTab = snapshot.validationActiveTab || 'validation'
+      this.validationActiveTab = snapshot.validationActiveTab === 'activity' ? 'activity' : 'quality'
       this.validationItems = snapshot.validationItems ? JSON.parse(JSON.stringify(snapshot.validationItems)) : this.validationItems
       this.analysisActiveTab = snapshot.analysisActiveTab || 'routine'
       this.analysisSubStep = snapshot.analysisSubStep || 0
@@ -498,7 +828,7 @@ export default {
     },
     goBackToUpper() {
       this.saveStageSnapshot()
-      this.$router.go(-1)
+      this.$router.push('/agent-center/apps/beijing-carbon').catch(() => {})
     },
     showCmdHint() {
       this.messages.push({
@@ -522,10 +852,10 @@ export default {
     resetSession() {
       this.currentStepIndex = 0
       this.selectedStandard = this.defaultStandardCode()
-      this.selectedUnit = 'scope123'
+      this.selectedUnit = 'scope12'
       this.boundarySubStep = 0
       this.validationStep = 0
-      this.validationActiveTab = 'validation'
+      this.validationActiveTab = 'quality'
       this.isModelBuilt = false
       this.analysisActiveTab = 'routine'
       this.analysisSubStep = 0
@@ -535,8 +865,8 @@ export default {
       this.isSopPublished = false
       this.boundaryConfig = {
         lifecycleScope: 'operational',
-        unitType: 'scope123',
-        unitDetail: '覆盖范围1（直接排放）、范围2（外购能源间接）、范围3（价值链其他间接）',
+        unitType: 'scope12',
+        unitDetail: '化石燃料燃烧排放 + 工业生产过程排放 + 外购电力、热力隐含排放（DB11/T 1787 口径）',
         allocationRule: 'facility',
         cutoffThreshold: '1%/5%',
         cutoffItemThreshold: '1%',
@@ -629,7 +959,7 @@ export default {
         this.isTyping = false
         this.currentStepIndex = 5
         this.validationStep = 1
-        this.validationActiveTab = 'validation'
+        this.validationActiveTab = 'quality'
         this.messages.push({
           id: 'MSG-' + Date.now(),
           role: 'assistant',
@@ -673,7 +1003,7 @@ export default {
         '**【阶段4·活动数据】**\n系统已并发拉取排放源活动数据（燃料消耗、外购电量、原料投入等），右侧清单已显示实测数据值。',
         '**【阶段5·排放因子】**\n右侧已自动绑定排放因子库中的对应因子，可查看各排放源的因子绑定情况。',
         '',
-        '**【阶段7·排放计算】**\n右侧展示排放总量（范围1+2+3）及各排放源贡献树形表。',
+        '**【阶段7·排放计算】**\n右侧展示排放总量（范围1+2）及各排放源贡献树形表。',
         '**【阶段8·排放分析】**\n进行范围构成分析、不确定性分析和排放因子敏感性分析。',
         '**【阶段9·排放报告】**\n查看并导出组织温室气体排放核算报告，可发布为SOP或提交第三方认证。'
       ]
@@ -790,27 +1120,37 @@ export default {
         }
       }, 1000)
     },
-    /** 阶段3 开场引导：行业画像 + 清单确认指引 */
+    /** 阶段3 开场引导：北京碳市场口径（DB11/T 1787） */
     buildStage3Guide() {
       const ent = { name: this.currentEnterprise, industry: this.currentIndustry }
-      const hints = this.getIndustryHints ? this.getIndustryHints() : null
+      const period = this.boundaryConfig && this.boundaryConfig.periodRange ? this.boundaryConfig.periodRange : ''
       let hintBlock = ''
-      if (hints) {
+      const hints = this.getIndustryHints ? this.getIndustryHints() : null
+      if (hints && hints.scope1 && hints.scope1.length) {
         const fmt = (list) => list.map(h => '  · **' + h.name + '** — ' + h.why).join('\n')
         hintBlock = '\n\n根据您的企业（**' + (ent.name || '本企业') + ' · ' + (ent.industry || '') + '**），建议重点关注：\n'
-          + '\n**范围1 直接排放**\n' + fmt(hints.scope1)
-          + '\n\n**范围2 外购能源间接**\n' + fmt(hints.scope2)
-          + '\n\n**范围3 价值链间接**\n' + fmt(hints.scope3)
+          + '\n**化石燃料燃烧排放**\n' + fmt(hints.scope1)
+          + '\n\n**外购电力、热力隐含排放**\n' + fmt(hints.scope2 || [])
       }
-      return '**【阶段三：排放源清单】**\n核算清单是本次核算的**基础**，直接决定后续活动数据收集与排放计算的完整性。'
+
+      return '**【阶段三：排放源清单】**\n\n'
+        + '本次核算依据 **DB11/T 1787** 口径，核算范围为：\n\n'
+        + '· **化石燃料燃烧排放**\n'
+        + '· **工业生产过程排放**\n'
+        + '· **外购电力、热力隐含排放**\n\n'
+        + '> 说明：北京碳市场试点**不核算范围3**（价值链间接排放），以二氧化碳为主。'
+        + (period ? '\n> 履约年度：**' + period + '**' : '')
         + hintBlock
-        + '\n\n**右侧清单已按范围1/2/3 分类**，请按以下方式确认：\n'
-        + '* ✓ **保留**：本企业适用的排放源\n'
+        + '\n\n**右侧清单已按上述三类组织**，请按以下方式确认：\n'
+        + '* ✓ **保留**：本企业实际存在的排放源\n'
         + '* ✗ **删除**：不适用的（如无燃煤锅炉）\n'
         + '* ＋ **补充**：遗漏的（下拉选择或输入自定义名称）\n'
-        + '* 📍 **细化**：为每个排放源添加**排放单元**（如"1号涂装线""2号锅炉"）\n\n'
-        + '需要我按大类**逐项引导确认**吗？\n\n'
-        + '> 提示：排放单元越细，后续活动数据归集越精确；如暂不细分，可按排放源汇总填报。'
+        + '* 📍 **细化**：为每个排放源添加**排放设施**（如"1号锅炉""2号涂装线"）\n\n'
+        + '**核算要求：**\n'
+        + '* 边界口径：法人边界（运营控制权法）\n'
+        + '* 核算粒度：设施 → 企业级\n'
+        + '* 数据凭证：需留存备查（3 级溯源）\n\n'
+        + '> 提示：北京试点核查需逐设施核对，排放设施越细，后续核查越顺畅。'
     },
 
     /** 点击不确定性 KPI 卡片：输出该指标的详细解读（不推进阶段） */
@@ -1038,13 +1378,13 @@ export default {
           this.boundarySubStep = 1
           return {
             content: `**【阶段二 - 步骤 1/2】组织边界**\n已确认：**${this.lifecycleScopeLabel}**\n\n请选择本次核算的范围口径：`,
-            suggestions: ['范围1+2', '范围1+2+3'],
+            suggestions: ['范围1+2'],
             nextStepIndex: 1
           }
         }
 
         if (this.boundarySubStep === 1) {
-          let scope = 'scope123'
+          let scope = 'scope12'
           if ((lower.includes('范围1+2') || lower.includes('范围1和2')) && !lower.includes('3')) scope = 'scope12'
           this.boundaryConfig.unitType = scope
           this.selectedUnit = scope
@@ -1092,15 +1432,13 @@ export default {
               nextStepIndex: 2
             }
           } else {
-            // 无问题：标记已校验 → 后台拉取活动数据 + 匹配因子 → 直接进入阶段6（数据校验）
-            this.modelValidated = true
-            return {
-              content: `**【阶段三：排放源清单 - 完成】**\n排放源清单结构校验通过！\n\n**后台已自动执行**：\n* 📥 **阶段四·活动数据**：从能源台账 / 采购系统 / 计量点并发拉取\n* 🔗 **阶段五·排放因子**：按排放源品种匹配因子库\n\n正在生成**待确认清单**与**数据清单**...`,
-              followUpContent: this.buildValidationSummary(),
-              followUpSuggestions: ['全部使用建议值确认', '暂不处理，直接计算'],
-              nextStepIndex: 5,
-              validationStep: 1
-            }
+            // 无问题：标记已校验 → 后台拉取活动数据 + 匹配因子 → 直接进入阶段6（数据校验）        this.modelValidated = true
+        return {
+          content: `**【阶段三：排放源清单 - 完成】**\n\n排放源清单结构校验通过！\n\n**接下来进入阶段四·活动数据**：\n右侧将列出各排放源的活动数据（AD）参数，请逐项核对数值、原始值与数据来源，确认无误后进入因子匹配。`,
+          followUpContent: `**【阶段四：活动数据】**\n\n请逐项确认各排放源的活动数据：\n\n**核对要点：**\n· 参数值：换算后的标准单位值\n· 原始值：数据源原始记录\n· 数据来源：台账 / 结算单 / 计量点\n· 状态：待补充 → 待确认 → 已确认\n\n> 提示：点击右侧「状态」列的标签可直接确认或取消确认。`,
+          followUpSuggestions: ['确认数据，进入因子匹配'],
+          nextStepIndex: 3
+        }
           }
         } else {
           // 已校验过，直接进入下一阶段（防止重复触发）
@@ -1111,8 +1449,8 @@ export default {
       // ===== 阶段4→5：确认数据，进入因子匹配 =====
       if (this.currentStepIndex === 3 && (lower.includes('确认数据') || lower.includes('因子匹配'))) {
         return {
-          content: `**【阶段四：活动数据 - 完成】**\n活动数据已锁定，所有实测数据已归档。`,
-          followUpContent: `**【阶段五：排放因子】**\n排放因子库已自动匹配各排放源对应因子，右侧清单已显示因子绑定标签。\n\n请确认因子匹配结果：`,
+          content: `**【阶段四：活动数据 - 完成】**\n\n**已确认内容：**\n· 活动数据（AD）逐项核对完成\n· 原始值与单位换算已确认\n· 数据来源与佐证材料已关联\n\n活动数据已锁定，将作为排放计算的输入依据。`,
+          followUpContent: `**【阶段五：排放因子】**\n\n系统已按**四级匹配链路**自动匹配各排放源对应的排放因子：\n\n**匹配链路：** P-1 企业实测 → P0 企业记忆 → 规则表 → 兜底缺省\n\n右侧清单已显示因子绑定标签与匹配置信度。请逐项确认因子匹配结果：\n\n> 提示：命中「兜底缺省」的因子（置信度 0.82）建议后续升级为企业实测或行业数据。`,
           followUpSuggestions: ['确认因子，进入数据校验'],
           nextStepIndex: 4
         }
@@ -1126,9 +1464,9 @@ export default {
           item.statusLabel = item.type === 'completeness' ? '待补充' : '待确认'
         })
         return {
-          content: `**【阶段五：核算因子 - 完成】**\n排放因子匹配已确认，所有排放源均已绑定对应因子。`,
-          followUpContent: this.buildValidationSummary(),
-          followUpSuggestions: ['全部使用建议值确认', '暂不处理，直接计算'],
+          content: `**【阶段五：排放因子 - 完成】**\n\n**已确认内容：**\n· 排放因子（EF）逐项匹配完成\n· 因子来源与权威池已核实\n· 匹配置信度已记录\n\n所有排放源均已绑定对应因子。`,
+          followUpContent: this.buildQualitySummary(),
+          followUpSuggestions: ['确认质量评估，进入排放分析'],
           nextStepIndex: 5,
           validationStep: 1
         }

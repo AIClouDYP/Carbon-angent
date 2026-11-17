@@ -409,7 +409,7 @@ export default {
     },
     goBackToUpper() {
       this.saveStageSnapshot()
-      this.$router.go(-1)
+      this.$router.push('/agent-center/apps/carbon-accounting').catch(() => {})
     },
     showCmdHint() {
       this.messages.push({

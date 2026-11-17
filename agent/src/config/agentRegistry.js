@@ -56,7 +56,7 @@ export const agentRegistry = [
     category: '碳核算',
     desc: '面向产业园区的碳排放全景核算与零碳路径规划，支持园区企业/公共配套/能源供应三维度核算+可再生能源抵消+蒙特卡洛不确定性分析+敏感度排序，助力园区实现碳达峰碳中和目标',
     status: '可用',
-    route: '/park-accounting/accounting/agent',
+    route: '/park-accounting/workspace',
     todayCompleted: 32,
     todayRunning: 1,
     todayExceptions: 0,
