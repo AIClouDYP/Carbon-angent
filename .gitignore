@@ -8,6 +8,7 @@
 !/agent/
 !/.gitignore
 !/README.md
+!/.github/
 
 # ===== 依赖 =====
 node_modules/

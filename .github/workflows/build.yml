@@ -1,0 +1,117 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'agent/**'
+      - '.github/workflows/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'agent/**'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  # ============ 构建校验 ============
+  build:
+    name: Build Agent
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: agent/package-lock.json
+
+      - name: Install dependencies
+        working-directory: agent
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Build
+        working-directory: agent
+        run: npm run build
+        env:
+          NODE_OPTIONS: --max_old_space_size=4096
+          CI: false
+
+      - name: Check build output
+        working-directory: agent
+        run: |
+          if [ ! -d "dist" ]; then
+            echo "::error::dist 目录未生成"
+            exit 1
+          fi
+          echo "构建产物："
+          du -sh dist
+          find dist -type f | wc -l
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ github.sha }}
+          path: agent/dist
+          retention-days: 14
+
+  # ============ 部署到 GitHub Pages（仅 main 分支）============
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: agent/package-lock.json
+
+      - name: Install dependencies
+        working-directory: agent
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Build
+        working-directory: agent
+        run: npm run build
+        env:
+          NODE_OPTIONS: --max_old_space_size=4096
+          CI: false
+
+      # SPA 路由回退：复制 index.html 为 404.html
+      - name: Add SPA fallback
+        run: cp agent/dist/index.html agent/dist/404.html
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: agent/dist
+
+      - name: Deploy to Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

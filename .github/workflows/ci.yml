@@ -1,0 +1,56 @@
+name: CI Check
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  lint-and-build:
+    name: Lint & Build Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: agent/package-lock.json
+
+      - name: Install dependencies
+        working-directory: agent
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Lint
+        working-directory: agent
+        continue-on-error: true
+        run: npm run lint
+
+      - name: Build
+        working-directory: agent
+        run: npm run build
+        env:
+          NODE_OPTIONS: --max_old_space_size=4096
+          CI: false
+
+      - name: Report build size
+        working-directory: agent
+        run: |
+          echo "### 构建产物统计" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| 指标 | 值 |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| 总大小 | $(du -sh dist | cut -f1) |" >> $GITHUB_STEP_SUMMARY
+          echo "| 文件数 | $(find dist -type f | wc -l) |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "#### 最大的 10 个文件" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          find dist -type f -exec du -h {} + | sort -rh | head -10 >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
