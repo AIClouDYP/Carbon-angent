@@ -11,7 +11,7 @@ const PefAccountingCenter = () => import('./views/PefAccountingCenter.vue')
 const OrgAccountingCenter = () => import('./views/OrgAccountingCenter.vue')
 
 const BeijingCarbonCenter = () => import('../beijing-carbon/agent-center/views/BeijingCarbonCenter.vue')
-// 产品与物料库
+// 企业产品库
 const EnterpriseProductLibrary = () => import('./views/EnterpriseProductLibrary.vue')
 // 产品SOP库
 const ProductSOPLibrary = () => import('./views/ProductSOPLibrary.vue')
@@ -109,12 +109,12 @@ export const agentCenterRoutes = [
     meta: { title: '零碳工厂', hideBreadcrumb: true, theme: 'light' }
   },
 
-  // 产品与物料库
+  // 企业产品库
   {
     path: '/agent-center/apps/enterprise-product-library',
     component: EnterpriseProductLibrary,
     name: 'EnterpriseProductLibrary',
-    meta: { title: '产品与物料库', hideBreadcrumb: true, theme: 'light' }
+    meta: { title: '企业产品库', hideBreadcrumb: true, theme: 'light' }
   },
 
   // 产品SOP库

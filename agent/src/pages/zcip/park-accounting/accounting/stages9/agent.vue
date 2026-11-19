@@ -480,6 +480,10 @@
             <!-- 顶部统计 -->
             <!-- 子页签 -->
             <div class="src-subtabs">
+              <div :class="['src-subtab', { active: parkQaTab === 'validation' }]" @click="parkQaTab = 'validation'">
+                <i class="el-icon-warning-outline"></i> 待补充 / 待确认
+                <span class="src-subtab-count" v-if="validationItems.filter(v => v.status !== 'resolved' && v.status !== 'skipped').length">{{ validationItems.filter(v => v.status !== 'resolved' && v.status !== 'skipped').length }}</span>
+              </div>
               <div :class="['src-subtab', { active: parkQaTab === 'quality' }]" @click="parkQaTab = 'quality'">
                 <i class="el-icon-data-analysis"></i> 整体质量评估
               </div>
@@ -487,6 +491,142 @@
                 <i class="el-icon-document-copy"></i> 数据清单
                 <span class="src-subtab-count">{{ parkQualityAssessment.total }}</span>
               </div>
+            </div>
+
+            <!-- 滚动内容：待补充 / 待确认清单 -->
+            <div v-show="parkQaTab === 'validation'" class="qa-park-scroll">
+
+              <!-- ① 补充/确认清单 -->
+              <div class="val-section val-checklist-section">
+                <div class="val-section-header">
+                  <div class="val-section-title">
+                    <i class="el-icon-warning-outline"></i>
+                    <span>补充 / 确认清单</span>
+                    <el-tag size="mini" type="danger" effect="plain" v-if="validationItems.filter(v => v.status === 'missing').length">
+                      缺失 {{ validationItems.filter(v => v.status === 'missing').length }}
+                    </el-tag>
+                    <el-tag size="mini" type="warning" effect="plain" v-if="validationItems.filter(v => v.status === 'pending').length">
+                      待确认 {{ validationItems.filter(v => v.status === 'pending').length }}
+                    </el-tag>
+                  </div>
+                  <el-button size="mini" type="text" icon="el-icon-download" @click="downloadMissingChecklist">下载清单</el-button>
+                </div>
+                <div class="val-checklist-body">
+                  <div v-for="item in validationItems.filter(v => v.status !== 'resolved' && v.status !== 'skipped')" :key="'ck-' + item.id" class="checklist-item">
+                    <div class="checklist-item-info">
+                      <i :class="item.status === 'missing' ? 'el-icon-error' : 'el-icon-question'" :style="{ color: item.status === 'missing' ? '#f56c6c' : '#e6a23c', fontSize: '14px' }"></i>
+                      <span class="checklist-item-name">{{ item.ioName || item.name || item.label }}</span>
+                      <el-tag size="mini" :type="item.status === 'missing' ? 'danger' : 'warning'" effect="plain">{{ item.stage }}</el-tag>
+                      <el-tag size="mini" type="info" effect="plain">{{ item.statusLabel }}</el-tag>
+                    </div>
+                    <div class="checklist-item-desc">{{ item.label }}</div>
+                    <div class="checklist-item-suggest">
+                      <i class="el-icon-paperclip"></i>
+                      <span>建议上传：{{ item.supplementHint || '相关数据台账/清单文件' }}</span>
+                    </div>
+                  </div>
+                  <div v-if="validationItems.filter(v => v.status === 'resolved').length > 0" class="checklist-resolved-tip">
+                    <i class="el-icon-circle-check" style="color:#67c23a"></i>
+                    已处理 {{ validationItems.filter(v => v.status === 'resolved').length }} 项
+                  </div>
+                </div>
+              </div>
+
+              <!-- ② 文件上传 -->
+              <div class="val-section val-upload-section">
+                <div class="val-section-header">
+                  <div class="val-section-title">
+                    <i class="el-icon-upload2"></i>
+                    <span>材料上传</span>
+                  </div>
+                </div>
+                <div class="val-upload-body">
+                  <el-upload
+                    action="#"
+                    :auto-upload="false"
+                    :show-file-list="false"
+                    :on-change="handleSupplementFile"
+                    multiple
+                    drag
+                    accept=".xlsx,.xls,.csv,.pdf,.jpg,.png"
+                  >
+                    <i class="el-icon-upload"></i>
+                    <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                    <div class="el-upload__tip" slot="tip">支持 Excel / PDF / 图片格式</div>
+                  </el-upload>
+                  <div class="supplement-file-list" v-if="supplementFiles.length > 0">
+                    <div v-for="(f, i) in supplementFiles" :key="i" class="supplement-file-item">
+                      <i :class="getFileIcon(f.name)"></i>
+                      <span class="supplement-file-name">{{ f.name }}</span>
+                      <span class="supplement-file-status" v-if="f.parsed"><i class="el-icon-circle-check"></i> 已解析</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ③ 逐项填报 / 确认 -->
+              <div class="val-section val-edit-section">
+                <div class="val-section-header">
+                  <div class="val-section-title">
+                    <i class="el-icon-edit-outline"></i>
+                    <span>逐项填报 / 确认</span>
+                  </div>
+                </div>
+                <div class="val-edit-list">
+                  <div v-for="item in validationItems" :key="item.id" class="validation-task-card" :class="`is-status-${item.status}`">
+                    <div class="vtc-header">
+                      <div class="vtc-title">
+                        <el-tag size="mini" effect="dark" type="info">{{ item.stage }}</el-tag>
+                        <i class="el-icon-arrow-right vtc-arrow"></i>
+                        <el-tag size="mini" effect="plain" type="success">{{ item.process }}</el-tag>
+                        <span class="vtc-problem-desc">
+                          <i :class="item.status === 'missing' ? 'el-icon-warning-outline' : 'el-icon-info'" :style="{ color: item.status === 'missing' ? '#f56c6c' : '#e6a23c', marginRight: '4px' }"></i>
+                          {{ item.label }}
+                        </span>
+                      </div>
+                      <div class="vtc-status">
+                        <el-tag size="small" :type="statusTagType(item.status)">{{ item.statusLabel }}</el-tag>
+                      </div>
+                    </div>
+                    <div class="vtc-body">
+                      <div class="vtc-data-field">
+                        <span class="vtc-label">{{ item.ioType === 'input' ? '输入项' : '输出项' }}名称：</span>
+                        <span class="vtc-value-name">{{ item.ioName || item.name || '—' }}</span>
+                      </div>
+                      <div class="vtc-data-field">
+                        <span class="vtc-label">{{ item.status === 'missing' ? '待填报数值' : '待确认数值' }}：</span>
+                        <div v-if="item.status !== 'resolved' && item.status !== 'skipped'" class="vtc-input-group">
+                          <el-input size="small" v-model="item.value" placeholder="请输入..." style="width: 140px;">
+                            <template slot="append" v-if="item.unit">{{ item.unit }}</template>
+                          </el-input>
+                        </div>
+                        <div v-else class="vtc-readonly-val">
+                          <strong>{{ item.value || '—' }}</strong>
+                        </div>
+                      </div>
+                      <div class="vtc-data-field vtc-recommend-field" v-if="item.recommended !== undefined && item.status !== 'resolved' && item.status !== 'skipped'">
+                        <span class="vtc-label">智能体推荐值：</span>
+                        <span class="vtc-recommend-val">{{ item.recommended }}{{ item.unit ? ' ' + item.unit : '' }}</span>
+                        <span class="vtc-recommend-note">{{ item.recommendNote }}</span>
+                        <el-button type="text" size="mini" class="vtc-adopt-btn" @click="adoptRecommended(item)">采纳</el-button>
+                      </div>
+                      <div class="vtc-actions">
+                        <el-button v-if="item.status !== 'resolved' && item.status !== 'skipped'" size="small" :type="item.status === 'missing' ? 'primary' : 'warning'" @click="handleValItemClick(item)">
+                          <i class="el-icon-check"></i> {{ item.status === 'missing' ? '提交填报' : '确认数据' }}
+                        </el-button>
+                        <span v-else-if="item.status === 'resolved'" class="vtc-resolved-mark"><i class="el-icon-circle-check"></i> 已处理</span>
+                        <span v-else class="vtc-skipped-mark"><i class="el-icon-remove-outline"></i> 已跳过</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 全部校验项处理完毕后的下一步入口 -->
+              <div class="val-next-bar" v-if="validationAllResolved">
+                <el-button type="primary" size="small" @click="finishValidation"><i class="el-icon-right"></i> 确认数据，进入下一步</el-button>
+              </div>
+
             </div>
 
             <!-- 滚动内容 -->

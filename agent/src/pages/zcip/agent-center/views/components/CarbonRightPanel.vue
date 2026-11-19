@@ -7,7 +7,7 @@
           <i class="el-icon-s-order"></i> 任务列表
         </span>
         <span class="tab-selector" :class="{ active: localRightPanel === 'products' }" @click="switchTab('products')">
-          <i class="el-icon-s-goods"></i> 产品库
+          <i class="el-icon-s-goods"></i> 企业产品库
         </span>
       </div>
     </div>
@@ -43,13 +43,13 @@
       </div>
     </div>
 
-    <!-- 产品与物料库 -->
+    <!-- 企业产品库 -->
     <div v-if="localRightPanel === 'products'" class="panel-content">
       <div class="search-header">
-        <span class="panel-title">产品与物料库</span>
+        <span class="panel-title">企业产品库</span>
         <div style="display:flex;align-items:center;gap:8px;">
           <el-input placeholder="搜索产品..." prefix-icon="el-icon-search" size="mini" v-model="searchProduct" style="width: 120px;"></el-input>
-          <el-tooltip content="前往产品与物料库管理" placement="bottom">
+          <el-tooltip content="前往企业产品库管理" placement="bottom">
             <el-button size="mini" icon="el-icon-setting" circle @click="$emit('go-to-product-library')"></el-button>
           </el-tooltip>
         </div>

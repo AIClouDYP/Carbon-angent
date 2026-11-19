@@ -581,9 +581,9 @@ export default {
         '**【阶段1·政策标准】**\n请从右侧政策标准库选择核算标准，查看标准解析结果。选择标准后系统将自动进入下一阶段。',
         '**【阶段2·核算边界】**\n配置生命周期范围、量化单位、分配规则、取舍规则和时间边界共5个步骤。',
         '**【阶段3·核算模型】**\n右侧已初始化核算模型框架，请上传工艺流程图、BOM清单、能源消耗台账等材料，系统将自动解析生成工艺拓扑模型。',
-        '**【阶段4·活动数据】**\n系统已并发拉取多源活动数据（BOM清单、能耗数据等），右侧模型已显示实测数据值。',
-        '**【阶段5·核算因子】**\n右侧模型已自动绑定排放因子库中的对应因子，可查看各单元过程的因子绑定情况。',
-        '',
+        '**【阶段4·活动数据（自动执行）】**\n确认模型后系统自动并发拉取多源活动数据（BOM清单、能耗数据等），无需人工操作。',
+        '**【阶段5·核算因子（自动执行）】**\n活动数据采集完成后系统自动匹配排放因子并完成绑定，无需人工操作。',
+        '**【阶段6·数据校验】**\n对活动数据与因子进行完整性、一致性、DQR 多重校验，处理待补充项与待确认项。',
         '**【阶段7·碳足迹计算】**\n右侧展示最终碳足迹计算结果及各单元过程排放贡献树形表。',
         '**【阶段8·碳足迹分析】**\n进行常规统计分析、不确定性分析和因子敏感性分析。',
         '**【阶段9·碳足迹报告】**\n查看并导出产品碳足迹核算报告，可发布为SOP或提交第三方认证。'
@@ -947,10 +947,13 @@ export default {
             this.validationItems[3].status = 'pending'
             this.validationItems[3].statusLabel = '待确认'
 
+            // 阶段4、5 自动运行（后台执行，不展示），直接进入阶段6
             return {
-              content: `**【阶段三：核算模型 - 完成】**\n模型结构校验通过！工艺拓扑模型结构完整、逻辑合理。\n\n**【阶段四：活动数据】** 已并发拉取各单元过程活动数据，请在右侧逐项核对物料的原始值与数据来源。\n\n确认无误后进入排放因子匹配。`,
-              suggestions: ['确认数据，进入因子匹配'],
-              nextStepIndex: 3
+              content: `**【阶段三：核算模型 - 完成】**\n模型结构校验通过！工艺拓扑模型结构完整、逻辑合理。\n\n**【阶段四：活动数据 - 自动完成】**\n系统已并发拉取各单元过程活动数据，覆盖 BOM 清单、能源消耗台账、包装与运输数据等多源信息，全部活动数据已自动匹配并归档。\n\n**【阶段五：核算因子 - 自动完成】**\n排放因子库已按标准优先级自动匹配各单元过程因子，所有输入输出流均已完成因子绑定。\n\n**【阶段六：数据校验】**\n已完成完整性、一致性、DQR 多重校验，以下为校验结果：`,
+              followUpContent: this.buildValidationSummary(),
+              followUpSuggestions: ['全部使用建议值确认', '暂不处理，直接计算'],
+              nextStepIndex: 5,
+              validationStep: 1
             }
           }
         } else {
@@ -1600,9 +1603,20 @@ export default {
       window.addEventListener('resize', this._onWinResize)
     }
     // 从localStorage加载历史任务列表
+    // 仅保留两个预置任务（燃油汽车 / 陆上风电机组），清理其余历史任务
+    const ALLOWED_TASK_IDS = ['task-ice-a160-preset', 'task-wind-preset']
     try {
       const saved = localStorage.getItem('cfp_task_list')
-      if (saved) this.taskList = JSON.parse(saved)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (Array.isArray(parsed)) {
+          this.taskList = parsed.filter(t => t && ALLOWED_TASK_IDS.indexOf(t.id) > -1)
+          // 若过滤后与原始数据不同，回写清理后的列表
+          if (this.taskList.length !== parsed.length) {
+            try { localStorage.setItem('cfp_task_list', JSON.stringify(this.taskList)) } catch (e2) { /* ignore */ }
+          }
+        }
+      }
     } catch (e) { /* ignore */ }
     // 预置燃油汽车产品碳足迹计算任务（基于0714燃油汽车产品碳模型样例）
     const iceTaskId = 'task-ice-a160-preset'

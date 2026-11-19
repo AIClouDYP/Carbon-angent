@@ -63,6 +63,259 @@
       </div>
     </template>
 
+    <!-- ============ 第二层：分时分区电碳因子库（专用视图） ============ -->
+    <template v-else-if="isTimeSpaceDb">
+      <!-- 返回 + 库信息 -->
+      <div class="db-detail-header">
+        <el-button size="mini" icon="el-icon-back" @click="backToList">返回因子库列表</el-button>
+        <div class="db-info">
+          <i :class="currentDb.icon" :style="{ color: currentDb.color }" style="font-size: 20px;"></i>
+          <div>
+            <div class="db-name">{{ currentDb.name }}</div>
+            <div class="db-meta">
+              <el-tag size="mini" :type="typeTagType(currentDb.type)">{{ currentDb.type }}</el-tag>
+              <el-tag size="mini" type="warning" effect="plain" style="margin-left: 8px;">来源优先级 P{{ currentDb.sourceTier || 4 }}</el-tag>
+              <el-tag size="mini" type="success" effect="plain" style="margin-left: 8px;">小时级 × 省市级</el-tag>
+              <span style="margin-left: 8px; color: #909399; font-size: 12px;">
+                {{ currentDb.publisher }} | {{ currentDb.regionCount || 0 }} 个区域 | {{ currentDb.dayCount || 0 }} 天 | {{ (currentDb.records || []).length }} 条记录
+              </span>
+            </div>
+            <div class="db-format-desc"><i class="el-icon-info"></i> {{ currentDb.formatDesc }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 覆盖度概览 -->
+      <div class="ts-overview">
+        <div class="ts-ov-item">
+          <div class="ts-ov-label">覆盖期间</div>
+          <div class="ts-ov-value ts-ov-sm">{{ currentDb.coveragePeriod || '—' }}</div>
+        </div>
+        <div class="ts-ov-item">
+          <div class="ts-ov-label">区域数</div>
+          <div class="ts-ov-value">{{ tsCoverageReport.provinceCount }}<span class="ts-ov-unit">省</span> / {{ tsCoverageReport.cityCount }}<span class="ts-ov-unit">市</span></div>
+        </div>
+        <div class="ts-ov-item">
+          <div class="ts-ov-label">记录总数</div>
+          <div class="ts-ov-value">{{ tsCoverageReport.actualHours.toLocaleString() }}<span class="ts-ov-unit">条</span></div>
+        </div>
+        <div class="ts-ov-item">
+          <div class="ts-ov-label">因子范围</div>
+          <div class="ts-ov-value ts-ov-sm">{{ tsCoverageReport.min }} ~ {{ tsCoverageReport.max }}</div>
+        </div>
+        <div class="ts-ov-item">
+          <div class="ts-ov-label">均值 / 标准差</div>
+          <div class="ts-ov-value ts-ov-sm">{{ tsCoverageReport.mean }} / {{ tsCoverageReport.std }}</div>
+        </div>
+        <div class="ts-ov-item">
+          <div class="ts-ov-label">数据完整度</div>
+          <div class="ts-ov-value">
+            {{ tsCoverageReport.expectedHours ? Math.round(tsCoverageReport.actualHours / tsCoverageReport.expectedHours * 100) : 100 }}<span class="ts-ov-unit">%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 操作栏 -->
+      <div class="toolbar">
+        <el-select v-model="tsFilterLevel" placeholder="层级" size="small" clearable style="width: 120px;">
+          <el-option v-for="lv in tsLevelOptions" :key="lv" :label="levelLabel(lv)" :value="lv"></el-option>
+        </el-select>
+        <el-select v-model="tsFilterRegion" placeholder="区域" size="small" clearable filterable style="width: 160px; margin-left: 8px;">
+          <el-option v-for="r in tsRegionOptions" :key="r.code" :label="r.name" :value="r.code">
+            <span>{{ r.name }}</span>
+            <span style="float: right; color: #8492a6; font-size: 12px;">{{ levelLabel(r.level) }}</span>
+          </el-option>
+        </el-select>
+        <el-date-picker
+          v-model="tsDateRange"
+          type="daterange"
+          size="small"
+          value-format="yyyy-MM-dd"
+          range-separator="至"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          style="width: 240px; margin-left: 8px;">
+        </el-date-picker>
+        <el-button size="small" icon="el-icon-refresh-left" style="margin-left: 8px;" @click="resetTsFilter">重置</el-button>
+        <el-button type="primary" size="small" icon="el-icon-upload2" style="margin-left: auto;" @click="openTsImport">导入时空数据</el-button>
+        <el-dropdown trigger="click" style="margin-left: 8px;" @command="downloadTsTemplate">
+          <el-button size="small" icon="el-icon-download">下载模板<i class="el-icon-arrow-down el-icon--right"></i></el-button>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item :command="false">基础模板（4 列）</el-dropdown-item>
+            <el-dropdown-item :command="true">扩展模板（含发电结构）</el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+      </div>
+
+      <!-- 数据明细表 -->
+      <div class="table-wrapper">
+        <div class="table-title-bar">
+          <span class="table-title-text">时空因子明细</span>
+          <span class="table-title-sub">共 {{ tsFilteredRecords.length }} 条</span>
+        </div>
+        <div class="table-scroll">
+          <el-table :data="tsPagedRecords" border stripe size="small" style="width: 100%;" :header-cell-style="headerCellStyle">
+            <el-table-column label="区域" min-width="120">
+              <template slot-scope="{ row }">
+                <el-tag size="mini" :type="levelTagType(row.regionLevel)" effect="plain" style="margin-right: 4px;">{{ levelLabel(row.regionLevel) }}</el-tag>
+                <span>{{ row.regionName }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="日期" prop="date" width="110" align="center"></el-table-column>
+            <el-table-column label="时段" width="120" align="center">
+              <template slot-scope="{ row }">{{ hourText(row.hour) }}</template>
+            </el-table-column>
+            <el-table-column label="碳排放因子" width="160" align="right">
+              <template slot-scope="{ row }">
+                <span :style="{ color: intensityColor(row.value), fontWeight: 600 }">{{ row.value }}</span>
+                <span class="code-font" style="font-size: 11px; color: #909399; margin-left: 2px;">kgCO₂e/kWh</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="数据来源" prop="source" min-width="200" show-overflow-tooltip></el-table-column>
+          </el-table>
+        </div>
+        <div class="pagination-bar" v-if="tsFilteredRecords.length > 0">
+          <el-pagination
+            background
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="tsFilteredRecords.length"
+            :page-sizes="[20, 50, 100]"
+            :page-size="tsPageSize"
+            :current-page="tsCurrentPage"
+            @size-change="handleTsSizeChange"
+            @current-change="handleTsPageChange">
+          </el-pagination>
+        </div>
+      </div>
+
+      <!-- 时空数据导入对话框 -->
+      <el-dialog title="导入分时分区电碳因子" :visible.sync="showTsImportDialog" width="760px" :close-on-click-modal="false">
+        <div v-if="tsImportStep === 1" class="import-zone">
+          <div class="import-tip">
+            <i class="el-icon-info"></i>
+            <div>
+              支持 CSV（UTF-8，Excel 可另存为 CSV）。必需列：<b>区域 / 日期 / 小时 / 碳排放因子</b>；
+              可选列：煤电占比、气电占比、水电占比、数据来源、数据质量。<br>
+              区域支持省级（北京、江苏省）、市级（南京市）、区域电网（华东）与全国，多种写法自动归一。
+              日期支持 <code>YYYYMMDD</code> 或 <code>YYYY-MM-DD</code>；小时支持 1~24 或 0~23。
+            </div>
+          </div>
+          <div class="ts-import-opts">
+            <div class="ts-opt-row">
+              <label>数据来源</label>
+              <el-input v-model="tsImportSource" size="small" placeholder="如：北京电力交易中心" style="width: 240px;"></el-input>
+              <label style="margin-left: 16px;">数据质量</label>
+              <el-select v-model="tsImportQuality" size="small" style="width: 100px;">
+                <el-option label="实测" value="measured"></el-option>
+                <el-option label="估算" value="estimated"></el-option>
+              </el-select>
+              <label style="margin-left: 16px;">导入方式</label>
+              <el-select v-model="tsImportMode" size="small" style="width: 110px;">
+                <el-option label="追加（去重）" value="append"></el-option>
+                <el-option label="覆盖全部" value="replace"></el-option>
+              </el-select>
+            </div>
+          </div>
+          <div class="import-drop" style="margin-top: 12px;" @click="$refs.tsImportFileInput.click()">
+            <input type="file" ref="tsImportFileInput" accept=".csv" style="display: none;" @change="handleTsImportFile" />
+            <i class="el-icon-upload"></i>
+            <div class="import-drop-text">点击选择 CSV 文件</div>
+            <div class="import-drop-hint">全国推广建议按省份分批导入，单省一年约 8,760 条</div>
+          </div>
+        </div>
+
+        <div v-else-if="tsImportStep === 2">
+          <div class="ts-import-summary">
+            <div class="ts-is-item ts-is-ok">
+              <div class="ts-is-num">{{ tsImportReport.success }}</div>
+              <div class="ts-is-label">成功解析</div>
+            </div>
+            <div class="ts-is-item ts-is-err">
+              <div class="ts-is-num">{{ tsImportReport.failed }}</div>
+              <div class="ts-is-label">失败</div>
+            </div>
+            <div class="ts-is-item">
+              <div class="ts-is-num">{{ tsImportReport.provinceCount }}</div>
+              <div class="ts-is-label">省级</div>
+            </div>
+            <div class="ts-is-item">
+              <div class="ts-is-num">{{ tsImportReport.cityCount }}</div>
+              <div class="ts-is-label">市级</div>
+            </div>
+            <div class="ts-is-item">
+              <div class="ts-is-num">{{ tsImportReport.dayCount }}</div>
+              <div class="ts-is-label">天数</div>
+            </div>
+            <div class="ts-is-item">
+              <div class="ts-is-num ts-is-sm">{{ tsImportReport.dateStart }}<br>~ {{ tsImportReport.dateEnd }}</div>
+              <div class="ts-is-label">期间</div>
+            </div>
+          </div>
+
+          <div class="ts-import-detail">
+            <div class="ts-det-row">
+              <span class="ts-det-label">因子范围</span>
+              <span>{{ tsImportReport.min }} ~ {{ tsImportReport.max }} kgCO₂e/kWh（均值 {{ tsImportReport.mean }}，标准差 {{ tsImportReport.std }}）</span>
+            </div>
+            <div class="ts-det-row">
+              <span class="ts-det-label">覆盖区域</span>
+              <span>{{ tsImportReport.regionList.map(r => r.name).join('、') || '—' }}</span>
+            </div>
+            <div class="ts-det-row">
+              <span class="ts-det-label">时间段完整度</span>
+              <span v-if="tsImportReport.expectedHours">
+                {{ tsImportReport.actualHours }} / {{ tsImportReport.expectedHours }}（{{ Math.round(tsImportReport.actualHours / tsImportReport.expectedHours * 100) }}%）
+                <span v-if="tsImportReport.missingHours > 0" style="color: #E6A23C; margin-left: 8px;">
+                  缺失 {{ tsImportReport.missingHours }} 个时刻
+                </span>
+              </span>
+              <span v-else>—</span>
+            </div>
+          </div>
+
+          <div v-if="tsImportErrors.length" class="ts-import-errors">
+            <div class="ts-err-header">
+              <i class="el-icon-warning-outline"></i> 失败明细（前 20 条）
+            </div>
+            <div class="ts-err-list">
+              <div v-for="(e, i) in tsImportErrors.slice(0, 20)" :key="i" class="ts-err-item">
+                第 {{ e.row }} 行：{{ e.message }}
+              </div>
+              <div v-if="tsImportErrors.length > 20" class="ts-err-more">
+                ... 另有 {{ tsImportErrors.length - 20 }} 条未显示
+              </div>
+            </div>
+          </div>
+
+          <div class="ts-import-preview" v-if="tsImportRecords.length">
+            <div class="ts-prev-header">数据预览（前 8 条）</div>
+            <el-table :data="tsImportRecords.slice(0, 8)" border size="mini" style="width: 100%;">
+              <el-table-column label="区域" width="110">
+                <template slot-scope="{ row }">
+                  <el-tag size="mini" :type="levelTagType(row.regionLevel)" effect="plain">{{ levelLabel(row.regionLevel) }}</el-tag>
+                  {{ row.regionName }}
+                </template>
+              </el-table-column>
+              <el-table-column label="日期" prop="date" width="110" align="center"></el-table-column>
+              <el-table-column label="时段" width="120" align="center">
+                <template slot-scope="{ row }">{{ hourText(row.hour) }}</template>
+              </el-table-column>
+              <el-table-column label="因子值" prop="value" width="100" align="right"></el-table-column>
+              <el-table-column label="来源" prop="source" min-width="140" show-overflow-tooltip></el-table-column>
+            </el-table>
+          </div>
+        </div>
+
+        <div slot="footer" class="dialog-footer">
+          <el-button v-if="tsImportStep === 2" size="small" icon="el-icon-refresh-left" @click="resetTsImport">重新上传</el-button>
+          <el-button size="small" @click="showTsImportDialog = false">取消</el-button>
+          <el-button v-if="tsImportStep === 2" size="small" type="primary" :disabled="!tsImportRecords.length" @click="doTsImport">
+            确认导入 {{ tsImportRecords.length }} 条
+          </el-button>
+        </div>
+      </el-dialog>
+    </template>
+
     <!-- ============ 第二层：因子库内部因子列表 ============ -->
     <template v-else>
       <!-- 返回按钮 + 因子库信息 -->
@@ -476,6 +729,14 @@
 </template>
 
 <script>
+import {
+  generateDemoRecords,
+  parseImportText,
+  buildCoverageReport,
+  buildTemplateCSV
+} from '@/utils/electricityFactorService'
+import { hourLabel, LEVEL_LABELS } from '@/utils/regionDict'
+
 // ===== 地区标准字典（因子匹配的地域结构化基础） =====
 // 标准名 → { code: activityId地区后缀, level: 层级, aliases: 别名 }
 const REGION_DICT = {
@@ -508,6 +769,46 @@ const PROVINCES = [
   { name: '中国贵州', short: '贵州', grid: '南方' }, { name: '中国海南', short: '海南', grid: '南方' },
   { name: '中国西藏', short: '西藏', grid: '西南' }
 ]
+
+// ===== 分时分区电碳因子库（时空分辨率电力因子） =====
+// 演示数据：北京 2025-12-01 起 31 天（本案例企业所在地）
+function makeElecTsDb() {
+  const records = []
+  // 北京（省级）
+  records.push(...generateDemoRecords('北京', '2025-12-01', '2025-12-31', 'measured'))
+
+  const regions = Array.from(new Set(records.map(r => r.regionCode)))
+  const dates = Array.from(new Set(records.map(r => r.date))).sort()
+
+  return {
+    id: 'ELEC-TS',
+    name: '分时分区电碳因子库',
+    type: '时空因子库',
+    publisher: '电力交易中心 / 电网调度机构',
+    region: '中国',
+    version: '2025版（小时级）',
+    factorCount: records.length,
+    status: '启用',
+    sourceTier: 1,
+    icon: 'el-icon-lightning',
+    color: '#E6A23C',
+    isTimeSpace: true,                 // 标记：使用专用的时空视图
+    temporalGranularity: 'hourly',     // monthly | daily | hourly | 15min
+    spatialGranularity: 'province+city',
+    coveragePeriod: dates.length ? `${dates[0]} ~ ${dates[dates.length - 1]}` : '',
+    regionCount: regions.length,
+    dayCount: dates.length,
+    unit: 'kgCO₂e/kWh',
+    formatDesc: '时空分辨电力碳强度因子 · 空间支持省级/市级（可回退区域电网/全国） · 时间粒度小时级 · 支持标准模板 CSV 导入（区域/日期/小时/碳排放因子） · 优先用于精细化电力间接排放核算',
+    extraColumns: [
+      { key: 'regionLevel', label: '层级', width: 90, align: 'center' },
+      { key: 'date', label: '日期', width: 110, align: 'center' },
+      { key: 'hourLabel', label: '时段', width: 120, align: 'center' }
+    ],
+    factors: [],
+    records
+  }
+}
 
 // ===== GWP 全球增温潜势系数库（折算参数库，非活动排放因子） =====
 // 工厂函数：默认数据与 localStorage 迁移共用，保证两处数据一致
@@ -582,6 +883,22 @@ export default {
       // ===== 智能体活动标识建议 =====
       showAidPop: false,
       aidCandidates: [],
+      // ===== 分时分区视图状态 =====
+      tsFilterLevel: '',
+      tsFilterRegion: '',
+      tsDateRange: [],
+      tsCurrentPage: 1,
+      tsPageSize: 20,
+      // 时空导入
+      showTsImportDialog: false,
+      tsImportStep: 1,
+      tsImportFileName: '',
+      tsImportRecords: [],
+      tsImportErrors: [],
+      tsImportReport: null,
+      tsImportSource: '',
+      tsImportQuality: 'measured',
+      tsImportMode: 'append',
       databases: [
         {
           id: 'CPCD',
@@ -716,13 +1033,73 @@ export default {
             { factorId: 'NGEF-EN-008', activityId: 'electricity_grid-average_north-west-china', name: '西北区域电力平均因子', category: '能源', activityUnit: 'kWh', value: '0.5543', factorUnit: 'kgCO₂/kWh', gasType: 'CO₂', region: '西北', year: '2023', techRoute: '电网平均', authoritative: true, intensityType: '年均', source: { dataset: '2023年电力二氧化碳排放因子（公告〔2025〕47号）', publisher: '生态环境部、国家统计局', url: 'https://www.mee.gov.cn/xxgk2018/xxgk/xxgk01/202512/t20251231_1139517.html' }, tags: ['电网', '电力', '外购电', '西北'] },
             { factorId: 'NGEF-EN-009', activityId: 'electricity_grid-average_south-china', name: '南方区域电力平均因子', category: '能源', activityUnit: 'kWh', value: '0.4042', factorUnit: 'kgCO₂/kWh', gasType: 'CO₂', region: '南方', year: '2023', techRoute: '电网平均', authoritative: true, intensityType: '年均', source: { dataset: '2023年电力二氧化碳排放因子（公告〔2025〕47号）', publisher: '生态环境部、国家统计局', url: 'https://www.mee.gov.cn/xxgk2018/xxgk/xxgk01/202512/t20251231_1139517.html' }, tags: ['电网', '电力', '外购电', '南方'] }
           ]
-        }
+        },
+        makeElecTsDb()
       ]
     }
   },
   computed: {
     isGwpDb() {
       return !!this.currentDb && this.currentDb.id === 'GWP'
+    },
+    /** 当前库是否为时空因子库 */
+    isTimeSpaceDb() {
+      return !!this.currentDb && !!this.currentDb.isTimeSpace
+    },
+    /** 时空库：全部记录 */
+    tsRecords() {
+      return (this.currentDb && this.currentDb.records) || []
+    },
+    /** 时空库：区域选项（去重） */
+    tsRegionOptions() {
+      const seen = new Map()
+      this.tsRecords.forEach(r => {
+        if (!seen.has(r.regionCode)) {
+          seen.set(r.regionCode, {
+            code: r.regionCode,
+            name: r.regionName,
+            level: r.regionLevel,
+            parentCode: r.parentCode
+          })
+        }
+      })
+      return Array.from(seen.values()).sort((a, b) => {
+        const pa = { city: 1, province: 2, grid: 3, national: 4 }[a.level] || 9
+        const pb = { city: 1, province: 2, grid: 3, national: 4 }[b.level] || 9
+        return pa - pb || a.name.localeCompare(b.name)
+      })
+    },
+    /** 时空库：层级选项 */
+    tsLevelOptions() {
+      return Array.from(new Set(this.tsRecords.map(r => r.regionLevel)))
+    },
+    /** 时空库：筛选后的记录 */
+    tsFilteredRecords() {
+      let list = this.tsRecords
+      if (this.tsFilterLevel) {
+        list = list.filter(r => r.regionLevel === this.tsFilterLevel)
+      }
+      if (this.tsFilterRegion) {
+        list = list.filter(r => r.regionCode === this.tsFilterRegion)
+      }
+      if (this.tsDateRange && this.tsDateRange.length === 2 && this.tsDateRange[0] && this.tsDateRange[1]) {
+        const [s, e] = this.tsDateRange
+        list = list.filter(r => r.date >= s && r.date <= e)
+      }
+      return list
+    },
+    /** 时空库：分页后记录 */
+    tsPagedRecords() {
+      const start = (this.tsCurrentPage - 1) * this.tsPageSize
+      return this.tsFilteredRecords.slice(start, start + this.tsPageSize)
+    },
+    /** 时空库：可用日期列表 */
+    tsDateOptions() {
+      return Array.from(new Set(this.tsRecords.map(r => r.date))).sort()
+    },
+    /** 覆盖度报告（库级） */
+    tsCoverageReport() {
+      return buildCoverageReport(this.tsRecords, [])
     },
     dbTypes() {
       return [...new Set(this.databases.map(d => d.type))]
@@ -769,6 +1146,162 @@ export default {
     }
   },
   methods: {
+    // ============ 分时分区电碳因子 ============
+    /** 层级标签 */
+    levelLabel(level) {
+      return LEVEL_LABELS[level] || level
+    },
+    /** 层级 tag 类型 */
+    levelTagType(level) {
+      return { city: 'danger', province: 'warning', grid: 'info', national: 'success' }[level] || ''
+    },
+    /** 小时 → 时段标签 */
+    hourText(h) {
+      return hourLabel(h)
+    },
+    /** 碳强度色阶（用于表格与图例） */
+    intensityColor(v) {
+      if (v === null || v === undefined) return '#C0C4CC'
+      if (v < 0.2) return '#67C23A'
+      if (v < 0.4) return '#95D475'
+      if (v < 0.55) return '#E6A23C'
+      if (v < 0.7) return '#F56C6C'
+      return '#C45656'
+    },
+    /** 分页 */
+    handleTsPageChange(p) {
+      this.tsCurrentPage = p
+    },
+    handleTsSizeChange(s) {
+      this.tsPageSize = s
+      this.tsCurrentPage = 1
+    },
+    /** 重置筛选 */
+    resetTsFilter() {
+      this.tsFilterLevel = ''
+      this.tsFilterRegion = ''
+      this.tsDateRange = []
+      this.tsCurrentPage = 1
+    },
+    /** 下载时空因子导入模板 */
+    downloadTsTemplate(withMix = false) {
+      const csv = buildTemplateCSV(withMix)
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = withMix ? '分时分区电碳因子导入模板（含发电结构）.csv' : '分时分区电碳因子导入模板.csv'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      this.$message.success('模板已下载')
+    },
+    /** 打开时空导入 */
+    openTsImport() {
+      this.tsImportStep = 1
+      this.tsImportFileName = ''
+      this.tsImportRecords = []
+      this.tsImportErrors = []
+      this.tsImportReport = null
+      this.tsImportSource = ''
+      this.tsImportQuality = 'measured'
+      this.tsImportMode = 'append'
+      this.showTsImportDialog = true
+    },
+    /** 选择文件并解析 */
+    handleTsImportFile(e) {
+      const file = e.target.files[0]
+      if (!file) return
+      this.tsImportFileName = file.name
+      const reader = new FileReader()
+      reader.onload = (ev) => {
+        const text = ev.target.result
+        const result = parseImportText(text, {
+          source: this.tsImportSource || file.name.replace(/\.csv$/i, ''),
+          quality: this.tsImportQuality
+        })
+        this.tsImportRecords = result.records
+        this.tsImportErrors = result.errors
+        this.tsImportReport = buildCoverageReport(result.records, result.errors)
+
+        if (!result.records.length) {
+          this.$message.error('未解析到有效记录，请检查文件格式与必填列')
+          return
+        }
+        this.tsImportStep = 2
+        if (result.unrecognizedRegions.length) {
+          this.$message.warning(`有 ${result.unrecognizedRegions.length} 个区域名无法识别：${result.unrecognizedRegions.slice(0, 5).join('、')}`)
+        }
+      }
+      reader.readAsText(file, 'UTF-8')
+    },
+    /** 确认导入 */
+    doTsImport() {
+      if (!this.currentDb || !this.tsImportRecords.length) return
+      if (this.tsImportMode === 'replace') {
+        this.currentDb.records = []
+      }
+      const existing = new Set(this.currentDb.records.map(r => `${r.regionCode}|${r.date}|${r.hour}`))
+      let added = 0
+      let skipped = 0
+      this.tsImportRecords.forEach(r => {
+        const key = `${r.regionCode}|${r.date}|${r.hour}`
+        if (existing.has(key)) {
+          skipped++
+          return
+        }
+        existing.add(key)
+        this.currentDb.records.push(r)
+        added++
+      })
+      // 刷新库统计
+      this.refreshTsDbMeta()
+      this.showTsImportDialog = false
+      this.$message.success(`导入完成：新增 ${added} 条${skipped ? `，跳过重复 ${skipped} 条` : ''}`)
+      this.tsCurrentPage = 1
+    },
+    /** 刷新时空库元信息 */
+    refreshTsDbMeta() {
+      const db = this.currentDb
+      if (!db || !db.records) return
+      const dates = Array.from(new Set(db.records.map(r => r.date))).sort()
+      const regions = new Set(db.records.map(r => r.regionCode))
+      db.factorCount = db.records.length
+      db.regionCount = regions.size
+      db.dayCount = dates.length
+      db.coveragePeriod = dates.length ? `${dates[0]} ~ ${dates[dates.length - 1]}` : ''
+    },
+    /** 重置时空导入 */
+    resetTsImport() {
+      this.tsImportStep = 1
+      this.tsImportFileName = ''
+      this.tsImportRecords = []
+      this.tsImportErrors = []
+      this.tsImportReport = null
+      if (this.$refs.tsImportFileInput) this.$refs.tsImportFileInput.value = ''
+    },
+    /** 演示：为当前库补充一个省份的模拟数据 */
+    genDemoForRegion(regionName) {
+      if (!this.currentDb) return
+      const recs = generateDemoRecords(regionName, '2025-12-01', '2025-12-07', 'estimated')
+      if (!recs.length) {
+        this.$message.warning('区域名称无法识别')
+        return
+      }
+      const existing = new Set(this.currentDb.records.map(r => `${r.regionCode}|${r.date}|${r.hour}`))
+      let added = 0
+      recs.forEach(r => {
+        const key = `${r.regionCode}|${r.date}|${r.hour}`
+        if (!existing.has(key)) {
+          this.currentDb.records.push(r)
+          existing.add(key)
+          added++
+        }
+      })
+      this.refreshTsDbMeta()
+      this.$message.success(`已生成 ${regionName} 一周模拟数据（${added} 条）`)
+    },
     boundaryText(val) {
       const map = {
         'cradle-to-gate': '摇篮到大门(含上游)',
@@ -1626,4 +2159,146 @@ export default {
 .empty-state i { font-size: 48px; margin-bottom: 12px; color: var(--text-placeholder); }
 .empty-state p { font-size: 14px; margin: 0 0 4px; }
 .empty-state span { font-size: 12px; }
+
+/* ============ 分时分区电碳因子库 ============ */
+.ts-overview {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.ts-ov-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 12px;
+  box-shadow: var(--shadow-card);
+}
+.ts-ov-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.ts-ov-value {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+.ts-ov-value.ts-ov-sm {
+  font-size: 13px;
+  font-weight: 500;
+}
+.ts-ov-unit {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-left: 2px;
+}
+
+/* 时空导入 */
+.ts-import-opts {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: var(--bg-subtle);
+  border-radius: 6px;
+}
+.ts-opt-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.ts-import-summary {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.ts-is-item {
+  text-align: center;
+  padding: 10px 6px;
+  background: var(--bg-subtle);
+  border-radius: 6px;
+}
+.ts-is-num {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.ts-is-num.ts-is-sm {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+.ts-is-item.ts-is-ok .ts-is-num { color: #67C23A; }
+.ts-is-item.ts-is-err .ts-is-num { color: #F56C6C; }
+.ts-is-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.ts-import-detail {
+  padding: 10px 12px;
+  background: var(--bg-subtle);
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+.ts-det-row {
+  display: flex;
+  gap: 10px;
+  font-size: 12px;
+  line-height: 1.9;
+  color: var(--text-primary);
+}
+.ts-det-label {
+  color: var(--text-muted);
+  min-width: 84px;
+  flex-shrink: 0;
+}
+.ts-import-errors {
+  border: 1px solid #FDE2E2;
+  background: #FEF0F0;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.ts-err-header {
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #F56C6C;
+  border-bottom: 1px solid #FDE2E2;
+}
+.ts-err-header i { margin-right: 4px; }
+.ts-err-list {
+  max-height: 140px;
+  overflow: auto;
+  padding: 8px 12px;
+}
+.ts-err-item {
+  font-size: 12px;
+  color: #C45656;
+  line-height: 1.8;
+}
+.ts-err-more {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding-top: 4px;
+}
+.ts-import-preview {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.ts-prev-header {
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--border-color);
+}
 </style>

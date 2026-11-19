@@ -210,7 +210,7 @@ import { loadOrgStandardsForAgent, loadBjStandardsForAgent, ensureSeed } from '@
       ],
       modelStages: this.createInitialModelStages(),
       validationStep: 0,
-      validationActiveTab: 'quality',
+      validationActiveTab: 'validation',
       validationItems: this.createDefaultValidationItems(),
       supplementFiles: []
     }
@@ -378,9 +378,7 @@ import { loadOrgStandardsForAgent, loadBjStandardsForAgent, ensureSeed } from '@
     stageConfirmConfig() {
       const configs = {
         1: { label: '确认边界配置，进入核算模型', icon: 'el-icon-check', hint: '确认边界配置无误后进入核算模型阶段', action: () => this.sendSuggestion('确认边界配置') },
-        2: { label: '确认清单，启动数据收集', icon: 'el-icon-check', hint: '确认核算清单无误后启动数据收集', action: () => this.sendSuggestion('确认模型，启动数据收集') },
-        3: { label: '确认数据，进入因子匹配', icon: 'el-icon-right', hint: '确认活动数据无误后进入排放因子匹配', action: () => this.sendSuggestion('确认数据，进入因子匹配') },
-        4: { label: '确认因子，进入数据校验', icon: 'el-icon-right', hint: '确认因子匹配结果后进入数据校验', action: () => this.sendSuggestion('确认因子，进入数据校验') },
+        2: { label: '确认清单，启动数据收集', icon: 'el-icon-check', hint: '确认核算清单无误后，系统将自动完成活动数据采集与因子匹配', action: () => this.sendSuggestion('确认模型，启动数据收集') },
         5: this.validationActiveTab === 'activity'
           ? { label: '确认调整，重新校核', icon: 'el-icon-refresh-right', hint: '数据调整完成后重新进入「数据采集→因子匹配→数据校验」循环', action: () => this.confirmActivityData() }
           : null,

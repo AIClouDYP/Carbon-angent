@@ -121,12 +121,7 @@ export default {
       messages: [],
       tasks: [
         { id: 7, name: '6.5MW陆上风电机组碳足迹核算', product: '6.5MW陆上风电机组 (叶轮171m)', status: '运行中', progress: 15, currentStage: '阶段2·LCI数据采集', updateTime: '2026-09-11', taskId: 'TASK-WIND-171' },
-        { id: 6, name: '燃油汽车ICE-A160碳足迹核算', product: '燃油汽车 ICE-A160 (1.6L)', status: '运行中', progress: 25, currentStage: '阶段2·LCI数据采集', updateTime: '2026-07-14', taskId: 'TASK-ICE-A160' },
-        { id: 1, name: '动力电池碳足迹核算', product: '三元锂电池组 EV700', status: '运行中', progress: 65, currentStage: '阶段5·排放计算', updateTime: '2026-06-29', taskId: 'T-001' },
-        { id: 2, name: '驱动电机LCA分析', product: '永磁同步驱动电机 200kW', status: '已完成', progress: 100, currentStage: '阶段9·报告生成', updateTime: '2026-06-28', taskId: 'T-002' },
-        { id: 3, name: '充电桩设备核算', product: '直流快充桩 120kW', status: '异常', progress: 40, currentStage: '阶段3·数据采集', updateTime: '2026-06-30', taskId: 'T-003' },
-        { id: 4, name: '汽车座椅碳足迹', product: '真皮电动座椅总成', status: '运行中', progress: 30, currentStage: '阶段2·范围界定', updateTime: '2026-06-30', taskId: 'T-004' },
-        { id: 5, name: '铝合金车身件核算', product: '压铸铝合金前舱盖', status: '已完成', progress: 100, currentStage: '阶段9·报告生成', updateTime: '2026-06-26', taskId: 'T-005' }
+        { id: 6, name: '燃油汽车ICE-A160碳足迹核算', product: '燃油汽车 ICE-A160 (1.6L)', status: '运行中', progress: 25, currentStage: '阶段2·LCI数据采集', updateTime: '2026-07-14', taskId: 'TASK-ICE-A160' }
       ],
       conversations: [
         { id: 'C-001', name: '动力电池碳足迹核算咨询', preview: '关于三元锂电池组EV700的碳足迹核算流程...', messageCount: 12, updateTime: '2026-07-14 10:30' },
@@ -210,7 +205,10 @@ export default {
     },
     reply(input) {
       if (input.includes('进度') || input.includes('状态')) return '当前共有 ' + this.tasks.length + ' 个核算任务，其中 ' + this.tasks.filter(t => t.status === '运行中').length + ' 个运行中，' + this.tasks.filter(t => t.status === '已完成').length + ' 个已完成。点击右侧"任务列表"可查看详情。'
-      if (input.includes('异常') || input.includes('错误')) return '发现1个异常任务：充电桩设备核算（T-003），3月用电量数据缺失。点击右侧该任务进行查看和处理。'
+      if (input.includes('异常') || input.includes('错误')) {
+        const expts = this.tasks.filter(t => t.status === '异常')
+        return expts.length ? ('发现' + expts.length + '个异常任务：' + expts.map(t => t.name + '（' + t.taskId + '）').join('、') + '。点击右侧该任务进行查看和处理。') : '当前无异常任务，全部任务运行正常。'
+      }
       return '我理解您的问题。输入"新建任务"可直接进入九阶段核算流程，或点击右侧面板切换查看。'
     },
     goToProductLibrary() {
@@ -223,7 +221,7 @@ export default {
       } else if (panel === 'tasks') {
         this.messages.push({ role: 'agent', text: '已切换至近期核算任务列表，右侧展示您的历史核算任务。点击任一任务可进入九阶段流程。', time: '刚刚', type: 'text' })
       } else if (panel === 'products') {
-        this.messages.push({ role: 'agent', text: '已切换至产品与物料库。绿色标记的产品已有核算模型SOP，可一键继承模型核算；灰色标记的产品需从零构建模型。', time: '刚刚', type: 'text' })
+        this.messages.push({ role: 'agent', text: '已切换至企业产品库。绿色标记的产品已有核算模型SOP，可一键继承模型核算；灰色标记的产品需从零构建模型。', time: '刚刚', type: 'text' })
       }
     },
     startCreateTask() {
@@ -392,13 +390,13 @@ export default {
           '<strong style="color:#0067FE;">核心能力</strong><br/>' +
           '• <strong>创建核算任务</strong> — 输入"新建任务"启动九阶段核算流程<br/>' +
           '• <strong>查询任务进度</strong> — 实时掌握运行中 / 已完成 / 异常任务状态<br/>' +
-          '• <strong>产品库管理</strong> — 查看企业产品与已有SOP模型，一键继承核算<br/>' +
+          '• <strong>企业产品库管理</strong> — 查看企业产品与已有SOP模型，一键继承核算<br/>' +
           '• <strong>异常诊断处理</strong> — 自动识别数据缺失、因子过期等问题' +
           '</div>' +
           '<div style="margin-top:8px;padding:10px 14px;background:rgba(230,126,34,0.04);border-radius:8px;border-left:3px solid #E67E22;">' +
-          '<strong style="color:#E67E22;">产品与物料库</strong><br/>' +
+          '<strong style="color:#E67E22;">企业产品库</strong><br/>' +
           '共 ' + this.enterpriseProducts.length + ' 个产品：<span style="color:#0067fe;font-weight:600;">' + sopCount + ' 个已建SOP可一键核算</span> · <span style="color:#E6A23C;">' + noSopCount + ' 个待构建模型</span>' +
-          '<br/><span style="font-size:12px;color:#909399;">点击右侧"产品库"Tab查看详情，有SOP的产品支持一键继承模型核算</span>' +
+          '<br/><span style="font-size:12px;color:#909399;">点击右侧"企业产品库"Tab查看详情，有SOP的产品支持一键继承模型核算</span>' +
           '</div>' +
           '<div style="margin-top:8px;padding:10px 14px;background:rgba(0,103,254,0.04);border-radius:8px;border-left:3px solid #0067fe;">' +
           '<strong style="color:#0067fe;">当前状态</strong><br/>' +

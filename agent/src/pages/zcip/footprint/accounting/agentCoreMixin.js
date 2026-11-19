@@ -44,8 +44,11 @@ import { loadPcfStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
         { id: 'elcd', name: 'ELCD（European Life Cycle Database）', shortName: 'ELCD', origin: '欧盟', desc: '欧洲参考生命周期数据库，适用于欧洲背景数据', selected: false, disabled: true, disabledReason: '当前企业未开通该因子库使用权限，如需启用请联系运维人员开通', version: 'v2023', releaseDate: '2023-06', standards: ['PEF', '2021/2279'] },
         { id: 'ipcc', name: 'IPCC排放因子数据库', shortName: 'IPCC', origin: '国际', desc: 'IPCC国家温室气体清单指南配套因子库，覆盖燃料燃烧、工业过程等', recommended: true, selected: true, version: '2019', releaseDate: '2019-05', standards: ['14067', 'ISO'] },
         { id: 'cpcd', name: '中国产品全生命周期温室气体排放系数库（CPCD）', shortName: 'CPCD', origin: '中国', desc: '中国本土因子库，覆盖主要工业产品全生命周期排放系数', recommended: true, selected: true, version: 'v1.2', releaseDate: '2024-06', standards: ['14067', '24067', 'ISO', 'GB/T'] },
-        { id: 'national-gef', name: '国家温室气体排放因子数据库', shortName: '国家因子库', origin: '中国', desc: '生态环境部发布，官方权威电网因子等核心数据', recommended: true, selected: true, version: 'v2024-Q4', releaseDate: '2024-12', standards: ['14067', '24067', 'ISO', 'GB/T'] }
+        { id: 'national-gef', name: '国家温室气体排放因子数据库', shortName: '国家因子库', origin: '中国', desc: '生态环境部发布，官方权威电网因子等核心数据', recommended: true, selected: true, version: 'v2024-Q4', releaseDate: '2024-12', standards: ['14067', '24067', 'ISO', 'GB/T'] },
+        { id: 'elec-ts', name: '分时分区电碳因子库', shortName: '分时分区电碳因子库', origin: '中国', desc: '时空分辨电力碳强度因子（省级/市级 × 小时级）', recommended: false, selected: false, version: '2025版（小时级）', releaseDate: '2025-12', standards: ['14067', '24067', 'ISO', 'GB/T', 'PEF'], hidden: true }
       ],
+      // 电力因子精度：regular=常规电网平均 | timespace=分时分区
+      elecFactorMode: 'regular',
       pageMode: 'task-list', // 'task-list'=任务列表模式 | 'task-active'=对话模式
       taskList: [], // 历史任务列表（localStorage持久化）
       currentTaskId: null, // 当前活跃任务ID
@@ -78,7 +81,8 @@ import { loadPcfStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
         cutoffThreshold: '1%/5%',
         cutoffItemThreshold: '1%',
         cutoffTotalThreshold: '5%',
-        timeBoundary: '2024-01-01 - 2024-12-31'
+        timeBoundary: '2024-01-01 - 2024-12-31',
+        region: '北京'   // 企业所在省市（用于电力因子与区域因子匹配）
       },
       // ===== 多轮澄清 =====
       clarificationState: null,  // 当前澄清状态: null | { topic, step, totalSteps, data }
@@ -189,9 +193,7 @@ import { loadPcfStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
     stageConfirmConfig() {
       const configs = {
         1: { label: '确认边界配置，进入核算模型', icon: 'el-icon-check', hint: '确认5项边界配置无误后进入核算模型阶段', action: () => this.sendSuggestion('确认边界配置') },
-        2: { label: '确认模型，启动数据收集', icon: 'el-icon-check', hint: '确认工艺拓扑模型无误后启动多源数据收集', action: () => this.sendSuggestion('确认模型，启动数据收集') },
-        3: { label: '确认数据，进入因子匹配', icon: 'el-icon-right', hint: '确认活动数据无误后进入排放因子匹配', action: () => this.sendSuggestion('确认数据，进入因子匹配') },
-        4: { label: '确认因子，进入数据校验', icon: 'el-icon-right', hint: '确认因子匹配结果后进入数据校验', action: () => this.sendSuggestion('确认因子，进入数据校验') },
+        2: { label: '确认模型，启动数据收集', icon: 'el-icon-check', hint: '确认工艺拓扑模型无误后，系统将自动完成活动数据采集与因子匹配', action: () => this.sendSuggestion('确认模型，启动数据收集') },
         5: this.validationActiveTab === 'activity'
           ? { label: '确认调整，重新校核', icon: 'el-icon-refresh-right', hint: '数据调整完成后重新进入「数据采集→因子匹配→数据校验」循环', action: () => this.confirmActivityData() }
           : null,
@@ -410,19 +412,7 @@ import { loadPcfStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
         active: std.code === this.selectedStandard
       }))
     },
-    boundarySubStepLabels() {
-      return ['生命周期范围', '量化单位', '分配规则', '取舍规则', '时间边界']
-    },
-    // 量化单位步骤占2个boundarySubStep（选类型+输内容），需映射到5步面板
-    boundaryActiveIdx() {
-      if (this.boundarySubStep <= 1) return this.boundarySubStep
-      if (this.boundarySubStep === 2) return 1 // 仍为量化单位
-      return this.boundarySubStep - 1 // 3→2, 4→3, 5→4
-    },
-    boundaryDisplayStep() {
-      return this.boundaryActiveIdx + 1
-    },
-        lifecycleScopeLabel() {
+    lifecycleScopeLabel() {
       const t = (this.selectedStandardConfig && this.selectedStandardConfig.boundaryTemplate && this.selectedStandardConfig.boundaryTemplate.lifecycleScope) || this.boundaryConfig.lifecycleScope
       const map = {
         'cradle-to-grave': '摇篮到坟墓',
@@ -530,6 +520,31 @@ import { loadPcfStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
         { name: '技术相关性', score: 2.5, color: '#eb2f96' }
       ]
     },
+    /**
+     * 数据质量评分（DQR）汇总 —— 用于阶段八 KPI 卡片
+     * DQR 各维度为 1~5 分（1=最优），此处翻转为 5 分制得分（5=最优）
+     */
+    dqrSummary() {
+      const dims = this.reportDqrData || []
+      const max = 5
+      if (!dims.length) {
+        return { score: '—', max, grade: '暂无评分', cls: '' }
+      }
+      const avgCost = dims.reduce((s, d) => s + (Number(d.score) || 0), 0) / dims.length
+      // DQR 成本 1~5 → 得分 5~1
+      const score = Math.round((max + 1 - avgCost) * 10) / 10
+      let grade = '较差'
+      let cls = 'up-color'
+      if (score >= 4.5) { grade = '优秀'; cls = 'down-color' }
+      else if (score >= 3.5) { grade = '良好'; cls = 'down-color' }
+      else if (score >= 2.5) { grade = '合格'; cls = '' }
+      return {
+        score: score.toFixed(1),
+        max,
+        grade,
+        cls
+      }
+    },
     reportSensitivityData() {
       // 风机任务：敏感性因子取自风机五环节模型真实排放基数（净额口径）
       if (this.isWindTask()) {
@@ -599,7 +614,7 @@ import { loadPcfStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
             { label: '总排放总量', value: this.formatEmission(total), unit: 'kgCO₂e', cls: '', sub: '' },
             { label: '度电碳足迹', value: `≈ ${this.degreeEmission}`, unit: 'gCO₂e/kWh', cls: '', sub: '' },
             { label: '同比变化', value: '↓ 1.9%', sub: '减排5.8万kg', cls: 'down-color' },
-            { label: '回收钢抵扣率', value: '88%', sub: '较上期+2%', cls: 'up-color' }
+            { label: '数据质量评分', value: this.dqrSummary.score, unit: `/ ${this.dqrSummary.max}`, cls: this.dqrSummary.cls, sub: this.dqrSummary.grade }
           ],
           yoyTitle: '生命周期阶段同比基准期对比',
           yoyRows: mkYoy([-4.8, -1.2, 2.1, -3.2, 0.6]),
@@ -642,7 +657,7 @@ import { loadPcfStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
           { label: '总排放总量', value: this.formatEmission(total), unit: 'kgCO₂e', cls: '', sub: '' },
           { label: '同比变化', value: '↓ 2.1%', sub: '减排333kg', cls: 'down-color' },
           { label: '环比变化', value: '↓ 0.8%', sub: '改善成效', cls: 'down-color' },
-          { label: '再生材料比重', value: '30%', sub: '较上月+1.5%', cls: 'up-color' }
+          { label: '数据质量评分', value: this.dqrSummary.score, unit: `/ ${this.dqrSummary.max}`, cls: this.dqrSummary.cls, sub: this.dqrSummary.grade }
         ],
         yoyTitle: '生命周期阶段同比基准期对比',
         yoyRows: mkYoy([-23.2, -0.8, -2.1, 3.1]),
@@ -720,11 +735,18 @@ import { loadPcfStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
             const val = parseFloat(this.getEmissionValue(proc.name, inp.name, true)) || 0
             procTotal += val
             if (val !== 0) {
+              // 分时分区模式：市电不存在单一因子，因子列直接显示 —
+              let factorText = inp.factor ? `${inp.factor} ${inp.factorUnit}` : '—'
+              let factorTs = false
+              if (this.isTsElecItem(inp, stage)) {
+                factorText = '—'
+              }
               procChildren.push({
                 id: `item-${stage.key}-${proc.name}-${inp.name}-in`,
                 name: `${inp.name} (输入)`,
                 activityData: `${inp.value} ${inp.unit}`,
-                factor: inp.factor ? `${inp.factor} ${inp.factorUnit}` : '—',
+                factor: factorText,
+                factorTs,
                 emission: val,
                 type: 'item'
               })
@@ -902,7 +924,7 @@ import { loadPcfStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
     // 执行 C-PSTGT-E 完整决策链匹配
     matchFactorWithCpstgt(item, stageKey) {
       const standard = this.selectedStandard || 'QC/T 1248-2025'
-      const taskRegion = (this.boundaryConfig && this.boundaryConfig.region) || '华东'
+      const taskRegion = (this.boundaryConfig && this.boundaryConfig.region) || '北京'
       // 调用公共轻量匹配服务
       const trace = matchFactor(item, 'footprint', { region: taskRegion, standard, stageKey })
       item.factor = trace.selected.factorValue
@@ -963,15 +985,15 @@ import { loadPcfStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
       let antiWarning = null
 
       if (itemName.includes('电') || itemName.includes('动力')) {
-        // 电力因子按场景精准路由
+        // 电力因子按场景精准路由（企业所在省市：北京）
         if (isFootprint) {
-          selectedFactor = { factorId: 'CPCD-EN-001', name: '华东电网平均排放因子', value: '0.581', unit: 'kgCO₂e/kWh', db: 'CPCD 2026版', pool: '生命周期数据库(池3)', tech: '电网平均', geo: '华东', year: '2024' }
-          candidates.push({ factorId: 'CPCD-EN-001', name: '华东电网平均排放因子', excluded: false, reason: '选中: 符合产品碳足迹摇篮到大门边界 + 华东区域生产地' })
-          candidates.push({ factorId: 'NGEF-EN-004', name: '华东区域电力平均因子', excluded: true, reason: '排除: 口径为消费侧CO₂，未含上游线损与全生命周期' })
+          selectedFactor = { factorId: 'CPCD-EN-001', name: '北京电网平均排放因子', value: '0.581', unit: 'kgCO₂e/kWh', db: 'CPCD 2026版', pool: '生命周期数据库(池3)', tech: '电网平均', geo: '北京', year: '2024' }
+          candidates.push({ factorId: 'CPCD-EN-001', name: '北京电网平均排放因子', excluded: false, reason: '选中: 符合产品碳足迹摇篮到大门边界 + 北京生产地' })
+          candidates.push({ factorId: 'NGEF-EN-004', name: '华北区域电力平均因子', excluded: true, reason: '排除: 区域级口径，粗于省级且为消费侧CO₂，未含上游线损与全生命周期' })
           confidence = 0.95
         } else {
-          selectedFactor = { factorId: 'NGEF-EN-004', name: '华东区域电力平均因子', value: '0.5500', unit: 'kgCO₂/kWh', db: '国家温室气体排放因子库', pool: '国家官方公告(池1)', tech: '电网平均', geo: '华东', year: '2023' }
-          candidates.push({ factorId: 'NGEF-EN-004', name: '华东区域电力平均因子', excluded: false, reason: '选中: 国家生态环境部权威公告 + 组织范围二消费侧CO₂口径' })
+          selectedFactor = { factorId: 'NGEF-EN-004', name: '北京电力平均因子', value: '0.5500', unit: 'kgCO₂/kWh', db: '国家温室气体排放因子库', pool: '国家官方公告(池1)', tech: '电网平均', geo: '北京', year: '2023' }
+          candidates.push({ factorId: 'NGEF-EN-004', name: '北京电力平均因子', excluded: false, reason: '选中: 国家生态环境部权威公告 + 北京市级口径 + 组织范围二消费侧CO₂口径' })
           confidence = 0.98
         }
       } else if (itemName.includes('铝') || itemName.includes('铸铝')) {
@@ -1490,12 +1512,36 @@ import { loadPcfStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
           if (item) {
             if (item.flowType === 'product') return '0'
             const val = parseFloat(item.value) || 0
-            const factor = parseFloat(item.factor) || 0
+            // 分时分区模式：生产阶段市电使用「核算期加权平均因子」
+            let factor = parseFloat(item.factor) || 0
+            if (isInput && this.isTsElecItem(item, stage)) {
+              const wf = this.tsWeightedFactorOf(procName)
+              if (wf > 0) factor = wf
+            }
             return (val * factor).toFixed(1)
           }
         }
       }
       return '0'
+    },
+
+    /**
+     * 判断某输入项是否适用分时分区因子（mixin 内通用）
+     * 规则：生产阶段 + 能源类型 + 含「电」+ 不含绿电/光伏 + 单位 kWh
+     */
+    isTsElecItem(item, stage) {
+      if (!item || !stage) return false
+      if (this.elecFactorMode !== 'timespace') return false
+      const prodKeys = ['manufacturing', 'vehicle_production']
+      if (prodKeys.indexOf(stage.key) === -1) return false
+      const isEnergy = item.flowType === 'energy' || item.listType === 'energy' || item.type === '能源'
+      if (!isEnergy) return false
+      const name = String(item.name || '')
+      if (name.indexOf('电') === -1) return false
+      const EXCLUDE = ['绿电', '光伏', '风电', '水电', '核电', '生物质电', '余电', '自发电', '直购电', '清洁能源']
+      if (EXCLUDE.some(k => name.indexOf(k) > -1)) return false
+      if (!/kwh|度/i.test(String(item.unit || ''))) return false
+      return true
     },
     // ===== 阶段3行内编辑方法 =====
     addProcess(groupIndex) {
@@ -2512,16 +2558,16 @@ import { loadPcfStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
       return map[val] || '质量分配'
     },
     onProcAllocationChange(proc) {
-      if (proc.allocation !== this.boundaryConfig.allocationRule) {
-        // 分配规则与全局不一致，自动生成备注
+      if (proc.allocation && proc.allocation !== 'mass') {
+        // 非质量分配，自动生成备注说明原因
         if (!proc.allocationRemark) {
-          this.$set(proc, 'allocationRemark', `全局规则为${this.allocationRuleLabel}，本过程改为${this.getAllocationLabel(proc.allocation)}`)
+          this.$set(proc, 'allocationRemark', `本过程采用${this.getAllocationLabel(proc.allocation)}，非质量分配`)
         } else {
           // 已有备注，更新规则名称部分
-          this.$set(proc, 'allocationRemark', proc.allocationRemark.replace(/本过程改为.*$/, `本过程改为${this.getAllocationLabel(proc.allocation)}`))
+          this.$set(proc, 'allocationRemark', proc.allocationRemark.replace(/本过程采用.*?分配/, `本过程采用${this.getAllocationLabel(proc.allocation)}`))
         }
       } else {
-        // 恢复一致，清空备注
+        // 质量分配，清空备注
         this.$set(proc, 'allocationRemark', '')
       }
     },

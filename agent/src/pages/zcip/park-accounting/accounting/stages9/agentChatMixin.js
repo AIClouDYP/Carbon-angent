@@ -140,7 +140,7 @@ export default {
       const fmt = (v) => (v == null ? '—' : Number(v).toFixed(2))
       const total = fmt(calc.total)
       const totalWan = (calc.total / 10000).toFixed(2)
-      const subject = this.isWindTask() ? '亦庄新能源汽车产业园' : '北京亦庄新城零碳智能产业园'
+      const subject = (this.parkBasicInfo && this.parkBasicInfo.name) || '北京亦庄新城零碳智能产业园'
 
       let msg = `**【阶段7 · 排放计算 - 完成】**\n系统已按「活动数据 × 排放因子」对 ${subject} 的 **4 大法定分类** 逐项完成排放核算，结果如下：\n`
 
@@ -235,15 +235,8 @@ export default {
     initChatFlow() {
       // 任务加载后校正标准（避免沿用其他场景的标准 code）
       this.ensureStandardValid && this.ensureStandardValid()
-      // 构建个性化欢迎消息（风机任务定制：五环节 LCA、度电碳足迹目标）
-      if (this.isWindTask()) {
-        const windWelcome = `您好！我是小易，园区碳核算智能体。\n\n当前核算对象为 **亦庄新能源汽车产业园**（叶轮直径171m / 塔架高度110m / 设计寿命20年）。\n\n当前处于 **【阶段1 · 政策标准】**：请在右侧「政策标准库」确认核算标准，系统将解析该标准的适用范围、生命周期阶段、边界量化规则与数据质量要求，作为后续核算的依据。\n\n当前已选中标准：**${this.selectedStandard}**`
-        this.messages = [
-          { id: 'MSG-001', role: 'assistant', content: windWelcome, timestamp: new Date().toLocaleTimeString('zh-CN'), suggestions: ['确认使用当前标准'] }
-        ]
-        return
-      }
-      // 构建通用个性化欢迎消息
+      // 构建个性化欢迎消息（园区碳核算统一口径）
+      // 已移除产品/风机机型画像分支
       let welcomeContent = `您好！我是小易，园区碳核算智能体。\n\n我将引导您完成**零碳园区碳排放核算**与**零碳建设自评**，共九个阶段：\n\n**政策标准 → 核算边界 → 排放源清单 → 活动数据 → 排放因子 → 数据校验 → 排放计算 → 排放分析 → 排放报告**\n\n当前处于 **【阶段1 · 政策标准】**，请先在右侧确认核算标准。\n\n当前已选中标准：**${this.selectedStandard}**`
 
       // 添加用户偏好提示
@@ -473,16 +466,9 @@ export default {
     continueTask(task) {
       this.currentTaskId = task.id
       // 无快照恢复时按任务类型应用画像（风机/通用）；有快照时快照内已含对应状态
-      // 无快照恢复时按任务类型应用画像（风机/通用）；有快照时快照内已含对应状态
+      // 无快照恢复时按园区统一口径初始化；有快照时快照内已含对应状态
       if (!task.stageSnapshot) {
-        if (this.isWindTask()) this.applyWindTaskProfile()
-        else this.applyDefaultTaskProfile()
-      } else {
-        // 风机任务即使有快照也校准模型与校验项（风机五环节模型可能已随版本更新）
-        if (this.isWindTask()) {
-          this.applyWindTaskProfile()
-          this.validationItems = this.createWindValidationItems()
-        }
+        this.applyDefaultTaskProfile()
       }
       // 从快照恢复所有阶段状态，不再重新初始化
       if (task.stageSnapshot) {
@@ -494,11 +480,9 @@ export default {
         if (task.currentStepIndex >= 2) this.isModelBuilt = true
         this.initChatFlow()
       }
-      // 快照恢复可能带回汽车口径（旧快照），风机任务最后强制校准
-      if (this.isWindTask()) {
-        this.applyWindTaskProfile()
-        this.validationItems = this.createWindValidationItems()
-        if (!this.standards.some(x => x.code === this.selectedStandard)) this.selectedStandard = this.defaultStandardCode()
+      // 快照恢复后校正核算标准（避免沿用其他场景的标准 code）
+      if (!this.standards.some(x => x.code === this.selectedStandard)) {
+        this.selectedStandard = this.defaultStandardCode()
       }
       this.pageMode = 'task-active'
     },
@@ -569,8 +553,7 @@ export default {
         item.statusLabel = item.type === 'completeness' ? '待补充' : '待确认'
       })
       this.supplementFiles = []
-      if (this.isWindTask()) this.applyWindTaskProfile()
-      else this.applyDefaultTaskProfile()
+      this.applyDefaultTaskProfile()
       this.initChatFlow()
       // 重置后清空该任务的快照，防止返回列表后再继续时恢复旧数据
       if (this.currentTaskId) {
@@ -699,7 +682,7 @@ export default {
       ]
       var suggestionsMap = [
         // ① 政策标准
-        this.isWindTask() ? ['选择 国家级零碳园区建设指标体系 标准', '选择 零碳园区碳排放核算方法 标准'] : ['选择 零碳园区碳排放核算方法 标准', '查看标准解析'],
+        ['选择 零碳园区碳排放核算方法 标准', '查看标准解析'],
         // ② 核算边界
         ['确认边界配置', '查看指标体系'],
         // ③ 排放源清单
@@ -1000,9 +983,10 @@ export default {
             this.validationItems[3].statusLabel = '待确认'
 
             return {
-              content: `**【阶段3 · 排放源清单 - 确认完成】**\n排放源清单与指标参数底账已确认，共归集 ${this.emissionSourceStats ? this.emissionSourceStats.total : 9} 个排放源、4 大法定分类、16 项指标计算参数。\n\n**【阶段4 · 活动数据采集】** 已启动多源数据拉取：\n* **底座数据识别** — 计量表直连数据已同步\n* **材料识别** — 上传凭证后 OCR 自动识别回填\n\n请逐项核对活动数据，或点击「下一个待确认」逐项确认。`,
-              suggestions: ['下一个待确认', '查看活动数据清单', '确认数据，进入因子匹配'],
-              nextStepIndex: 3,
+              content: `**【阶段3 · 排放源清单 - 确认完成】**\n排放源清单与指标参数底账已确认，共归集 ${this.emissionSourceStats ? this.emissionSourceStats.total : 9} 个排放源、4 大法定分类、16 项指标计算参数。\n\n**【阶段4 · 活动数据 - 自动完成】**\n已启动多源数据拉取并完成归集：底座数据识别（计量表直连数据已同步）、材料识别（上传凭证后 OCR 自动识别回填），全部活动数据已自动关联数据来源。\n\n**【阶段5 · 排放因子匹配 - 自动完成】**\n排放因子库已按标准优先级自动匹配各排放源对应因子，所有排放源均已完成因子绑定。\n\n**【阶段6 · 数据校验】**\n已完成完整性、一致性、DQR 多重校验，以下为校验结果：`,
+              followUpContent: this.buildValidationSummary(),
+              followUpSuggestions: ['全部使用建议值确认', '暂不处理，直接计算'],
+              nextStepIndex: 5,
               validationStep: 1
             }
           }

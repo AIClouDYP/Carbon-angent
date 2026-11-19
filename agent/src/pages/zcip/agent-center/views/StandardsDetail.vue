@@ -106,70 +106,35 @@
       <div class="detail-card">
         <div class="card-title"><i class="el-icon-cpu"></i> 结构化解析内容<span class="card-hint">（机器可读规则，供智能体直接消费）</span></div>
 
-        <!-- 核算标准：六维度配置包 -->
+        <!-- 核算标准：标准内容（分组 → 条目 → 每条挂条款溯源） -->
         <template v-if="structured.kind === 'accounting'">
-          <!-- R040201 STORY-004：参数化配置（params，机器可执行，逐条挂条款溯源） -->
-          <div v-if="structured.params && structured.params.length" class="dim-block">
-            <div class="dim-label">参数化配置（{{ structured.scenarioKind || 'PCF' }} 场景 · 每条参数须挂条款溯源，RULE-005）</div>
-            <el-table :data="structured.params" border size="mini">
-              <el-table-column label="参数键" width="190">
-                <template slot-scope="{ row }">
-                  <span class="code-font">{{ row.key }}</span>
-                  <div style="font-size:11px;color:#909399;">{{ pcfParamLabels[row.key] || '—' }}</div>
-                </template>
-              </el-table-column>
-              <el-table-column label="参数值" min-width="180">
-                <template slot-scope="{ row }">
-                  <el-input v-if="!Array.isArray(row.value) && typeof row.value !== 'boolean'" size="mini" v-model="row.value"></el-input>
-                  <el-select v-else-if="Array.isArray(row.value) && row.value.every(v => typeof v === 'string' || typeof v === 'number')" size="mini" v-model="row.value" multiple filterable allow-create default-first-option style="width:100%">
-                    <el-option v-for="v in row.value" :key="v" :label="v" :value="v"></el-option>
-                  </el-select>
-                  <el-input v-else size="mini" :value="JSON.stringify(row.value)" @input="row.value = $event ? JSON.parse($event) : null"></el-input>
-                </template>
-              </el-table-column>
-              <el-table-column label="条款溯源（出自标准原文）" min-width="260">
-                <template slot-scope="{ row }">
-                  <div v-for="(c, ci) in row.clauseRefs" :key="ci" class="point-row" style="margin-bottom:4px;">
-                    <el-input size="mini" v-model="row.clauseRefs[ci]" placeholder="条款位置或摘录"></el-input>
-                    <el-button size="mini" type="text" class="btn-danger" @click="row.clauseRefs.splice(ci, 1)">删</el-button>
-                  </div>
-                  <el-button size="mini" type="text" icon="el-icon-plus" @click="row.clauseRefs.push('')">添加溯源</el-button>
-                </template>
-              </el-table-column>
-            </el-table>
-          </div>
-
-          <!-- R040201 STORY-007：版本差异（生效时自动生成） -->
-          <div v-if="structured.diffs && structured.diffs.length" class="dim-block">
-            <div class="dim-label">版本差异（与上一生效版本对比，RULE-008）</div>
-            <el-table :data="structured.diffs" border size="mini">
-              <el-table-column label="差异类型" width="100" align="center">
-                <template slot-scope="{ row }">
-                  <el-tag size="mini" :type="row.type === 'added' ? 'success' : (row.type === 'removed' ? 'danger' : 'warning')">
-                    {{ { added: '新增', removed: '删除', changed: '变更' }[row.type] || row.type }}
-                  </el-tag>
-                </template>
-              </el-table-column>
-              <el-table-column label="参数" width="180">
-                <template slot-scope="{ row }">{{ row.label || row.key }}</template>
-              </el-table-column>
-              <el-table-column label="旧值" min-width="140">
-                <template slot-scope="{ row }"><span class="code-font">{{ row.oldValue || '—' }}</span></template>
-              </el-table-column>
-              <el-table-column label="新值" min-width="140">
-                <template slot-scope="{ row }"><span class="code-font">{{ row.newValue || '—' }}</span></template>
-              </el-table-column>
-            </el-table>
-          </div>
-
-          <div v-for="dim in structured.dimensions" :key="dim.key" class="dim-block">
-            <div class="dim-label">{{ dim.label }}</div>
-            <div v-for="(p, pi) in dim.points" :key="pi" class="point-row">
-              <el-input size="small" v-model="dim.points[pi]" placeholder="输入条款内容"></el-input>
-              <el-button size="mini" type="text" class="btn-danger" @click="removePoint(dim, pi)">删除</el-button>
+          <div v-for="(dim, di) in structured.dimensions" :key="dim.key || di" class="dim-block dim-group">
+            <!-- 分组头部 -->
+            <div class="dim-group-head">
+              <el-input v-model="dim.label" size="small" class="dim-group-name" placeholder="分组名称"></el-input>
+              <el-button size="mini" type="text" class="btn-danger" @click="removeGroup(di)">删除分组</el-button>
             </div>
+
+            <!-- 分组内条目：每条含内容 + 条款溯源 -->
+            <div v-for="(p, pi) in dim.points" :key="pi" class="dim-item">
+              <div class="dim-item-main">
+                <el-input size="small" v-model="p.text" placeholder="输入条款内容"></el-input>
+                <el-button size="mini" type="text" class="btn-danger" @click="removePoint(dim, pi)">删除</el-button>
+              </div>
+              <div class="dim-item-refs">
+                <div v-for="(c, ci) in p.clauseRefs" :key="ci" class="dim-ref-row">
+                  <i class="el-icon-paperclip dim-ref-icon"></i>
+                  <el-input size="mini" v-model="p.clauseRefs[ci]" placeholder="条款位置（如：第5.1条）"></el-input>
+                  <el-button size="mini" type="text" class="btn-danger" @click="p.clauseRefs.splice(ci, 1)">删</el-button>
+                </div>
+                <el-button size="mini" type="text" icon="el-icon-plus" @click="p.clauseRefs.push('')">添加溯源</el-button>
+              </div>
+            </div>
+
             <el-button size="mini" plain icon="el-icon-plus" @click="addPoint(dim)">添加条款</el-button>
           </div>
+
+          <el-button type="primary" size="small" plain icon="el-icon-plus" class="add-group-btn" @click="addGroup">新增分组</el-button>
         </template>
 
         <!-- 申报政策：申报条件 + 指标体系 + 材料要求 + 映射关系 -->
@@ -276,7 +241,7 @@
 </template>
 
 <script>
-import { SCENARIOS, recordDiffOnApprove, validateIndicatorsWeight, PCF_PARAM_LABELS } from '@/utils/policyStandardService'
+import { SCENARIOS, recordDiffOnApprove, validateIndicatorsWeight } from '@/utils/policyStandardService'
 
 export default {
   name: 'StandardsDetail',
@@ -287,8 +252,7 @@ export default {
       form: null,            // 基本信息（可编辑）
       structured: null,      // 结构化内容（可编辑，与 form.structured 同步）
       typeOptions: ['国际标准', '国家标准', '行业标准', '规范/指南', '政策文件'],
-      scenarioEnum: SCENARIOS,
-      pcfParamLabels: PCF_PARAM_LABELS
+      scenarioEnum: SCENARIOS
     }
   },
   computed: {
@@ -326,6 +290,8 @@ export default {
           }
           // 结构化内容深拷贝，编辑不影响原数据，保存时再写回
           this.structured = item.structured ? JSON.parse(JSON.stringify(item.structured)) : null
+          // 旧数据兼容：将 dimensions.points 的字符串统一转为 { text, clauseRefs } 结构
+          this.normalizeDimensions(this.structured)
         } else {
           this.form = null
           this.structured = null
@@ -339,11 +305,52 @@ export default {
     goBack() {
       this.$router.push('/agent-center/apps/standards-library')
     },
+    /** 新增条目（含条款溯源） */
     addPoint(dim) {
-      dim.points.push('')
+      dim.points.push({ text: '', clauseRefs: [] })
     },
+    /** 删除条目 */
     removePoint(dim, index) {
       dim.points.splice(index, 1)
+    },
+    /** 新增分组 */
+    addGroup() {
+      if (!Array.isArray(this.structured.dimensions)) this.$set(this.structured, 'dimensions', [])
+      this.structured.dimensions.push({
+        key: 'group_' + Date.now(),
+        label: '',
+        points: []
+      })
+    },
+    /** 删除分组 */
+    removeGroup(index) {
+      this.$confirm('确认删除该分组及其全部条款？', '删除分组', {
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.structured.dimensions.splice(index, 1)
+      }).catch(() => {})
+    },
+    /**
+     * 旧数据兼容：points 可能是字符串数组，统一转为 { text, clauseRefs } 结构
+     */
+    normalizeDimensions(structured) {
+      if (!structured || !Array.isArray(structured.dimensions)) return
+      structured.dimensions.forEach((dim, di) => {
+        if (!dim.key) dim.key = 'group_' + di
+        if (!Array.isArray(dim.points)) dim.points = []
+        dim.points = dim.points.map(p => {
+          if (typeof p === 'string') return { text: p, clauseRefs: [] }
+          if (p && typeof p === 'object') {
+            return {
+              text: p.text !== undefined ? p.text : (p.label || ''),
+              clauseRefs: Array.isArray(p.clauseRefs) ? p.clauseRefs : []
+            }
+          }
+          return { text: '', clauseRefs: [] }
+        })
+      })
     },
     parseStatusText(ps) {
       return { pending: '待审核', effective: '已生效', rejected: '已驳回' }[ps] || '未解析'
@@ -404,6 +411,8 @@ export default {
         this.$message.warning('标准编号和标准名称为必填项')
         return
       }
+      // 保存前统一维度结构（保证 points 为 { text, clauseRefs } 格式）
+      this.normalizeDimensions(this.structured)
       // R040201 RULE-014：申报指标权重合计校验（填写了权重才触发）
       if (this.structured && this.structured.indicators) {
         const vw = validateIndicatorsWeight(this.structured.indicators)
@@ -487,6 +496,60 @@ export default {
 .dim-label { font-size: 12.5px; font-weight: 600; color: #0067FE; margin-bottom: 8px; }
 .point-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
 .point-row .el-input { flex: 1; }
+
+/* ===== 标准内容分组（分组名 / 分组内容 / 条款溯源）===== */
+.dim-group { background: #fff; }
+.dim-group-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed #e2e8f0;
+}
+.dim-group-name { flex: 1; max-width: 420px; }
+.dim-group-name .el-input__inner {
+  font-weight: 600;
+  color: #0067FE;
+  font-size: 13px;
+}
+
+/* 单条条款 */
+.dim-item {
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  background: #f8fafc;
+  border-radius: 4px;
+  border-left: 2px solid #cbd5e1;
+}
+.dim-item-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dim-item-main .el-input { flex: 1; }
+
+/* 条款溯源 */
+.dim-item-refs {
+  margin-top: 6px;
+  padding-left: 10px;
+}
+.dim-ref-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.dim-ref-row .el-input { flex: 1; max-width: 420px; }
+.dim-ref-icon { color: #94a3b8; font-size: 12px; flex-shrink: 0; }
+.dim-item-refs .el-button--text {
+  font-size: 12px;
+  color: #94a3b8;
+  padding: 2px 0;
+}
+.dim-item-refs .el-button--text:hover { color: #0067FE; }
+
+.add-group-btn { margin-top: 4px; }
 .btn-danger { color: #f56c6c; }
 .btn-danger:hover { color: #f78989; }
 .detail-audit {

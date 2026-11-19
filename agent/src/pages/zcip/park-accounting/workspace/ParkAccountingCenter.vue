@@ -228,52 +228,31 @@ export default {
     // 进入核算详情界面
     enterTask(task) {
       if (!task || !task.id) return
-      // 双模式：默认任务走三步·五项确认，新建任务走九阶段
-      const isDefault = task.mode === 'default' || task.id === 'PARK-DEFAULT'
+      // 统一走九阶段；direct=true 直接进入对话模式（跳过任务列表）
       // 用 replace 避免平台页签栏新增一个页签
-      if (isDefault) {
-        this.$router.replace({
-          path: '/park-accounting/accounting/agent',
-          query: { task: task.id }
-        })
-      } else {
-        // 九阶段：direct=true 直接进入对话模式（跳过任务列表）
-        this.$router.replace({
-          path: '/park-accounting/accounting/stages9',
-          query: { task: task.id, direct: 'true' }
-        })
-      }
+      this.$router.replace({
+        path: '/park-accounting/accounting/stages9',
+        query: { task: task.id, direct: 'true' }
+      })
     },
-    /** 从统一数据源加载任务列表（org_task_list）并映射为卡片结构 */
+    /** 从统一数据源加载任务列表并映射为卡片结构 */
     loadTasks() {
       let raw = []
       try { raw = JSON.parse(localStorage.getItem('park_task_list') || '[]') } catch (e) { raw = [] }
-      if (Array.isArray(raw) && raw.length) {
-        this.tasks = raw.map(this.mapTask)
-      } else {
-        // 无数据 → 用演示数据初始化并落库
-        this.tasks = [{
-          id: 'PARK-DEFAULT',
-          mode: 'default',
-          name: '北京亦庄新城零碳智能产业园 碳排放核算',
-          periodText: '2025-01-01 ~ 2025-12-31',
-          standard: '零碳园区碳排放核算方法（试行）',
-          status: '运行中',
-          currentStepIndex: 0,
-          currentStage: '步骤1·园区主体与依据',
-          updateTime: '2026-11-11'
-        }]
-        this.saveTasks()
+      // 清空重置：过滤掉历史遗留的三步模式默认任务
+      const valid = (Array.isArray(raw) ? raw : []).filter(
+        t => t && t.id && t.id !== 'PARK-DEFAULT' && t.mode !== 'default'
+      )
+      this.tasks = valid.map(this.mapTask)
+      // 若过滤后与原始数据不同，回写清理后的列表
+      if (valid.length !== (Array.isArray(raw) ? raw.length : 0)) {
+        try { localStorage.setItem('park_task_list', JSON.stringify(valid)) } catch (e) { /* ignore */ }
       }
     },
     /** 任务数据 → 卡片结构 */
     mapTask(t) {
-      // 双模式：默认任务用三步，新建任务用九阶段
-      const STEPS_3 = ['步骤1·园区主体与依据', '步骤2·核算底账与源清单', '步骤3·园区核算模型']
       const STEPS_9 = ['阶段1·核算依据', '阶段2·核算边界', '阶段3·核算模型', '阶段4·活动数据', '阶段5·排放因子',
         '阶段6·数据校验', '阶段7·排放计算', '阶段8·排放分析', '阶段9·排放报告']
-      const isDefault = t.mode === 'default' || t.id === 'PARK-DEFAULT'
-      const STEPS = isDefault ? STEPS_3 : STEPS_9
       const step = Number(t.currentStepIndex) || 0
       const statusMap = { 'in-progress': '运行中', 'completed': '已完成', 'error': '异常' }
       return {
@@ -283,7 +262,7 @@ export default {
         standard: t.standard || '',
         status: statusMap[t.status] || t.status || '运行中',
         currentStepIndex: step,
-        currentStage: t.currentStage || STEPS[step] || STEPS[0],
+        currentStage: t.currentStage || STEPS_9[step] || STEPS_9[0],
         updateTime: t.updatedAt || t.createdAt || ''
       }
     },

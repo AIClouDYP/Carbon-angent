@@ -3,8 +3,8 @@
     <!-- 页头 -->
     <div class="page-header">
       <div class="header-left">
-        <h2 class="page-title"><i class="el-icon-goods"></i> 产品与物料库</h2>
-        <p class="page-desc">企业自产产品与外购供应链物料（原辅料 / 包装材料）的统一登记底座，为碳足迹核算与 LCA 建模提供产品与物料数据</p>
+        <h2 class="page-title"><i class="el-icon-goods"></i> 企业产品库</h2>
+        <p class="page-desc">企业自产产品的统一登记底座，为碳足迹核算与 LCA 建模提供产品数据，支持一键发起核算并继承已有 SOP 模型</p>
       </div>
     </div>
 
@@ -13,9 +13,6 @@
       <el-input placeholder="搜索产品名称、类别..." prefix-icon="el-icon-search" size="small" v-model="searchText" clearable style="width: 240px;"></el-input>
       <el-select v-model="filterCategory" placeholder="按类别筛选" size="small" clearable class="toolbar-select">
         <el-option v-for="cat in categories" :key="cat" :label="cat" :value="cat"></el-option>
-      </el-select>
-      <el-select v-model="filterMatType" placeholder="物料类型" size="small" clearable class="toolbar-select" style="margin-left: 8px;">
-        <el-option v-for="t in matTypeOptions" :key="t" :label="t" :value="t"></el-option>
       </el-select>
     </div>
 
@@ -29,11 +26,6 @@
       <el-table :data="pagedProducts" border size="small" stripe style="width: 100%;" :header-cell-style="headerCellStyle">
         <el-table-column label="序号" type="index" width="55" align="center"></el-table-column>
         <el-table-column prop="category" label="类别" width="100"></el-table-column>
-        <el-table-column label="物料类型" width="100" align="center">
-          <template slot-scope="{ row }">
-            <el-tag size="mini" :type="row.matType === '外购原辅料' ? 'warning' : (row.matType === '包装材料' ? '' : 'success')" effect="plain">{{ row.matType || '自产产品' }}</el-tag>
-          </template>
-        </el-table-column>
         <el-table-column label="产品编号" prop="id" width="110"></el-table-column>
         <el-table-column label="产品名称" min-width="160" show-overflow-tooltip>
           <template slot-scope="{ row }">
@@ -109,19 +101,12 @@
         <!-- 基本信息 -->
         <el-divider content-position="left"><span class="divider-label">基本信息</span></el-divider>
         <el-row :gutter="16">
-          <el-col :span="8">
-            <el-form-item label="物料类型" required>
-              <el-select v-model="formData.matType" style="width: 100%;">
-                <el-option v-for="t in matTypeOptions" :key="t" :label="t" :value="t"></el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
+          <el-col :span="12">
             <el-form-item label="类别" required>
               <el-input v-model="formData.category" placeholder="如：燃油汽车"></el-input>
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :span="12">
             <el-form-item label="产品名称" required>
               <el-input v-model="formData.name" placeholder="如：燃油汽车 ICE-A160"></el-input>
             </el-form-item>
@@ -186,8 +171,6 @@ export default {
       products: [],
       searchText: '',
       filterCategory: '',
-      filterMatType: '',
-      matTypeOptions: ['自产产品', '外购原辅料', '包装材料'],
       dialogVisible: false,
       editMode: false,
       currentPage: 1,
@@ -210,7 +193,6 @@ export default {
       return this.products.filter(p => {
         if (this.searchText && !p.name.includes(this.searchText) && !p.category.includes(this.searchText)) return false
         if (this.filterCategory && p.category !== this.filterCategory) return false
-        if (this.filterMatType && (p.matType || '自产产品') !== this.filterMatType) return false
         return true
       })
     },
@@ -225,7 +207,7 @@ export default {
   methods: {
     emptyForm() {
       return {
-        name: '', category: '', matType: '自产产品',
+        name: '', category: '',
         weight: null, grossWeight: null, specs: '', packagingInfo: '',
         serviceLife: '', usePhaseEnergy: '', productionLocation: '', discontinued: false
       }
@@ -310,18 +292,6 @@ export default {
               specs: 'X90-EREV-2024', packagingInfo: '裸车发运+防撞护角, 约25kg',
               serviceLife: '15年/300,000km', usePhaseEnergy: '纯电16kWh/100km + 增程5.5L/100km', productionLocation: '武汉新能源制造基地', discontinued: false
             },
-            {
-              id: 'EP-013', name: '电解液（外购，LFP/NCM 共用）', category: '电池原辅料', matType: '外购原辅料',
-              weight: null, grossWeight: null,
-              specs: '溶剂 EC/DMC + LiPF₆', packagingInfo: '250kg 铁桶',
-              serviceLife: '—', usePhaseEnergy: '—', productionLocation: '供应商：江苏国泰', discontinued: false
-            },
-            {
-              id: 'EP-014', name: '出口木箱包装托盘', category: '包装材料', matType: '包装材料',
-              weight: null, grossWeight: null,
-              specs: '1200×1000 免熏蒸', packagingInfo: '—',
-              serviceLife: '单次周转', usePhaseEnergy: '—', productionLocation: '供应商：本地包装厂', discontinued: false
-            }
           ]
           this.persist()
         }

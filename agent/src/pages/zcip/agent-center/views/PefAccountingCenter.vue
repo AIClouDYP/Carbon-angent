@@ -223,7 +223,7 @@ export default {
       } else if (panel === 'tasks') {
         this.messages.push({ role: 'agent', text: '已切换至近期核算任务列表，右侧展示您的历史核算任务。点击任一任务可进入九阶段流程。', time: '刚刚', type: 'text' })
       } else if (panel === 'products') {
-        this.messages.push({ role: 'agent', text: '已切换至产品与物料库。绿色标记的产品已有核算模型SOP，可一键继承模型核算；灰色标记的产品需从零构建模型。', time: '刚刚', type: 'text' })
+        this.messages.push({ role: 'agent', text: '已切换至企业产品库。绿色标记的产品已有核算模型SOP，可一键继承模型核算；灰色标记的产品需从零构建模型。', time: '刚刚', type: 'text' })
       }
     },
     startCreateTask() {
@@ -392,14 +392,14 @@ export default {
           '<strong style="color:#0067FE;">核心能力</strong><br/>' +
           '• <strong>创建核算任务</strong> — 输入"新建任务"启动九阶段核算流程<br/>' +
           '• <strong>查询任务进度</strong> — 实时掌握运行中 / 已完成 / 异常任务状态<br/>' +
-          '• <strong>产品库管理</strong> — 查看企业产品与已有SOP模型，一键继承核算<br/>' +
+          '• <strong>企业产品库管理</strong> — 查看企业产品与已有SOP模型，一键继承核算<br/>' +
           '• <strong>多类别影响评价</strong> — 十六类环境影响指标可选，输出类别 × 阶段影响矩阵<br/>' +
           '• <strong>异常诊断处理</strong> — 自动识别数据缺失、因子过期等问题' +
           '</div>' +
                     '<div style="margin-top:8px;padding:10px 14px;background:rgba(230,126,34,0.04);border-radius:8px;border-left:3px solid #E67E22;">' +
-          '<strong style="color:#E67E22;">产品与物料库</strong><br/>' +
+          '<strong style="color:#E67E22;">企业产品库</strong><br/>' +
           '共 ' + this.enterpriseProducts.length + ' 个产品：<span style="color:#0067fe;font-weight:600;">' + sopCount + ' 个已建SOP可一键核算</span> · <span style="color:#E6A23C;">' + noSopCount + ' 个待构建模型</span>' +
-          '<br/><span style="font-size:12px;color:#909399;">点击右侧"产品库"Tab查看详情，有SOP的产品支持一键继承模型核算</span>' +
+          '<br/><span style="font-size:12px;color:#909399;">点击右侧"企业产品库"Tab查看详情，有SOP的产品支持一键继承模型核算</span>' +
           '</div>' +
           '<div style="margin-top:8px;padding:10px 14px;background:rgba(0,103,254,0.04);border-radius:8px;border-left:3px solid #0067fe;">' +
           '<strong style="color:#0067fe;">当前状态</strong><br/>' +

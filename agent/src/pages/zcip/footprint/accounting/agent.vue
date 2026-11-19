@@ -470,23 +470,14 @@
               <div class="content-header-row">
                 <i class="el-icon-set-up"></i>
                 <span class="content-header-title">核算边界配置</span>
-                <span class="content-header-sub">步骤 {{ boundaryDisplayStep }}/5</span>
-              </div>
-            </div>
-
-            <!-- 子步骤进度 -->
-            <div class="sub-step-progress">
-              <div v-for="(label, idx) in boundarySubStepLabels" :key="idx"
-                :class="['sub-step-item', { 'sub-step-done': idx < boundaryActiveIdx, 'sub-step-active': idx === boundaryActiveIdx }]">
-                <div class="sub-step-dot">{{ idx + 1 }}</div>
-                <span>{{ label }}</span>
+                <span class="content-header-sub">已由智能体按标准预填，可直接修改</span>
               </div>
             </div>
 
             <!-- 可编辑配置列表 -->
             <div class="boundary-edit-list">
               <!-- 1. 生命周期范围（按所选标准自适应：标准固定则只读，否则可选） -->
-              <div class="boundary-edit-row" :class="{ 'row-disabled': boundaryActiveIdx < 0 }">
+              <div class="boundary-edit-row">
                 <span class="boundary-edit-label">生命周期范围</span>
                 <!-- 标准明确规定阶段：只读锁定，不可改 -->
                 <template v-if="stdStagesFixed">
@@ -506,7 +497,7 @@
                 <span class="boundary-stages-text">{{ stdStageNames.join(' · ') }}</span>
               </div>
               <!-- 2. 量化单位 -->
-              <div class="boundary-edit-row" :class="{ 'row-disabled': boundaryActiveIdx < 1 }">
+              <div class="boundary-edit-row">
                 <span class="boundary-edit-label">量化单位</span>
                 <!-- 标准固定：只读 -->
                 <template v-if="isBoundaryLocked('unitType')">
@@ -524,7 +515,7 @@
                 </div>
               </div>
               <!-- 3. 分配规则 -->
-              <div class="boundary-edit-row" :class="{ 'row-disabled': boundarySubStep < 2 }">
+              <div class="boundary-edit-row">
                 <span class="boundary-edit-label">分配规则</span>
                 <template v-if="isBoundaryLocked('allocationRule')">
                   <span class="boundary-locked-value boundary-locked-long">{{ stdAllocationLabel }}</span>
@@ -537,7 +528,7 @@
                 </el-select>
               </div>
               <!-- 4. 取舍规则 -->
-              <div class="boundary-edit-row" :class="{ 'row-disabled': boundaryActiveIdx < 3 }">
+              <div class="boundary-edit-row">
                 <span class="boundary-edit-label">取舍规则</span>
                 <template v-if="isBoundaryLocked('cutoffThreshold')">
                   <span class="boundary-locked-value boundary-locked-long">{{ stdCutoff }}</span>
@@ -551,7 +542,7 @@
                 </div>
               </div>
               <!-- 5. 时间边界 -->
-              <div class="boundary-edit-row" :class="{ 'row-disabled': boundaryActiveIdx < 4 }">
+              <div class="boundary-edit-row">
                 <span class="boundary-edit-label">时间边界</span>
                 <el-date-picker v-model="boundaryDateRange" type="daterange" size="mini" class="boundary-edit-control" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" value-format="yyyy-MM-dd" @change="onDateRangeChange"></el-date-picker>
               </div>
@@ -566,6 +557,7 @@
                       <div class="flc-opt">
                         <span class="flc-opt-name">{{ lib.shortName || lib.name }}</span>
                         <span class="flc-opt-meta">{{ lib.version }} · {{ lib.releaseDate }}</span>
+                        <el-tag v-if="lib.id === 'elec-ts'" size="mini" type="success" effect="plain">时空分辨</el-tag>
                         <el-tag v-if="lib.required" size="mini" type="warning" effect="plain">标准要求</el-tag>
                       </div>
                     </el-option>
@@ -577,6 +569,23 @@
                     <el-button type="text" size="mini" @click="selectAllFactorLibs(false)">仅保留必选</el-button>
                   </div>
                 </div>
+              </div>
+              <!-- 7. 电力因子精度（独立于因子库列表；仅当分时分区库覆盖企业所在省市时显示） -->
+              <div class="boundary-edit-row" v-if="hasTimespaceFactorForRegion">
+                <span class="boundary-edit-label">电力因子精度</span>
+                <el-select v-model="elecFactorMode" size="mini" class="boundary-efm-select" @change="onElecFactorModeChange">
+                  <el-option label="常规（电网平均）" value="regular"></el-option>
+                  <el-option label="分时分区" value="timespace"></el-option>
+                </el-select>
+                <span class="efm-hint" :class="{ 'efm-hint-warn': elecFactorMode === 'timespace' }">
+                  <template v-if="elecFactorMode === 'regular'">
+                    采用所选因子库的区域电网平均因子，仅需电量总量数据
+                  </template>
+                  <template v-else>
+                    <i class="el-icon-warning-outline"></i>
+                    按小时级时刻与具体生产工序取值，要求阶段四电量数据充足：须按小时、按工序、分电力类型记录且覆盖完整
+                  </template>
+                </span>
               </div>
             </div>
 
@@ -765,13 +774,23 @@
                       </div>
                       <div v-for="inp in proc.inputs" :key="inp.name" class="aet-row aet-input-row is-clickable" @click="onActivityRowClick(inp, proc, 'input')">
                         <span class="aet-col-name"><i v-if="inp.verified" class="el-icon-circle-check aet-verified-icon"></i>{{ inp.name }}</span>
-                        <span class="aet-col-val">
-                          <template v-if="currentStepIndex === 2"><span class="aet-val-hidden">—</span></template>
-                          <template v-else><input class="aet-input" v-model="inp.value" /></template>
-                        </span>
-                        <span class="aet-col-unit">{{ inp.unit }}</span>
-                        <span class="aet-col-factor" v-if="inp.factor"><input class="aet-input aet-factor-input" v-model="inp.factor" /><small>{{ inp.factorUnit }}</small></span>
-                        <span class="aet-col-factor aet-factor-none" v-else>—</span>
+                        <!-- 分时分区模式：活动数据改为「查看详情」按钮，排放因子不再折算显示 -->
+                        <template v-if="isTsElec(inp, stage)">
+                          <span class="aet-col-val">
+                            <el-button type="text" size="mini" icon="el-icon-view" class="ts-view-btn" @click.stop="openTsDetail(inp, proc.name)">查看详情</el-button>
+                          </span>
+                          <span class="aet-col-unit">{{ inp.unit }}</span>
+                          <span class="aet-col-factor aet-factor-none">—</span>
+                        </template>
+                        <template v-else>
+                          <span class="aet-col-val">
+                            <template v-if="currentStepIndex === 2"><span class="aet-val-hidden">—</span></template>
+                            <template v-else><input class="aet-input" v-model="inp.value" /></template>
+                          </span>
+                          <span class="aet-col-unit">{{ inp.unit }}</span>
+                          <span class="aet-col-factor" v-if="inp.factor"><input class="aet-input aet-factor-input" v-model="inp.factor" /><small>{{ inp.factorUnit }}</small></span>
+                          <span class="aet-col-factor aet-factor-none" v-else>—</span>
+                        </template>
                       </div>
                     </div>
                   </div>
@@ -866,19 +885,83 @@
                   <span>{{ analysisProfile.conclusionText }}</span>
                 </div>
 
-                <!-- 常规分析优化建议 -->
-                <div class="analysis-suggestion-box sug-routine">
-                  <div class="sug-header">
-                    <i class="el-icon-warning-outline"></i>
-                    <span>常规分析优化与减排路径建议</span>
+                <!-- 电力因子口径对比（仅启用分时分区时显示）-->
+                <div v-if="powerFactorCompare.show" class="ts-compare-card">
+                  <div class="ts-cmp-header">
+                    <i class="el-icon-s-data"></i>
+                    <span>生产阶段电力因子口径对比</span>
+                    <el-tag size="mini" type="success" effect="plain" style="margin-left: 8px;">已启用分时分区</el-tag>
                   </div>
-                  <div class="sug-body">
-                    <div v-for="(sug, idx) in analysisProfile.routineSugs" :key="idx" class="sug-item">
-                      <span class="sug-num">{{ idx + 1 }}</span>
-                      <div class="sug-content">
-                        <strong>{{ sug.title }}</strong>
-                        <p>{{ sug.text }}</p>
+                  <div class="ts-cmp-body">
+                    <!-- 左右对比 -->
+                    <div class="ts-cmp-pair">
+                      <div class="ts-cmp-side">
+                        <div class="ts-cmp-side-label">常规口径（区域电网年均）</div>
+                        <div class="ts-cmp-side-value">{{ powerFactorCompare.normalEmission.toLocaleString() }}<span class="ts-cmp-unit">kgCO₂e</span></div>
+                        <div class="ts-cmp-side-sub">占总碳足迹 {{ powerFactorCompare.normalShare }}%</div>
                       </div>
+                      <div class="ts-cmp-arrow">
+                        <i class="el-icon-right"></i>
+                      </div>
+                      <div class="ts-cmp-side ts-cmp-side-active">
+                        <div class="ts-cmp-side-label">分时分区口径</div>
+                        <div class="ts-cmp-side-value">{{ powerFactorCompare.tsEmission.toLocaleString() }}<span class="ts-cmp-unit">kgCO₂e</span></div>
+                        <div class="ts-cmp-side-sub">占总碳足迹 {{ powerFactorCompare.tsShare }}%</div>
+                      </div>
+                    </div>
+
+                    <!-- 差异汇总 -->
+                    <div class="ts-cmp-summary">
+                      <div class="ts-cmp-sum-item">
+                        <span class="ts-cmp-sum-label">电力排放差</span>
+                        <span class="ts-cmp-sum-val" :class="powerFactorCompare.emisDiff <= 0 ? 'ts-cmp-down' : 'ts-cmp-up'">
+                          {{ powerFactorCompare.emisDiff <= 0 ? '↓' : '↑' }}
+                          {{ Math.abs(powerFactorCompare.emisDiff).toLocaleString() }} kgCO₂e
+                          （{{ powerFactorCompare.emisDiffPct > 0 ? '+' : '' }}{{ powerFactorCompare.emisDiffPct }}%）
+                        </span>
+                      </div>
+                      <div class="ts-cmp-sum-item">
+                        <span class="ts-cmp-sum-label">总碳足迹</span>
+                        <span class="ts-cmp-sum-val">
+                          {{ powerFactorCompare.normalTotal.toLocaleString() }} → {{ powerFactorCompare.tsTotal.toLocaleString() }}
+                          <span :class="powerFactorCompare.totalDiffPct <= 0 ? 'ts-cmp-down' : 'ts-cmp-up'">
+                            （{{ powerFactorCompare.totalDiffPct > 0 ? '+' : '' }}{{ powerFactorCompare.totalDiffPct }}%）
+                          </span>
+                        </span>
+                      </div>
+                      <div class="ts-cmp-sum-item">
+                        <span class="ts-cmp-sum-label">电力排放因子偏差</span>
+                        <span class="ts-cmp-sum-val" :class="factorDeltaPct <= 0 ? 'ts-cmp-down' : 'ts-cmp-up'">
+                          {{ factorDeltaPct <= 0 ? '↓' : '↑' }} {{ Math.abs(factorDeltaPct).toFixed(1) }}%
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- 分工序明细 -->
+                    <div class="ts-cmp-table" v-if="powerFactorCompare.rows.length">
+                      <div class="ts-cmp-tr ts-cmp-th">
+                        <span class="ts-cmp-td-name">单元过程</span>
+                        <span class="ts-cmp-td-num">常规排放</span>
+                        <span class="ts-cmp-td-num">分时排放</span>
+                        <span class="ts-cmp-td-num">偏差</span>
+                        <span class="ts-cmp-td-num">排放差(kgCO₂e)</span>
+                      </div>
+                      <div v-for="r in powerFactorCompare.rows" :key="r.proc" class="ts-cmp-tr">
+                        <span class="ts-cmp-td-name">{{ r.proc }}</span>
+                        <span class="ts-cmp-td-num">{{ r.normalEmission.toLocaleString() }}</span>
+                        <span class="ts-cmp-td-num ts-cmp-ts-factor">{{ r.tsEmission.toLocaleString() }}</span>
+                        <span class="ts-cmp-td-num" :class="r.diffPct <= 0 ? 'ts-cmp-down' : 'ts-cmp-up'">
+                          {{ r.diffPct > 0 ? '+' : '' }}{{ r.diffPct }}%
+                        </span>
+                        <span class="ts-cmp-td-num" :class="r.diffEmis <= 0 ? 'ts-cmp-down' : 'ts-cmp-up'">
+                          {{ r.diffEmis > 0 ? '+' : '' }}{{ r.diffEmis.toLocaleString() }}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div class="ts-cmp-tip">
+                      <i class="el-icon-info"></i>
+                      分时分区因子按企业所在区域（{{ tsRegion() }}）逐小时取值，并依各工序用电时刻加权；差异主要来自区域电网结构与该区域日内发电波动。
                     </div>
                   </div>
                 </div>
@@ -1038,6 +1121,7 @@
               <div class="meta-row"><span class="meta-lbl">核算标准</span><span class="meta-val">{{ selectedStandard }}</span></div>
               <div class="meta-row"><span class="meta-lbl">量化单位</span><span class="meta-val">{{ unitTypeLabel }} — {{ boundaryConfig.unitDetail }}</span></div>
               <div class="meta-row"><span class="meta-lbl">时间边界</span><span class="meta-val">{{ boundaryConfig.timeBoundary || '2024-01-01 - 2024-12-31' }}</span></div>
+              <div class="meta-row"><span class="meta-lbl">电力因子精度</span><span class="meta-val">{{ elecFactorModeDesc }}</span></div>
             </div>
             <p class="section-desc">{{ reportProfile.lifeDesc }}</p>
           </div>
@@ -1056,6 +1140,9 @@
               <div class="meta-row"><span class="meta-lbl">取舍规则</span><span class="meta-val">{{ boundaryConfig.cutoffThreshold }}（单项&lt;{{ boundaryConfig.cutoffItemThreshold }}，累计≤{{ boundaryConfig.cutoffTotalThreshold }}）</span></div>
             </div>
             <p class="section-desc">{{ lifecycleScopeLabel }}，涵盖原材料获取阶段、生产制造阶段、运输分销阶段、产品使用阶段、报废回收阶段五大阶段，所有排放源计入或依取舍规则（单项 &lt; {{ boundaryConfig.cutoffItemThreshold }}、累计 ≤ {{ boundaryConfig.cutoffTotalThreshold }}）取舍。</p>
+            <p v-if="elecFactorMode === 'timespace'" class="section-desc">
+              生产制造阶段的外购市电排放采用<b>分时分区电碳因子</b>核算：按企业所在区域（{{ tsRegion() }}）逐小时取电网碳强度因子，并依各工序用电时刻加权计算；其余排放源采用常规因子库年均值。
+            </p>
           </div>
 
           <!-- ★ 第三章：全生命周期排放清单 + 饼图+堆叠柱状图 -->
@@ -1136,8 +1223,8 @@
               <div class="rule-card">
                 <div class="rule-icon"><i class="el-icon-location-outline"></i></div>
                 <div class="rule-name">地理边界</div>
-                <div class="rule-value">中国</div>
-                <div class="rule-desc">背景数据集优先选用中国本土数据，缺失时采用Ecoinvent全球数据并标注地理代表性扣分</div>
+                <div class="rule-value">{{ tsRegion() }}</div>
+                <div class="rule-desc">企业生产地所在省市；排放因子优先选用该省市数据，缺失时按「市级→省级→华北区域→全国」逐级回退并标注地理代表性扣分</div>
               </div>
             </div>
           </div>
@@ -1270,7 +1357,7 @@
               <ol class="disclaimer-list">
                 <li><b>数据来源与准确性</b>：本报告所引用的活动数据及排放因子均来源于企业实测记录、行业标准数据库及公开发布的官方统计数据。系统已尽合理努力确保数据的准确性与完整性，但不对数据源的实时更新及潜在偏差承担保证责任。</li>
                 <li><b>核算边界限制</b>：本报告遵循 {{ selectedStandard }} 规范设定核算边界，采用 {{ boundaryConfig.cutoffThreshold }} 取舍规则。被取舍的微量排放源（单项 < {{ boundaryConfig.cutoffItemThreshold }}）虽对总结果影响有限，但不代表其对特定环境影响类别无贡献。</li>
-                <li><b>排放因子时效性</b>：排放因子数据引用截止日期为 {{ boundaryConfig.timeBoundary || '2024-01-01 - 2024-12-31' }}，因子版本更新可能导致数值差异。建议定期复核因子库版本，及时更新引用。</li>
+                <li><b>排放因子时效性</b>：排放因子数据引用截止日期为 {{ boundaryConfig.timeBoundary || '2024-01-01 - 2024-12-31' }}，因子版本更新可能导致数值差异。建议定期复核因子库版本，及时更新引用。<template v-if="elecFactorMode === 'timespace'">本项目生产制造阶段市电采用<b>分时分区电碳因子库（2025 版，小时级）</b>，因子按省市与时刻动态取值，与常规年度平均因子存在差异。</template></li>
                 <li><b>不确定性声明</b>：蒙特卡洛模拟结果表明，在 {{ uncertaintyParams.confidenceLevel }}% 置信水平下，碳足迹总量的不确定度范围为 {{ confidenceIntervalText }} kgCO₂e。实际值可能在此区间内波动，决策时应考虑不确定度影响。</li>
                 <li><b>适用范围</b>：本报告仅适用于 {{ boundaryConfig.unitDetail }} 核算单位的产品碳足迹声明，不可直接用于其他产品、其他区域或其他时间周期的碳排放比较。</li>
                 <li><b>知识产权</b>：本报告内容受版权保护，未经书面授权不得复制、传播或用于商业用途。报告中的方法论及核算模型归核算方所有。</li>
@@ -1403,16 +1490,7 @@
               </div>
             </div>
 
-            <!-- 阶段4：活动数据提示 -->
-            <div v-if="currentStepIndex === 3" class="stage-info-banner">
-              <i class="el-icon-circle-check"></i>
-              <span>系统已并发拉取BOM清单、能耗数据等多源活动数据，下方模型已显示实测数据值。</span>
-            </div>
-            <!-- 阶段5：排放因子提示 -->
-            <div v-else-if="currentStepIndex === 4" class="stage-info-banner">
-              <i class="el-icon-circle-check"></i>
-              <span>排放因子库已自动匹配各单元过程对应因子，下方模型已显示因子绑定标签。</span>
-            </div>
+
 
             <!-- 阶段三：已构建的模型拓扑图（自动初始化） -->
             <div class="model-stage-groups">
@@ -1468,7 +1546,10 @@
                                     <span class="row-indent"></span>
                                     <span class="row-name"><i class="el-icon-document-copy"></i> {{ item.name }}</span>
                                     <span class="row-activity">{{ item.activityData }}</span>
-                                    <span :class="['row-factor', item.factor === '—' ? 'row-factor-none' : '']">{{ item.factor }}</span>
+                                    <span :class="['row-factor', item.factor === '—' ? 'row-factor-none' : '']">
+                                      {{ item.factor }}
+                                      <el-tag v-if="item.factorTs" size="mini" type="success" effect="plain" class="ts-factor-tag">分时</el-tag>
+                                    </span>
                                     <span class="row-val">{{ formatEmission(item.emission) }}</span>
                                   </div>
                                   <div class="item-percent-bar" :style="{ width: getItemPercentWidth(item.emission), backgroundColor: item.emission < 0 ? '#52c41a' : '#0067FE' }"></div>
@@ -1520,17 +1601,17 @@
                       <div class="process-col center-col">
                         <div class="proc-card">
                           <div class="proc-card-arrow left">→</div>
-                          <div class="proc-card-body" :class="{ 'proc-card-deviated': proc.allocation !== boundaryConfig.allocationRule }">
+                          <div class="proc-card-body" :class="{ 'proc-card-deviated': proc.allocation && proc.allocation !== 'mass' }">
                             <el-input v-model="proc.name" size="mini" class="proc-name-edit" placeholder="过程名称"></el-input>
                             <el-select v-model="proc.allocation" size="mini" class="proc-allocation-select" placeholder="分配规则" @change="onProcAllocationChange(proc)">
                               <el-option label="质量分配" value="mass"></el-option>
                               <el-option label="经济分配" value="economic"></el-option>
                               <el-option label="能源分配" value="energy"></el-option>
                             </el-select>
-                            <!-- 分配规则偏离全局时，显示备注输入框 -->
-                            <div v-if="proc.allocation !== boundaryConfig.allocationRule" class="proc-allocation-remark">
+                            <!-- 分配规则非质量分配时，显示备注输入框 -->
+                            <div v-if="proc.allocation && proc.allocation !== 'mass'" class="proc-allocation-remark">
                               <i class="el-icon-warning-outline"></i>
-                              <el-input v-model="proc.allocationRemark" size="mini" placeholder="说明偏离全局规则的原因" class="proc-remark-input"></el-input>
+                              <el-input v-model="proc.allocationRemark" size="mini" placeholder="说明非质量分配的原因" class="proc-remark-input"></el-input>
                             </div>
                           </div>
                           <div class="proc-card-arrow right">→</div>
@@ -1585,13 +1666,17 @@
                       <!-- 左列：输入 -->
                       <div class="process-col input-col">
                         <div v-for="inp in proc.inputs" :key="inp.name" class="io-item input-item">
-                          <div :class="['io-bubble', { 'emission-bubble': currentStepIndex === 6, 'product-flow-bubble': inp.flowType === 'product', 'byproduct-bubble': inp.productSubType === 'by_product' }]" :title="currentStepIndex >= 3 ? (currentStepIndex === 6 ? `${inp.name}: ${getEmissionValue(proc.name, inp.name, true)} kgCO₂e` : `${inp.name}: ${inp.value}${inp.unit}`) : inp.name">
+                          <div :class="['io-bubble', { 'emission-bubble': currentStepIndex === 6, 'product-flow-bubble': inp.flowType === 'product', 'byproduct-bubble': inp.productSubType === 'by_product', 'ts-bubble': currentStepIndex >= 3 && currentStepIndex <= 5 && isTsElec(inp, group) }]" :title="currentStepIndex >= 3 ? (currentStepIndex === 6 ? `${inp.name}: ${getEmissionValue(proc.name, inp.name, true)} kgCO₂e` : `${inp.name}: ${inp.value}${inp.unit}`) : inp.name">
                             <span class="io-name">{{ inp.name }}</span>
                             <span class="io-type-tag" v-if="inp.listType" :style="{ color: getListTypeColor(inp.listType), borderColor: getListTypeColor(inp.listType) }">{{ getListTypeLabel(inp.listType) }}</span>
                             <span class="io-val" v-if="currentStepIndex >= 3">
-                              <span v-if="currentStepIndex === 6">{{ getEmissionValue(proc.name, inp.name, true) }}<small> kgCO₂e</small></span>
+                              <!-- 分时分区模式：市电查看详情按钮（阶段4/5/6）-->
+                              <template v-if="currentStepIndex >= 3 && currentStepIndex <= 5 && isTsElec(inp, group)">
+                                <el-button type="text" size="mini" icon="el-icon-view" class="ts-view-btn" @click.stop="openTsDetail(inp, proc.name)">查看详情</el-button>
+                              </template>
+                              <span v-else-if="currentStepIndex === 6">{{ getEmissionValue(proc.name, inp.name, true) }}<small> kgCO₂e</small></span>
                               <span v-else-if="currentStepIndex === 2">{{ inp.unit ? '（' + inp.unit + '）' : '' }}</span>
-                        <span v-else>{{ inp.value }}<small>{{ inp.unit }}</small></span>
+                              <span v-else>{{ inp.value }}<small>{{ inp.unit }}</small></span>
                             </span>
                           </div>
                         </div>
@@ -1605,7 +1690,7 @@
                             <div class="node-allocation-tag">
                               <i class="el-icon-share"></i> {{ getAllocationLabel(proc.allocation) }}
                             </div>
-                            <!-- 分配规则偏离全局时，显示备注 -->
+                            <!-- 非质量分配的备注说明 -->
                             <div v-if="proc.allocationRemark" class="node-allocation-remark" :title="proc.allocationRemark">
                               <i class="el-icon-warning-outline"></i> {{ proc.allocationRemark }}
                             </div>
@@ -1650,6 +1735,180 @@
 
     <!-- 因子库选择对话框 -->
 
+    <!-- 分时分区市电活动数据详情弹窗 -->
+    <!-- 说明：powerFactorCompare 由 computed 提供 -->
+    <el-dialog
+      :title="`市电分时活动数据 · ${tsDetailProc}`"
+      :visible.sync="tsDetailVisible"
+      width="820px"
+      top="6vh"
+      :close-on-click-modal="false"
+      custom-class="ts-dialog">
+      <div v-if="tsDetailData" class="ts-dlg">
+        <!-- 顶部概要 -->
+        <div class="ts-dlg-summary">
+          <div class="ts-dlg-sum-item">
+            <div class="ts-dlg-sum-label">核算期</div>
+            <div class="ts-dlg-sum-val ts-dlg-sm">{{ tsPeriod().start }} ~ {{ tsPeriod().end }}</div>
+          </div>
+          <div class="ts-dlg-sum-item">
+            <div class="ts-dlg-sum-label">核算期总电量</div>
+            <div class="ts-dlg-sum-val">{{ (Number(tsDetailItem.value) || 0).toLocaleString() }}<span class="ts-dlg-unit">kWh</span></div>
+          </div>
+          <div class="ts-dlg-sum-item">
+            <div class="ts-dlg-sum-label">区域</div>
+            <div class="ts-dlg-sum-val ts-dlg-sm">{{ tsRegion() }}</div>
+          </div>
+          <div class="ts-dlg-sum-item">
+            <div class="ts-dlg-sum-label">核算期天数</div>
+            <div class="ts-dlg-sum-val">{{ tsDaysCount() }}<span class="ts-dlg-unit">天</span></div>
+          </div>
+        </div>
+
+        <!-- 日期跳转 + 当日用电 -->
+        <div class="ts-dlg-datebar">
+          <span class="ts-dlg-datebar-label">选择日期</span>
+          <el-button size="mini" icon="el-icon-arrow-left" @click="tsPrevDay">前一天</el-button>
+          <el-date-picker
+            v-model="tsDetailDate"
+            type="date"
+            size="mini"
+            value-format="yyyy-MM-dd"
+            :picker-options="{
+              disabledDate(time) {
+                return false
+              }
+            }"
+            style="width: 150px;"
+            @change="onTsDateChange">
+          </el-date-picker>
+          <el-button size="mini" @click="tsNextDay">后一天<i class="el-icon-arrow-right el-icon--right"></i></el-button>
+          <span class="ts-dlg-weekday">{{ weekdayOf(tsDetailDate) }}</span>
+          <span class="ts-dlg-daybar-kwh">
+            当日用电 <b>{{ tsDetailData.dayKwh.toLocaleString() }}</b> kWh
+          </span>
+        </div>
+
+        <!-- ===== 24 小时明细表（时段 / 用电量 / 排放因子 / 数据来源）===== -->
+        <div class="ts-dlg-table-wrap">
+          <table class="ts-dlg-table">
+            <thead>
+              <tr>
+                <th style="width: 140px;">时段</th>
+                <th style="width: 140px;">用电量(kWh)</th>
+                <th style="width: 160px;">排放因子(kgCO₂e/kWh)</th>
+                <th>数据来源</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="r in tsDetailData.rows" :key="r.hour" :class="{ 'ts-dlg-row-stopped': r.stopped }">
+                <td class="ts-dlg-td-hour">{{ r.hourLabel }}</td>
+                <td class="ts-dlg-td-num">
+                  <el-input
+                    size="mini"
+                    class="ts-dlg-kwh-input"
+                    :value="r.kwh"
+                    @change="onTsHourKwhChange(r, $event)">
+                  </el-input>
+                </td>
+                <td class="ts-dlg-td-num">{{ r.factor ? r.factor.toFixed(4) : '—' }}</td>
+                <td class="ts-dlg-td-src">{{ r.dataSource }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 佐证材料 -->
+        <div class="ts-dlg-evidence">
+          <div class="ts-ev-header">
+            <span class="ts-ev-title">
+              <i class="el-icon-paperclip"></i> 佐证材料
+              <span class="ts-ev-count">（{{ tsEvidenceOf(tsDetailProc).length }}）</span>
+            </span>
+            <el-button size="mini" type="primary" plain icon="el-icon-upload2" @click="uploadTsEvidence">上传佐证材料</el-button>
+          </div>
+          <div v-if="tsEvidenceOf(tsDetailProc).length" class="ts-ev-list">
+            <div v-for="(ev, i) in tsEvidenceOf(tsDetailProc)" :key="i" class="ts-ev-item ts-ev-item-block">
+              <div class="ts-ev-row-main">
+                <i class="ts-ev-icon" :class="ev.icon || 'el-icon-document'"></i>
+                <div class="ts-ev-info">
+                  <div class="ts-ev-name" :title="ev.name">{{ ev.name }}</div>
+                  <div class="ts-ev-meta">{{ ev.desc }}</div>
+                </div>
+                <el-tag size="mini" :type="ev.status === 'verified' ? 'success' : 'warning'" effect="plain">
+                  {{ ev.status === 'verified' ? '已验证' : '待审核' }}
+                </el-tag>
+                <el-button type="text" size="mini" @click="viewTsEvidence(ev)">查看</el-button>
+                <el-button type="text" size="mini" class="ts-ev-del" @click="removeTsEvidence(i)">删除</el-button>
+              </div>
+              <!-- OCR 模拟识别结果 -->
+              <div v-if="ev.ocr" class="ts-ev-ocr">
+                <el-tag size="mini" :type="ev.ocr.status === 'done' ? 'success' : 'info'" effect="plain">
+                  <i :class="ev.ocr.status === 'done' ? 'el-icon-circle-check' : 'el-icon-loading'"></i>
+                  {{ ev.ocr.status === 'done' ? '识别完成' : '识别中' }}
+                </el-tag>
+                <span v-if="ev.ocr.status === 'done'" class="ts-ev-ocr-text">{{ ev.ocr.summary }}</span>
+                <span v-if="ev.ocr.status === 'done'" class="ts-ev-ocr-conf">置信度 {{ ev.ocr.confidence }}%</span>
+                <el-button
+                  v-if="ev.ocr.status === 'done' && !ev.ocr.applied"
+                  type="text" size="mini" class="ts-ev-ocr-apply"
+                  @click="applyOcrResult(ev)">应用识别结果</el-button>
+                <el-tag v-if="ev.ocr.applied" size="mini" type="success" effect="dark">已应用</el-tag>
+              </div>
+            </div>
+          </div>
+          <div v-else class="ts-ev-empty">
+            <i class="el-icon-folder-opened"></i>
+            暂无佐证材料。建议上传电表读数记录、电力交易账单等，以证明分时电量数据来源。
+          </div>
+        </div>
+
+        <!-- 修改记录 -->
+        <div class="ts-dlg-audit">
+          <div class="ts-audit-header" @click="tsAuditExpanded = !tsAuditExpanded">
+            <span class="ts-audit-title">
+              <i class="el-icon-time"></i> 修改记录
+              <span class="ts-audit-count">（{{ tsAuditLogOf(tsDetailProc).length }}）</span>
+            </span>
+            <i :class="tsAuditExpanded ? 'el-icon-arrow-up' : 'el-icon-arrow-down'" class="ts-audit-toggle"></i>
+          </div>
+          <div v-if="tsAuditExpanded" class="ts-audit-body">
+            <div v-if="!tsAuditLogOf(tsDetailProc).length" class="ts-audit-empty">
+              <i class="el-icon-info"></i> 暂无修改记录
+            </div>
+            <div v-else class="ts-audit-list">
+              <div v-for="(log, i) in tsAuditLogOf(tsDetailProc)" :key="i" class="ts-audit-item">
+                <span class="ts-audit-dot"></span>
+                <div class="ts-audit-main">
+                  <div class="ts-audit-line">
+                    <b>{{ log.time }}</b>
+                    <span class="ts-audit-user">{{ log.user }}</span>
+                    <span class="ts-audit-hour">{{ log.hourLabel }}</span>
+                  </div>
+                  <div class="ts-audit-detail">
+                    用电量 <span class="ts-audit-old">{{ log.oldVal }}</span>
+                    <i class="el-icon-right"></i>
+                    <span class="ts-audit-new">{{ log.newVal }}</span> kWh
+                    <span v-if="log.reason" class="ts-audit-reason">· {{ log.reason }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ts-dlg-foot-tip">
+          <i class="el-icon-info"></i>
+          电碳因子按企业所在区域（{{ tsRegion() }}）从分时分区电碳因子库逐小时取值，随发电结构日内波动而变化；
+          停产时段电量为 0 但仍保留记录。
+        </div>
+      </div>
+
+      <div slot="footer" class="dialog-footer">
+        <el-button size="small" @click="tsDetailVisible = false">关闭</el-button>
+      </div>
+    </el-dialog>
+
     <!-- 新手引导浮层 -->
     <onboarding-guide
       :visible="showOnboarding"
@@ -1668,6 +1927,8 @@ import AgentIcon from '@/pages/zcip/common/AgentIcon.vue'
 import OnboardingGuide from '../../agent-center/components/OnboardingGuide.vue'
 import agentCoreMixin from './agentCoreMixin'
 import agentChatMixin from './agentChatMixin'
+import { isTimespaceElec, buildDayDetail, daysBetween, calcPeriodWeightedFactor } from '@/utils/timespaceElec'
+import { normalizeRegion } from '@/utils/regionDict'
 
 export default {
   name: 'CarbonFootprintAgent',
@@ -1678,6 +1939,20 @@ export default {
       showOnboarding: false,
       activeActivityRow: null,  // 数据清单当前选中行（对话联动）
       selectedFactorLibs: [],
+      // 分时分区：市电活动数据详情弹窗
+      tsDetailVisible: false,
+      tsDetailProc: '',
+      tsDetailItem: null,
+      tsDetailDate: '',
+      tsDetailData: null,
+      // 分时加权因子缓存（避免重复计算）
+      tsWeightedCache: {},
+      // 分时电量佐证材料（按工序名索引）
+      tsEvidenceMap: {},
+      // 分时电量修改记录（按工序名索引）
+      tsAuditMap: {},
+      // 修改记录面板展开态
+      tsAuditExpanded: false,
       onboardingStep: 0,
       onboardingSteps: [
         {
@@ -1735,7 +2010,468 @@ export default {
     this.initSelectedFactorLibs()
     this.ensureStandardValid()
   },
+  computed: {
+    /** 阶段8：电力因子口径对比 */
+    powerFactorCompare() {
+      return this.buildPowerFactorCompare()
+    },
+    /** 阶段9：电力因子精度描述（报告元信息） */
+    elecFactorModeDesc() {
+      if (this.elecFactorMode === 'timespace') {
+        return `分时分区（${this.tsRegion()} × 小时级）`
+      }
+      return '常规（区域电网年均）'
+    },
+    /** 阶段8：电力排放因子偏差比例（分时 vs 常规，仅显示百分比不显示因子值） */
+    factorDeltaPct() {
+      const c = this.powerFactorCompare
+      if (!c || !c.show) return 0
+      const nf = parseFloat(c.normalFactor) || 0
+      const tf = parseFloat(c.tsFactor) || 0
+      if (nf <= 0) return 0
+      return Math.round(((tf - nf) / nf) * 1000) / 10
+    }
+  },
   methods: {
+    // ===== 分时分区电碳因子（仅生产阶段市电）=====
+    /** 该输入流是否适用分时分区因子 */
+    isTsElec(inp, stage) {
+      return this.elecFactorMode === 'timespace' && isTimespaceElec(inp, stage)
+    },
+    /** 核算期起止日期 */
+    tsPeriod() {
+      const tb = this.boundaryConfig && this.boundaryConfig.timeBoundary
+      if (tb) {
+        const parts = tb.split(' - ')
+        if (parts.length === 2) return { start: parts[0], end: parts[1] }
+      }
+      return { start: '2024-01-01', end: '2024-12-31' }
+    },
+    /** 核算期天数 */
+    tsDaysCount() {
+      const p = this.tsPeriod()
+      return daysBetween(p.start, p.end)
+    },
+    /** 任务区域（企业所在省市） */
+    tsRegion() {
+      return (this.boundaryConfig && this.boundaryConfig.region) || '北京'
+    },
+    /**
+     * 分时分区库是否覆盖企业所在省市
+     * 逻辑：读取因子库 localStorage → 找到分时分区库 → 判断其 records 中是否有该区域的因子
+     * 有 → 显示「电力因子精度」选项；无 → 不显示
+     */
+    hasTimespaceFactorForRegion() {
+      const regionName = this.tsRegion()
+      if (!regionName) return false
+      try {
+        const raw = localStorage.getItem('cfp_factor_databases_v5')
+        if (!raw) {
+          // 无持久化数据时，按默认演示数据判断（仅北京有）
+          return normalizeRegion(regionName) !== null && this.defaultTsRegionHasData(regionName)
+        }
+        const dbs = JSON.parse(raw)
+        const tsDb = (dbs || []).find(d => d && d.id === 'elec-ts')
+        if (!tsDb || !Array.isArray(tsDb.records) || !tsDb.records.length) {
+          return this.defaultTsRegionHasData(regionName)
+        }
+        const region = normalizeRegion(regionName)
+        if (!region) return false
+        // 直接命中该区域
+        if (tsDb.records.some(r => r.regionCode === region.code)) return true
+        // 市级 → 回退其父级省级
+        if (region.level === 'city' && region.parentCode) {
+          if (tsDb.records.some(r => r.regionCode === region.parentCode)) return true
+        }
+        return false
+      } catch (e) {
+        return this.defaultTsRegionHasData(regionName)
+      }
+    },
+    /**
+     * 阶段8：电力因子口径对比数据
+     */
+    buildPowerFactorCompare() {
+      const empty = {
+        show: false, rows: [],
+        normalEmission: 0, tsEmission: 0,
+        normalShare: 0, tsShare: 0,
+        emisDiff: 0, emisDiffPct: 0,
+        normalTotal: 0, tsTotal: 0, totalDiffPct: 0,
+        normalFactor: 0, tsFactor: 0
+      }
+      if (this.elecFactorMode !== 'timespace') return empty
+
+      const rows = []
+      let normalEmission = 0
+      let tsEmission = 0
+
+      ;(this.modelStages || []).forEach(stage => {
+        (stage.processes || []).forEach(proc => {
+          const elec = (proc.inputs || []).filter(i => this.isTsElecItem(i, stage))
+          if (!elec.length) return
+          let procNormal = 0
+          let procTs = 0
+          elec.forEach(i => {
+            const val = parseFloat(i.value) || 0
+            const nf = parseFloat(i.factor) || 0
+            const tf = this.tsWeightedFactorOf(proc.name) || nf
+            procNormal += val * nf
+            procTs += val * tf
+          })
+          normalEmission += procNormal
+          tsEmission += procTs
+          const nfAvg = elec.length === 1 ? (parseFloat(elec[0].factor) || 0) : 0
+          const tfAvg = this.tsWeightedFactorOf(proc.name) || nfAvg
+          rows.push({
+            proc: proc.name,
+            normalEmission: Math.round(procNormal),
+            tsEmission: Math.round(procTs),
+            diffPct: nfAvg > 0 ? Math.round(((tfAvg - nfAvg) / nfAvg) * 10000) / 100 : 0,
+            diffEmis: Math.round(procTs - procNormal)
+          })
+        })
+      })
+
+      if (!rows.length) return empty
+
+      const total = this.totalCarbonEmission || 0
+      const otherEmis = Math.max(0, total - tsEmission)
+      const normalTotal = otherEmis + normalEmission
+      const tsTotal = otherEmis + tsEmission
+      const emisDiff = tsEmission - normalEmission
+      // 加权平均因子（总电量加权）
+      let totalKwh = 0
+      let wfSum = 0
+      ;(this.modelStages || []).forEach(stage => {
+        (stage.processes || []).forEach(proc => {
+          const elec = (proc.inputs || []).filter(i => this.isTsElecItem(i, stage))
+          elec.forEach(i => {
+            const val = parseFloat(i.value) || 0
+            totalKwh += val
+            wfSum += val * (this.tsWeightedFactorOf(proc.name) || 0)
+          })
+        })
+      })
+      const tsFactor = totalKwh > 0 ? Math.round((wfSum / totalKwh) * 10000) / 10000 : 0
+      // 常规加权平均因子：按同一电量权重加权（与分时口径可比）
+      let nfSum = 0
+      ;(this.modelStages || []).forEach(stage => {
+        (stage.processes || []).forEach(proc => {
+          const elec = (proc.inputs || []).filter(i => this.isTsElecItem(i, stage))
+          elec.forEach(i => {
+            const val = parseFloat(i.value) || 0
+            nfSum += val * (parseFloat(i.factor) || 0)
+          })
+        })
+      })
+      const normalFactor = totalKwh > 0 ? nfSum / totalKwh : 0
+
+      return {
+        show: true,
+        rows,
+        normalEmission: Math.round(normalEmission),
+        tsEmission: Math.round(tsEmission),
+        normalShare: normalTotal > 0 ? Math.round((normalEmission / normalTotal) * 1000) / 10 : 0,
+        tsShare: tsTotal > 0 ? Math.round((tsEmission / tsTotal) * 1000) / 10 : 0,
+        emisDiff: Math.round(emisDiff),
+        emisDiffPct: normalEmission > 0 ? Math.round((emisDiff / normalEmission) * 10000) / 100 : 0,
+        normalTotal: Math.round(normalTotal),
+        tsTotal: Math.round(tsTotal),
+        totalDiffPct: normalTotal > 0 ? Math.round(((tsTotal - normalTotal) / normalTotal) * 10000) / 100 : 0,
+        normalFactor: normalFactor.toFixed(4),
+        tsFactor: tsFactor.toFixed(4)
+      }
+    },
+    /**
+     * 取某工序市电的分时加权平均因子（供阶段7计算与表格展示）
+     * 带缓存，避免重复计算
+     */
+    tsWeightedFactorOf(procName) {
+      if (!this.tsWeightedCache) this.$set(this, 'tsWeightedCache', {})
+      const key = procName + '|' + this.tsRegion() + '|' + (this.boundaryConfig.timeBoundary || '')
+      if (this.tsWeightedCache[key] !== undefined) return this.tsWeightedCache[key]
+      const p = this.tsPeriod()
+      const r = calcPeriodWeightedFactor({
+        procName,
+        startDate: p.start,
+        endDate: p.end,
+        region: this.tsRegion()
+      })
+      this.$set(this.tsWeightedCache, key, r.avgFactor)
+      return r.avgFactor
+    },
+    /**
+     * 阶段7：判断某工序的市电是否走分时加权因子
+     */
+    isTsElecInStage(procName) {
+      if (this.elecFactorMode !== 'timespace') return false
+      // 找到该工序所属阶段
+      for (const stage of this.modelStages || []) {
+        const proc = (stage.processes || []).find(p => p.name === procName)
+        if (proc) {
+          const elec = (proc.inputs || []).find(i => isTimespaceElec(i, stage))
+          return !!elec
+        }
+      }
+      return false
+    },
+    /**
+     * 无持久化数据时的默认判断：演示数据仅覆盖「北京」
+     * 支持市级回退到省级（如「北京市区」→ 北京）
+     */
+    defaultTsRegionHasData(regionName) {
+      const region = normalizeRegion(regionName)
+      if (!region) return false
+      const DEFAULT_COVERED = ['11'] // 北京行政区划代码
+      if (DEFAULT_COVERED.indexOf(region.code) > -1) return true
+      if (region.level === 'city' && region.parentCode) {
+        return DEFAULT_COVERED.indexOf(region.parentCode) > -1
+      }
+      return false
+    },
+    /** 获取某工序的分时电量佐证材料列表 */
+    tsEvidenceOf(procName) {
+      return this.tsEvidenceMap[procName] || []
+    },
+    /** 上传佐证材料 */
+    uploadTsEvidence() {
+      const input = document.createElement('input')
+      input.type = 'file'
+      input.accept = '.pdf,.xlsx,.xls,.csv,.jpg,.jpeg,.png,.doc,.docx'
+      input.onchange = (e) => {
+        const files = Array.from(e.target.files || [])
+        if (!files.length) return
+        const proc = this.tsDetailProc
+        if (!this.tsEvidenceMap[proc]) this.$set(this.tsEvidenceMap, proc, [])
+        files.forEach(f => {
+          const ext = (f.name.split('.').pop() || '').toLowerCase()
+          const iconMap = {
+            pdf: 'el-icon-document',
+            xlsx: 'el-icon-s-grid',
+            xls: 'el-icon-s-grid',
+            csv: 'el-icon-s-grid',
+            doc: 'el-icon-document',
+            docx: 'el-icon-document',
+            jpg: 'el-icon-picture-outline',
+            jpeg: 'el-icon-picture-outline',
+            png: 'el-icon-picture-outline'
+          }
+          const sizeKb = f.size / 1024
+          const sizeText = sizeKb > 1024 ? (sizeKb / 1024).toFixed(1) + ' MB' : sizeKb.toFixed(0) + ' KB'
+          const item = {
+            name: f.name,
+            desc: `${sizeText} · ${new Date().toLocaleDateString('zh-CN')} 上传`,
+            status: 'pending',
+            icon: iconMap[ext] || 'el-icon-document',
+            size: f.size,
+            ocr: { status: 'pending', summary: '', confidence: 0, applied: false }
+          }
+          this.tsEvidenceMap[proc].push(item)
+          // 模拟 OCR 识别（1.5s 后返回结果）
+          this.mockOcrRecognize(item, ext)
+        })
+        this.$message.success(`已上传 ${files.length} 个佐证材料，正在识别…`)
+      }
+      input.click()
+    },
+
+    /** ===== OCR 模拟识别（前端模拟，不接后端） ===== */
+    mockOcrRecognize(item, ext) {
+      setTimeout(() => {
+        const isSheet = ['xlsx', 'xls', 'csv'].indexOf(ext) > -1
+        const isPdf = ext === 'pdf'
+        const isImg = ['jpg', 'jpeg', 'png'].indexOf(ext) > -1
+        if (isSheet) {
+          item.ocr.summary = '识别到 24 条小时级电量记录，合计 ' + (this.tsDetailData ? this.tsDetailData.dayKwh.toFixed(2) : '0') + ' kWh'
+          item.ocr.confidence = 96
+        } else if (isPdf) {
+          item.ocr.summary = '识别到月度电费账单，总电量 ' + (this.tsDetailData ? this.tsDetailData.dayKwh.toFixed(2) : '0') + ' kWh'
+          item.ocr.confidence = 88
+        } else if (isImg) {
+          item.ocr.summary = '识别到电表读数照片，建议人工复核后填'
+          item.ocr.confidence = 82
+        } else {
+          item.ocr.summary = '未识别到结构化电量数据'
+          item.ocr.confidence = 45
+        }
+        item.ocr.status = 'done'
+      }, 1500)
+    },
+
+    /** 应用 OCR 识别结果（用模拟数据回填 24 小时电量） */
+    applyOcrResult(ev) {
+      if (!this.tsDetailData) return
+      this.$confirm('将用识别结果覆盖当前 24 小时电量数据，是否继续？', '应用识别结果', {
+        confirmButtonText: '应用',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        const rows = this.tsDetailData.rows || []
+        rows.forEach(r => {
+          if (r.stopped) return
+          // 模拟：按原比例微调（±2%），模拟识别出的真实值
+          const factor = 0.98 + Math.random() * 0.04
+          const oldVal = r.kwh || 0
+          const newVal = Math.round(oldVal * factor * 100) / 100
+          r.kwh = newVal
+          this.pushTsAuditLog({
+            hourLabel: r.hourLabel,
+            oldVal: oldVal.toFixed(2),
+            newVal: newVal.toFixed(2),
+            reason: '应用 OCR 识别结果'
+          })
+        })
+        this.recalcTsDaySummary()
+        ev.ocr.applied = true
+        this.$message.success('已应用识别结果')
+      }).catch(() => {})
+    },
+
+    /** 重算当日用电合计（排放量不在此阶段展示） */
+    recalcTsDaySummary() {
+      if (!this.tsDetailData) return
+      const rows = this.tsDetailData.rows || []
+      this.tsDetailData.dayKwh = Math.round(rows.reduce((s, r) => s + (r.kwh || 0), 0) * 100) / 100
+    },
+
+    /** ===== 电量手动调整 ===== */
+    onTsHourKwhChange(row, val) {
+      const oldVal = row.kwh || 0
+      const newVal = Math.max(0, parseFloat(val) || 0)
+      if (Math.abs(newVal - oldVal) < 0.0001) return
+      row.kwh = newVal
+      this.recalcTsDaySummary()
+      this.pushTsAuditLog({
+        hourLabel: row.hourLabel,
+        oldVal: oldVal.toFixed(2),
+        newVal: newVal.toFixed(2),
+        reason: '手动调整'
+      })
+      // 偏差提示
+      const orig = this.tsDetailData.origDayKwh
+      if (orig > 0) {
+        const diffPct = Math.abs((this.tsDetailData.dayKwh - orig) / orig) * 100
+        if (diffPct > 5 && !this._tsDevWarned) {
+          this._tsDevWarned = true
+          this.$message.warning(`当日用电合计较原始值偏差 ${diffPct.toFixed(1)}%，请确认数据来源`)
+        }
+      }
+    },
+
+    /** ===== 修改记录 ===== */
+    tsAuditLogOf(procName) {
+      return this.tsAuditMap[procName] || []
+    },
+    pushTsAuditLog(entry) {
+      const proc = this.tsDetailProc
+      if (!proc) return
+      if (!this.tsAuditMap[proc]) this.$set(this.tsAuditMap, proc, [])
+      this.tsAuditMap[proc].unshift({
+        time: new Date().toLocaleString('zh-CN', { hour12: false }),
+        user: 'admin001',
+        hourLabel: entry.hourLabel,
+        oldVal: entry.oldVal,
+        newVal: entry.newVal,
+        reason: entry.reason || ''
+      })
+    },
+    /** 查看佐证材料 */
+    viewTsEvidence(ev) {
+      this.$alert(
+        `<div style="line-height:2;font-size:13px">
+          <div><b>文件名：</b>${ev.name}</div>
+          <div><b>说明：</b>${ev.desc}</div>
+          <div><b>状态：</b>${ev.status === 'verified' ? '已验证' : '待审核'}</div>
+        </div>`,
+        '佐证材料详情',
+        { dangerouslyUseHTMLString: true, confirmButtonText: '知道了' }
+      )
+    },
+    /** 删除佐证材料 */
+    removeTsEvidence(idx) {
+      const proc = this.tsDetailProc
+      const list = this.tsEvidenceMap[proc]
+      if (!list || !list[idx]) return
+      this.$confirm(`确认删除「${list[idx].name}」？`, '删除佐证材料', {
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        list.splice(idx, 1)
+        this.$message.success('已删除')
+      }).catch(() => {})
+    },
+    /** 打开市电分时详情弹窗（按当前阶段决定内容） */
+    openTsDetail(inp, procName) {
+      this.tsDetailProc = procName
+      this.tsDetailItem = inp
+      this.tsDetailDate = this.tsPeriod().start
+      this.tsDetailVisible = true
+      this.refreshTsDayDetail()
+    },
+    /** 刷新当日 24 小时明细 */
+    refreshTsDayDetail() {
+      if (!this.tsDetailItem || !this.tsDetailDate) return
+      // 兼容：value 可能是字符串、数字或 undefined
+      const raw = this.tsDetailItem.value
+      const num = Number(raw)
+      const totalKwh = Number.isFinite(num) && num > 0 ? num : 0
+      this.tsDetailData = buildDayDetail({
+        procName: this.tsDetailProc,
+        date: this.tsDetailDate,
+        totalKwh,
+        days: this.tsDaysCount(),
+        region: this.tsRegion()
+      })
+      // 记录原始当日用电，用于手动调整后的偏差提示
+      if (this.tsDetailData) {
+        this.tsDetailData.origDayKwh = this.tsDetailData.dayKwh
+      }
+      this._tsDevWarned = false
+    },
+    /** 日期变更 */
+    onTsDateChange() {
+      this.refreshTsDayDetail()
+    },
+    /** 前一天 */
+    tsPrevDay() {
+      const d = new Date(this.tsDetailDate + 'T00:00:00')
+      d.setDate(d.getDate() - 1)
+      const s = this.fmtDate(d)
+      if (s < this.tsPeriod().start) {
+        this.$message.info('已到核算期起始日')
+        return
+      }
+      this.tsDetailDate = s
+      this.refreshTsDayDetail()
+    },
+    /** 后一天 */
+    tsNextDay() {
+      const d = new Date(this.tsDetailDate + 'T00:00:00')
+      d.setDate(d.getDate() + 1)
+      const s = this.fmtDate(d)
+      if (s > this.tsPeriod().end) {
+        this.$message.info('已到核算期结束日')
+        return
+      }
+      this.tsDetailDate = s
+      this.refreshTsDayDetail()
+    },
+    /** 日期格式化 */
+    fmtDate(d) {
+      const y = d.getFullYear()
+      const m = String(d.getMonth() + 1).padStart(2, '0')
+      const dd = String(d.getDate()).padStart(2, '0')
+      return `${y}-${m}-${dd}`
+    },
+    /** 星期几 */
+    weekdayOf(date) {
+      if (!date) return ''
+      const d = new Date(date + 'T00:00:00')
+      if (isNaN(d.getTime())) return ''
+      return ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][d.getDay()]
+    },
     // 数据清单行点击：把该行数据读入对话，引导确认/修改
     onActivityRowClick(item, proc, dir) {
       this.activeActivityRow = { item, proc, dir }
@@ -1832,9 +2568,56 @@ export default {
     availableFactorLibs() {
       const cfg = this.selectedStandardConfig || {}
       const txt = (cfg.code || '') + ' ' + (cfg.name || '')
-      const all = this.factorDatabases || []
+      const all = (this.factorDatabases || []).filter(l => !l.hidden)
       const list = all.filter(l => !l.standards || l.standards.some(t => txt.indexOf(t) > -1))
       return list.length ? list : all
+    },
+    // 切换电力因子精度（选分时分区时提示电量数据要求）
+    onElecFactorModeChange(val) {
+      if (val === 'timespace') {
+        // 前置校验：分时分区库须覆盖企业所在省市
+        if (!this.hasTimespaceFactorForRegion) {
+          this.$message.warning(`分时分区电碳因子库暂无「${this.tsRegion()}」的因子数据，无法启用分时分区模式`)
+          this.elecFactorMode = 'regular'
+          return
+        }
+        this.$confirm(
+          '<div style="line-height:1.8">' +
+          '<b>启用分时分区电碳因子前，请确认电量数据充足：</b><br><br>' +
+          '<b>1. 时间粒度</b>：电量数据须为<b>小时级</b>（每一条用电记录对应具体日期与小时），' +
+          '与分时因子的小时分辨率一一对应；仅有月度/年度汇总电量无法用于分时匹配。<br>' +
+          '<b>2. 工序粒度</b>：电力须按<b>具体生产工序（单元过程）</b>分别记录，不可按全厂汇总；' +
+          '不同工序的用电时刻不同，须分别匹配对应时段因子。<br>' +
+          '<b>3. 电力分项与完整性</b>：每个工序的市电、绿电、光伏等不同电力类型应分别记录，' +
+          '不可合并为单一总电量；核算期内各工序各时段的电量数据应连续无缺失。<br><br>' +
+          '<span style="color:#E6A23C">若电量数据不足，建议保持「常规」模式，采用所选因子库的区域电网平均因子。</span>' +
+          '</div>',
+          '启用分时分区电碳因子的数据要求',
+          {
+            dangerouslyUseHTMLString: true,
+            confirmButtonText: '数据充足，启用',
+            cancelButtonText: '暂不启用',
+            type: 'warning',
+            distinguishCancelAndClose: true
+          }
+        ).then(() => {
+          const lib = (this.factorDatabases || []).find(l => l.id === 'elec-ts')
+          if (lib) lib.selected = true
+          if (this.selectedFactorLibs.indexOf('elec-ts') === -1) this.selectedFactorLibs.push('elec-ts')
+          this.$message.success('已启用分时分区电碳因子，请确保阶段四电量数据按时刻与区域采集')
+        }).catch(() => {
+          this.elecFactorMode = 'regular'
+          const lib = (this.factorDatabases || []).find(l => l.id === 'elec-ts')
+          if (lib) lib.selected = false
+          const i = this.selectedFactorLibs.indexOf('elec-ts')
+          if (i > -1) this.selectedFactorLibs.splice(i, 1)
+        })
+      } else {
+        const lib = (this.factorDatabases || []).find(l => l.id === 'elec-ts')
+        if (lib) lib.selected = false
+        const i = this.selectedFactorLibs.indexOf('elec-ts')
+        if (i > -1) this.selectedFactorLibs.splice(i, 1)
+      }
     },
     requiredFactorLibs() {
       return this.availableFactorLibs().filter(l => l.required).map(l => l.key)

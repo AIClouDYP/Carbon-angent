@@ -631,7 +631,7 @@ export default {
       }
       this.isModelBuilt = snapshot.isModelBuilt || false
       this.validationStep = snapshot.validationStep || 0
-      this.validationActiveTab = snapshot.validationActiveTab === 'activity' ? 'activity' : 'quality'
+      this.validationActiveTab = snapshot.validationActiveTab === 'activity' ? 'activity' : 'validation'
       this.validationItems = snapshot.validationItems ? JSON.parse(JSON.stringify(snapshot.validationItems)) : this.validationItems
       this.analysisActiveTab = snapshot.analysisActiveTab || 'routine'
       this.analysisSubStep = snapshot.analysisSubStep || 0
@@ -850,7 +850,7 @@ export default {
       this.selectedUnit = 'scope123'
       this.boundarySubStep = 0
       this.validationStep = 0
-      this.validationActiveTab = 'quality'
+      this.validationActiveTab = 'validation'
       this.isModelBuilt = false
       this.analysisActiveTab = 'routine'
       this.analysisSubStep = 0
@@ -955,7 +955,7 @@ export default {
         this.isTyping = false
         this.currentStepIndex = 5
         this.validationStep = 1
-        this.validationActiveTab = 'quality'
+        this.validationActiveTab = 'validation'
         this.messages.push({
           id: 'MSG-' + Date.now(),
           role: 'assistant',
@@ -1418,12 +1418,18 @@ export default {
               nextStepIndex: 2
             }
           } else {
-            // 无问题：标记已校验 → 进入阶段4（活动数据），由用户逐阶段确认
+            // 无问题：标记已校验 → 后台自动完成阶段4、5 → 直接进入阶段6（数据校验）
             this.modelValidated = true
+            this.validationItems.forEach(item => {
+              item.status = item.type === 'completeness' ? 'missing' : 'pending'
+              item.statusLabel = item.type === 'completeness' ? '待补充' : '待确认'
+            })
             return {
-              content: `**【阶段三：排放源清单 - 完成】**\n排放源清单结构校验通过！\n\n**已从能源台账 / 采购系统 / 计量点并发拉取活动数据**，请在右侧逐项核对排放源活动数据与数据来源。\n\n确认无误后进入排放因子匹配。`,
-              suggestions: ['确认活动数据，进入因子匹配'],
-              nextStepIndex: 3
+              content: `**【阶段三：排放源清单 - 完成】**\n排放源清单结构校验通过！\n\n**【阶段四：活动数据 - 自动完成】**\n已从能源台账 / 采购系统 / 计量点并发拉取各排放源活动数据，数值、原始值与数据来源均已自动关联。\n\n**【阶段五：排放因子 - 自动完成】**\n系统已按 P-1 企业实测 → P0 企业记忆 → 规则表 → 兜底缺省 四级链路自动匹配各排放源因子，匹配置信度已记录。\n\n**【阶段六：数据校验】**\n已完成完整性、一致性、DQR 多重校验，以下为校验结果：`,
+              followUpContent: this.buildValidationSummary(),
+              followUpSuggestions: ['全部使用建议值确认', '暂不处理，直接计算'],
+              nextStepIndex: 5,
+              validationStep: 1
             }
           }
         } else {

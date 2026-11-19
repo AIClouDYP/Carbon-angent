@@ -451,9 +451,9 @@ import { loadParkStandardsForAgent, ensureSeed } from '@/utils/policyStandardSer
 
       calcTreeExpanded: {},
 
-      // 阶段6 子页签：quality（质量评估）| list（数据清单）
+      // 阶段6 子页签：validation（待补充/待确认）| quality（质量评估）| list（数据清单）
 
-      parkQaTab: 'quality',
+      parkQaTab: 'validation',
 
       baseSyncDone: false,
 
@@ -1957,9 +1957,7 @@ import { loadParkStandardsForAgent, ensureSeed } from '@/utils/policyStandardSer
     stageConfirmConfig() {
       const configs = {
         1: { label: '确认边界配置，进入核算模型', icon: 'el-icon-check', hint: '确认5项边界配置无误后进入核算模型阶段', action: () => this.sendSuggestion('确认边界配置') },
-        2: { label: '确认模型，启动数据收集', icon: 'el-icon-check', hint: '确认工艺拓扑模型无误后启动多源数据收集', action: () => this.sendSuggestion('确认模型，启动数据收集') },
-        3: { label: '确认数据，进入因子匹配', icon: 'el-icon-right', hint: '确认活动数据无误后进入排放因子匹配', action: () => this.sendSuggestion('确认数据，进入因子匹配') },
-        4: { label: '确认因子，进入数据校验', icon: 'el-icon-right', hint: '确认因子匹配结果后进入数据校验', action: () => this.sendSuggestion('确认因子，进入数据校验') },
+        2: { label: '确认模型，启动数据收集', icon: 'el-icon-check', hint: '确认工艺拓扑模型无误后，系统将自动完成活动数据采集与因子匹配', action: () => this.sendSuggestion('确认模型，启动数据收集') },
         5: this.validationActiveTab === 'activity'
           ? { label: '确认调整，重新校核', icon: 'el-icon-refresh-right', hint: '数据调整完成后重新进入「数据采集→因子匹配→数据校验」循环', action: () => this.confirmActivityData() }
           : null,
@@ -2036,11 +2034,7 @@ import { loadParkStandardsForAgent, ensureSeed } from '@/utils/policyStandardSer
       return (cfg && cfg.boundaryTemplate) || {}
     },
     standardsWithSelection() {
-      // 按任务类型初筛：风机任务剔除汽车行业专属标准 QC/T 1248-2025（通用核算标准保留）
       let list = this.standards
-      if (this.isWindTask()) {
-        list = list.filter(std => std.code !== 'QC/T 1248-2025')
-      }
       return list.map(std => ({
         ...std,
         active: std.code === this.selectedStandard
@@ -2080,8 +2074,8 @@ import { loadParkStandardsForAgent, ensureSeed } from '@/utils/policyStandardSer
       ]
     },
     carbonFootprintUnitLabel() {
-      if (this.isWindTask()) return '台（度电碳足迹 gCO₂e/kWh）'
-      return this.boundaryConfig.unitType === 'declaration' ? '辆' : '150,000 km'
+      // 园区碳核算以园区整体为核算对象，无产品或功能单位概念
+      return 'tCO₂e（园区年度排放量）'
     },
     boundaryDateRange: {
       get() {
@@ -2158,23 +2152,14 @@ import { loadParkStandardsForAgent, ensureSeed } from '@/utils/policyStandardSer
       ]
     },
     reportSensitivityData() {
-      // 风机任务：敏感性因子取自风机五环节模型真实排放基数（净额口径）
-      if (this.isWindTask()) {
-        return [
-          { name: '年发电小时数', coeff: -0.91, baseEmission: 3035649 },   // 度电分母：小时数+10% → 度电约-9%
-          { name: '稀土采选冶因子', coeff: 0.46, baseEmission: 111600 },   // 6,000kg × 18.6
-          { name: '玻纤/环氧树脂因子', coeff: 0.21, baseEmission: 437850 }, // 85,000×2.71 + 50,000×4.15
-          { name: '回收钢抵扣系数', coeff: -0.24, baseEmission: 375000 },  // 300,000kg × (-1.25)
-          { name: '电网排放因子（制造+施工）', coeff: 0.33, baseEmission: 101094 } // (112,000+62,000)×0.581
-        ]
-      }
+      // 园区碳核算：敏感性因子取自四大排放分类的真实排放基数
       const scale = this.totalCarbonEmission > 0 ? this.totalCarbonEmission / 16510.5 : 1
       return [
-        { name: '原铝冶炼电力', coeff: 0.42, baseEmission: 841.7 * scale },
-        { name: '拆解能耗', coeff: 0.32, baseEmission: 671.9 * scale },
-        { name: '再生钢含量比例', coeff: -0.22, baseEmission: 967.2 * scale },
-        { name: '再生铝含量比例', coeff: -0.15, baseEmission: 841.7 * scale },
-        { name: '汽油碳排放因子', coeff: 0.75, baseEmission: 12800.0 * scale }
+        { name: '净购入电力排放因子', coeff: 0.62, baseEmission: 6800.0 * scale },
+        { name: '化石燃料燃烧低位热值', coeff: 0.35, baseEmission: 4200.0 * scale },
+        { name: '能源加工转换效率', coeff: -0.28, baseEmission: 3100.0 * scale },
+        { name: '工业过程工艺排放因子', coeff: 0.22, baseEmission: 2400.0 * scale },
+        { name: '绿电消纳比例', coeff: -0.41, baseEmission: 6800.0 * scale }
       ]
     },
     sensitivityImpactData() {
@@ -2195,9 +2180,9 @@ import { loadParkStandardsForAgent, ensureSeed } from '@/utils/policyStandardSer
     enabledLibCount() {
       return (this.factorDatabases || []).filter(l => l.selected).length
     },
-    // 溯源数据按任务切换：风机任务→风机数据项，其余→汽车数据项
+    // 溯源数据：园区排放源数据项
     activeTraceabilityData() {
-      return this.isWindTask() ? this.windTraceabilityData : this.defaultTraceabilityData
+      return this.defaultTraceabilityData
     },
     // ===== 阶段八·分析中心演示数据（按任务画像切换：本期值直接取自 emissionTreeData，保证与阶段七/报告自洽） =====
     analysisProfile() {
@@ -2220,71 +2205,27 @@ import { loadParkStandardsForAgent, ensureSeed } from '@/utils/policyStandardSer
           maxVal: maxVal
         }
       })
-      if (this.isWindTask()) {
-        return {
-          kpis: [
-            { label: '总排放总量', value: this.formatEmission(total), unit: 'kgCO₂e', cls: '', sub: '' },
-            { label: '度电碳足迹', value: `≈ ${this.degreeEmission}`, unit: 'gCO₂e/kWh', cls: '', sub: '' },
-            { label: '同比变化', value: '↓ 1.9%', sub: '减排5.8万kg', cls: 'down-color' },
-            { label: '回收钢抵扣率', value: '88%', sub: '较上期+2%', cls: 'up-color' }
-          ],
-          yoyTitle: '生命周期阶段同比基准期对比',
-          yoyRows: mkYoy([-4.8, -1.2, 2.1, -3.2, 0.6]),
-          momTitle: '单元过程环比上期波动排行榜',
-          momRows: [
-            { proc: '叶片制造固化挥发物收集效率提升', change: '↓ 5.4% 🟢', cls: 'down-color' },
-            { proc: '吊装施工机械柴油优化', change: '↓ 1.5% 🟢', cls: 'down-color' },
-            { proc: '稀土采选冶因子版本更新', change: '↑ 1.2% 🔴', cls: 'up-color' }
-          ],
-          conclusionText: '原材料生产环节为全生命周期最大排放来源（占正排放49.3%），叶片玻纤/环氧树脂、塔筒钢材与直驱发电机稀土永磁材料为主要贡献；风场建设安装环节次之（占40.1%），基础混凝土与吊装施工柴油影响显著；零部件加工（3.0%）、大件运输（2.7%）与运营维护（2.4%）占比较低，报废回收阶段钢/铜回收抵扣显著降低净排放。',
-          routineSugs: [
-            { title: '原材料生产环节为全生命周期首要热点，应作为减排核心抓手', text: '原材料生产环节占正排放的49.3%，叶片玻纤/环氧树脂、塔筒钢材与发电机钕铁硼永磁材料是主要来源。建议：一是与叶片供应商协同推进大丝束玻纤与生物基环氧树脂应用；二是评估中速永磁等技术路线以降低稀土用量；三是将碳排放要求纳入材料采购合同条款，推动供应链整体减碳。该环节减排投入产出比最高，建议作为近期减排规划的优先领域。' },
-            { title: '风场建设安装阶段的混凝土与施工能耗优化空间显著', text: '风场建设安装环节占正排放的40.1%，风机基础混凝土、集电线路混凝土与吊装施工机械柴油是主要排放源。建议优化基础结构设计以降低混凝土用量，探索低碳水泥与粉煤灰掺合料替代；施工环节可通过机械化方案优化与新能源施工机械试点降低柴油消耗，并优先选择运输半径内的部件供应基地以缩短大件运输距离。' },
-            { title: '运营维护环节备件与润滑油管理影响长期碳足迹', text: '20年运营维护期内齿轮箱润滑油更换与备件更换是主要排放来源（占正排放2.4%，占比最低但随寿命累积）。建议建立备件寿命预测与预防性维护体系，延长关键部件更换周期；优先选用长寿命润滑油并规范废油回收处置，减少运维期排放的同时降低度电碳足迹。' },
-            { title: '报废回收阶段提升叶片回收率，保障回收抵扣数据质量', text: '报废回收阶段钢材/铜回收抵扣显著降低全生命周期碳足迹，但废玻纤叶片处置仍是行业难点。建议跟踪玻纤回收（水泥窑协同/热解回收）技术进展，与专业回收服务商建立合作；同时完善回收钢铜的计量与台账管理，确保回收抵扣数据可审计，支撑度电碳足迹持续下降。' }
-          ],
-          uncSources: [
-            { name: '稀土采选冶因子波动', badge: '高影响', cls: 'unc-high', pct: '贡献 28.4%', detail: '钕铁硼永磁材料6,000kg，稀土采选冶因子18.6 kgCO₂e/kg受矿源品位与分离工艺影响±15%，影响±16,700 kgCO₂e，是当前首要不确定度来源' },
-            { name: '电网排放因子（企业不可控）', badge: '仅参考', cls: 'unc-low', pct: '贡献 27.1%', detail: '零部件制造与施工用电合计422,000kWh，电网排放因子随全国电网结构演进年际波动±5%，影响±5,100 kgCO₂e。该因素属外部参数，企业无法直接控制，仅供核算参考' },
-            { name: '废玻纤处置因子数据质量', badge: '中影响', cls: 'unc-med', pct: '贡献 16.2%', detail: '废玻纤叶片135,000kg处置因子引用Ecoinvent国外数据库，地理代表性偏差±20%，影响±9,500 kgCO₂e' },
-            { name: '年发电小时数取值偏差', badge: '中影响', cls: 'unc-med', pct: '贡献 15.6%', detail: '年发电小时数取4,200h为可研值，SCADA实测存在±3%年际波动，直接影响度电碳足迹分母（度电值波动±0.17 gCO₂e/kWh）' }
-          ],
-          uncSugs: [
-            { title: '核实稀土永磁材料因子取值，降低原材料端不确定度', text: '钕铁硼稀土采选冶因子为当前最大不确定度来源。建议向发电机供应商索取稀土原料溯源清单与实测因子数据，必要时委托第三方开展稀土供应链LCA评估，通过提高实测数据比例有效收窄原材料阶段核算波动范围。' },
-            { title: '跟踪国内风电叶片回收处置因子发布动态', text: '废玻纤叶片处置因子当前依赖国际数据库，地理代表性存在偏差。建议关注国内风电叶片回收处置因子与行业LCA数据库发布进展，及时替换为本土因子，提升报废回收阶段数据代表性。' },
-            { title: '以SCADA实测数据滚动修正发电量参数', text: '年发电小时数是度电碳足迹的关键分母。建议建立投运后SCADA实测数据的年度滚动修正机制，以实测均值替代可研假设值，持续降低使用阶段参数不确定性。' },
-            { title: '当前不确定度水平满足标准要求，建议持续优化数据质量', text: '当前核算的不确定度在标准可接受范围内。如需对外披露或申请碳标签认证，建议进一步提升活动数据和排放因子的实测比例，逐步降低对数据库默认值的依赖，将数据质量提升纳入企业碳管理工作计划。' }
-          ],
-          sensSugs: [
-            { pri: 'P1', cls: 'sug-priority-1', numCls: 'pri-1', title: '发电小时数与发电量提升 (敏感度 -0.91) — 度电分母端首要杠杆', text: '度电碳足迹以全生命周期发电量为分母，对年发电小时数最为敏感（小时数+10%对应度电约-9%）。建议在风场规划阶段强化测风与微观选址优化，选用高容量系数机型；运维期通过智能提效改造（偏航校正/叶片气动附件）提升可利用率，以更高的实际发电量摊薄单位电量碳足迹。', kpis: ['方向：发电量提升', '策略：选址优化 + 智能提效', '优先级：最高'] },
-            { pri: 'P2', cls: 'sug-priority-2', numCls: 'pri-2', title: '稀土永磁材料碳因子优化 (敏感度 +0.46) — 材料端首要减排方向', text: '稀土采选冶因子对全生命周期排放影响最大，主要受矿源与分离工艺电力来源影响。建议在发电机采购中优先选择稀土供应链碳数据透明的供应商，评估中速永磁等低重稀土技术路线，必要时通过多供应商竞争获取更优低碳方案。该方向通过采购策略调整即可推进，实施门槛较低。', kpis: ['方向：稀土供应链低碳化', '策略：供应商选择 + 技术路线评估', '优先级：高'] },
-            { pri: 'P3', cls: 'sug-priority-3', numCls: 'pri-3', title: '回收钢抵扣率提升 (敏感度 -0.24) — 末端减排路径', text: '报废回收阶段钢材/铜回收抵扣对全生命周期结果有显著负向影响。建议完善退役机组回收拆解流程与计量台账，提升材料回收率与回收数据质量；跟踪叶片玻纤热解回收等新技术产业化进展，逐步扩大可抵扣回收材料范围，从末端持续降低碳足迹。', kpis: ['方向：回收率与数据质量', '策略：拆解优化 + 台账完善', '优先级：较高'] },
-            { pri: 'P4', cls: 'sug-priority-4', numCls: 'pri-4', title: '制造与施工用电清洁化 — 绿电替代方向', text: '零部件制造与施工用电的电网排放因子为重要可控相关参数。建议叶片/机舱/塔筒生产基地逐步提高绿电使用比例（绿电直购或分布式光伏），施工环节优先接入当地绿电或采用储能供电，降低制造与建设环节的碳排放强度。', kpis: ['方向：绿电替代', '策略：绿电采购 + 施工供电优化', '优先级：持续推进'] }
-          ],
-          sensSummary: 'P1 从发电量分母端摊薄度电碳足迹（敏感度最高）；P2 聚焦稀土供应链碳数据透明化与低稀土技术路线；P3 提升回收抵扣率与数据质量；P4 推进制造与施工绿电替代。四项方向均聚焦企业可控环节，建议结合自身资源禀赋分阶段实施。'
-        }
-      }
       return {
         kpis: [
-          { label: '总排放总量', value: this.formatEmission(total), unit: 'kgCO₂e', cls: '', sub: '' },
-          { label: '同比变化', value: '↓ 2.1%', sub: '减排333kg', cls: 'down-color' },
-          { label: '环比变化', value: '↓ 0.8%', sub: '改善成效', cls: 'down-color' },
-          { label: '再生材料比重', value: '30%', sub: '较上月+1.5%', cls: 'up-color' }
+          { label: '园区碳排放总量', value: this.formatEmission(total), unit: 'kgCO₂e', cls: '', sub: '' },
+          { label: '单位能耗碳排放', value: this.parkCarbonPerTce.toFixed(3), unit: 'tCO₂/tce', cls: this.parkCarbonPerTce <= 0.20 ? 'down-color' : 'up-color', sub: this.parkCarbonPerTce <= 0.20 ? '达标' : '未达标' },
+          { label: '同比变化', value: '↓ 2.1%', sub: '减排333t', cls: 'down-color' },
+          { label: '数据质量评分', value: '3.9', unit: '/ 5', cls: 'down-color', sub: '良好' }
         ],
-        yoyTitle: '生命周期阶段同比基准期对比',
+        yoyTitle: '四大排放分类同比基准期对比',
         yoyRows: mkYoy([-23.2, -0.8, -2.1, 3.1]),
-        momTitle: '单元过程环比上期波动排行榜',
+        momTitle: '排放源环比上期波动排行榜',
         momRows: [
-          { proc: '热塑性塑料注塑成型 (选用低碳催化剂)', change: '↓ 5.4% 🟢', cls: 'down-color' },
-          { proc: '涂装工序总装检测 (精益节电改进)', change: '↓ 1.5% 🟢', cls: 'down-color' },
-          { proc: '钢材轧制与深加工 (焦炭配比微幅波动)', change: '↑ 1.2% 🔴', cls: 'up-color' }
+          { proc: '净购入电力（绿电消纳比例提升）', change: '↓ 5.4% 🟢', cls: 'down-color' },
+          { proc: '能源加工转换（机组效率优化）', change: '↓ 1.5% 🟢', cls: 'down-color' },
+          { proc: '化石燃料燃烧（天然气用量波动）', change: '↑ 1.2% 🔴', cls: 'up-color' }
         ],
-        conclusionText: '原材料获取阶段为企业可控排放最大来源（占企业可控排放60.3%），通过再生钢铝含量提升（钢45%/铝30%）较上期降低23.2%。企业应聚焦原材料采购、生产制造、运输分销等可控环节推进减排。',
+        conclusionText: '净购入电力热力为园区碳排放主要来源，通过提升绿电消纳比例与能源加工转换效率较上期降低。园区应聚焦净购入电力清洁化、能源加工转换优化、化石燃料替代等可控环节推进减排。',
         routineSugs: [
-          { title: '原材料获取阶段为企业可控排放首要热点，应作为减排核心抓手', text: '原材料获取阶段占企业可控排放的60.3%，是生产企业能够直接发力减排的最大环节。建议企业从三个方向推进：一是持续提升再生材料使用比例，与上游供应商协同扩大再生钢、再生铝的采购渠道；二是探索低碳替代材料，在保证产品性能前提下逐步引入碳足迹更低的原材料；三是将碳排放要求纳入采购合同条款，推动供应链整体减碳。该阶段减排投入产出比较高，建议作为近期减排规划的优先领域。' },
-          { title: '生产制造阶段能耗优化仍有减排空间', text: '生产制造阶段的碳排放主要来源于能源消耗，其中涂装等工序占比较高。建议企业持续推进精益生产和节能改造，优化关键工序的能源使用效率。同时可逐步提高清洁能源在厂区用能中的占比，降低生产环节的碳排放强度。建议定期开展能源审计，识别高耗能工序并制定改进计划。' },
-          { title: '运输分销阶段物流优化有助于降低碳排放', text: '运输分销阶段虽占比较小，但企业可通过物流网络优化实现减排。建议企业优化运输路线规划，提高车辆装载率，减少空驶里程。同时可评估新能源物流车的适用场景，在短途配送环节逐步替换传统燃油运输车辆。与物流服务商合作时，可将碳排放绩效纳入考核指标，推动运输环节低碳化。' },
-          { title: '建立供应商碳排放管理体系，降低上游碳因子波动风险', text: '部分原材料碳排放因子存在波动，可能影响碳足迹核算结果的稳定性。建议企业建立供应商碳排放数据收集机制，定期更新关键材料的排放因子数据。对于碳因子较高的材料，可探索低碳替代方案或调整采购策略，逐步构建低碳供应链体系。' }
+          { title: '净购入电力热力为园区排放首要热点，应作为减排核心抓手', text: '净购入电力热力占园区排放的主要份额，是园区能够直接发力减排的最大环节。建议从三个方向推进：一是提升绿电直购与绿证核销规模，扩大非化石能源消纳比例；二是推进分布式光伏建设与储能配套，提高自发自用比例；三是优化用电负荷时序，降低高峰时段外购电比例。该环节减排投入产出比较高，建议作为近期减排规划的优先领域。' },
+          { title: '能源加工转换环节效率提升仍有减排空间', text: '能源加工转换环节的碳排放主要来源于转换损失。建议园区推进集中供热与热电联产优化，提升锅炉与机组运行效率；对高耗能转换设备开展能效诊断与技术改造；逐步以天然气、电能替代燃煤转换设施，降低加工转换环节的碳排放强度。' },
+          { title: '化石燃料燃烧替代与工艺优化', text: '化石燃料燃烧是园区直接排放的重要来源。建议园区推动工业窑炉、锅炉的清洁能源替代，优先实施天然气替代燃煤；对无法替代的燃烧设施，通过燃烧控制优化、余热回收等方式降低单位能耗；同时建立分品种燃料消耗台账，提升数据可追溯性。' },
+          { title: '建立园区碳排放数据管理体系，降低因子波动风险', text: '部分排放因子存在区域与年份差异，可能影响核算结果的稳定性。建议园区建立统一的碳排放数据收集机制，定期更新电网排放因子与燃料低位热值数据；对重点排放源安装在线监测，提升实测数据比例，逐步构建可审计的园区碳数据体系。' }
         ],
         uncSources: [
           { name: '再生铝比例实测偏差', badge: '高影响', cls: 'unc-high', pct: '贡献 24.5%', detail: '再生铝30%为供应商声明值而非实测，实际比例波动范围25%~38%，影响铝材EF加权结果±330 kgCO₂e，是企业可控范围内首要不确定度来源' },
@@ -2309,26 +2250,13 @@ import { loadParkStandardsForAgent, ensureSeed } from '@/utils/policyStandardSer
     },
     // ===== 阶段九·报告叙述性内容（按任务画像切换） =====
     reportProfile() {
-      if (this.isWindTask()) {
-        return {
-          coverTitle: '亦庄新能源汽车产业园零碳园区碳排放核算报告',
-          product: '亦庄新能源汽车产业园',
-          model: 'EN-171/6.5',
-          lifeDesc: '核算产品物理单位边界为台，机组设计寿命20年。功能单位定义为度电碳足迹（gCO₂e/kWh），基于额定功率6.5MW与年发电小时数4,200h。',
-          dqrConclusion: '本次碳足迹核算结果整体不确定度为 ±11.6%（95%置信度），变异系数 6.0%，处于较低水平。蒙特卡洛模拟（N=10,000）表明碳足迹总量在 ' + this.confidenceIntervalText + ' kgCO₂e 区间内波动，结果稳定可靠，满足 国家级零碳园区建设指标体系 对数据质量的要求。主要不确定度来源为稀土采选冶因子的行业研究数据偏差，建议向供应商核实实际取值以进一步收窄不确定度区间。',
-          ch7Desc: '在企业可控排放范围内，年发电小时数敏感度 -0.91 为度电碳足迹分母端首要杠杆，稀土采选冶因子 +0.46 为材料端减排热点，回收钢抵扣 -0.24 为末端减排路径。优化发电量、提升稀土供应链碳数据透明度与完善回收管理为最有效的可控减排路径。',
-          degreeText: `折算度电碳足迹 ≈ ${this.degreeEmission} gCO₂e/kWh`,
-          degreeSubText: '全生命周期发电量 5.46亿 kWh（6.5MW × 4200h × 20年）',
-          complianceText: '本报告严格遵循 ' + this.selectedStandard + ' 规范编制，数据来源可追溯、计算逻辑可审计、结果可复现，满足度电碳足迹（gCO₂e/kWh）量化与披露要求。'
-        }
-      }
       return {
-        coverTitle: '燃油汽车零碳园区碳排放核算报告',
-        product: '燃油汽车 ICE-A160',
-        model: 'ICE-A160-1.6L-2024',
-        lifeDesc: '核算产品物理单位边界为辆，寿命界定为15年。功能单位定义为' + this.boundaryConfig.unitDetail + '。',
-        dqrConclusion: '本次碳足迹核算结果整体不确定度为 ±11.6%（95%置信度），变异系数 6.0%，处于较低水平。蒙特卡洛模拟（N=10,000）表明碳足迹总量在 ' + this.confidenceIntervalText + ' kgCO₂e 区间内波动，结果稳定可靠，满足 零碳园区碳排放核算方法（试行） 对数据质量的要求。主要不确定度来源为原材料再生比例的供应商声明值偏差，建议通过提升实测数据比例进一步收窄不确定度区间。',
-        ch7Desc: '在企业可控排放范围内，原铝冶炼电力因子敏感度 +0.42 为首要减排热点，再生钢含量比例 -0.22 为减排杠杆。提升再生材料比例与优化供应链低碳采购为企业最有效的可控减排路径。',
+        coverTitle: '北京亦庄新城零碳智能产业园 碳排放核算报告',
+        product: '北京亦庄新城零碳智能产业园',
+        model: (this.parkBasicInfo && this.parkBasicInfo.name) || '园区整体',
+        lifeDesc: '核算主体为园区整体，核算周期为' + ((this.boundaryConfig && this.boundaryConfig.timeBoundary) || '2024-01-01 ~ 2024-12-31') + '，核算口径为 E_园区 = E_能源活动 + E_工业过程。',
+        dqrConclusion: '本次核算结果整体不确定度为 ±11.6%（95%置信度），变异系数 6.0%，处于较低水平。蒙特卡洛模拟（N=10,000）表明园区碳排放总量在 ' + this.confidenceIntervalText + ' kgCO₂e 区间内波动，结果稳定可靠，满足「零碳园区碳排放核算方法（试行）」对数据质量的要求。主要不确定度来源为净购入电力排放因子的区域代表性偏差，建议提升实测数据比例进一步收窄不确定度区间。',
+        ch7Desc: '在企业可控排放范围内，净购入电力因子为首要减排热点，能源加工转换效率提升为减排杠杆。提升绿电消纳比例与优化园区能源结构为最有效的可控减排路径。',
         complianceText: '本报告严格遵循 ' + this.selectedStandard + ' 规范编制，数据来源可追溯、计算逻辑可审计、结果可复现。'
       }
     },
@@ -2417,10 +2345,7 @@ import { loadParkStandardsForAgent, ensureSeed } from '@/utils/policyStandardSer
     totalCarbonEmission() {
       return this.emissionTreeData.reduce((sum, stage) => sum + stage.emission, 0)
     },
-    // 风机任务：度电碳足迹折算值（全生命周期发电量 = 6.5MW × 4200h × 20年 = 5.46亿 kWh）
-    degreeEmission() {
-      return (this.totalCarbonEmission / 546000000 * 1000).toFixed(2)
-    },
+    // 园区碳核算无度电碳足迹概念（该方法已随产品/风机画像清理移除）
     confidenceIntervalText() {
       const mu = this.totalCarbonEmission
       const sigma = mu * 0.0594
@@ -4195,11 +4120,10 @@ import { loadParkStandardsForAgent, ensureSeed } from '@/utils/policyStandardSer
         { key: 'recycle', title: '报废回收阶段', dotClass: 'sd-recycle', processes: [] }
       ]
     },
-    // 是否为风机碳足迹任务（产品名含"风电机组/风机"）
+    // 园区碳核算场景不区分产品机型画像，统一按园区口径核算
+    // （保留方法签名以兼容既有调用，恒返回 false）
     isWindTask() {
-      const t = this.taskList.find(t => t.id === this.currentTaskId)
-      const n = (t && t.productName) || ''
-      return n.indexOf('风机') > -1 || n.indexOf('风电机组') > -1
+      return false
     },
     // 通用任务的默认校验项（汽车制造示例，与 data() 初始同构）
     createDefaultValidationItems() {
@@ -4215,10 +4139,9 @@ import { loadParkStandardsForAgent, ensureSeed } from '@/utils/policyStandardSer
       const items = this.validationItems || []
       return items.length > 0 && items.every(v => v.status === 'resolved' || v.status === 'skipped')
     },
-    // 按任务类型分发模型构建：风机任务→风机五环节模型，其余→汽车默认模型
-    // （仅在事件处理时机调用；data() 初始化阶段 taskList 未就绪，须继续用 createInitialModelStages）
+    // 构建园区排放源模型（仅在事件处理时机调用）
     buildModelStages() {
-      return this.isWindTask() ? this.createWindModelStages() : this.createInitialModelStages()
+      return this.createInitialModelStages()
     },
     // 风机任务校验项（数据质量/一致性/完整性问题取自风机核算实际场景）
     createWindValidationItems() {
@@ -4242,11 +4165,11 @@ import { loadParkStandardsForAgent, ensureSeed } from '@/utils/policyStandardSer
       this.modelStages = this.createWindModelStages()
       this.validationItems = this.createWindValidationItems()
     },
-    // 通用任务画像：恢复汽车制造默认口径
+    // 园区碳核算画像：统一按「零碳园区碳排放核算方法（试行）」园区口径
     applyDefaultTaskProfile() {
-      this.selectedStandard = 'QC/T 1248-2025'
-      this.boundaryConfig.unitType = 'declaration'
-      this.boundaryConfig.unitDetail = '1辆汽车（排量1.6L，整备质量1850kg，设计寿命15年/20万公里）'
+      this.selectedStandard = '零碳园区碳排放核算方法（试行）'
+      this.boundaryConfig.unitType = 'park'
+      this.boundaryConfig.unitDetail = '园区整体（年度周期核算）'
       this.modelStages = this.createInitialModelStages()
       this.validationItems = this.createDefaultValidationItems()
     },

@@ -147,7 +147,7 @@ export default {
             { key: 'declaration-material-library', label: '佐证材料库', icon: 'el-icon-folder-opened', route: '/agent-center/apps/declaration-material-library', pageTitle: '佐证材料库' },
             { key: 'enterprise-factor-library', label: '企业因子库', icon: 'el-icon-odometer', route: '/agent-center/apps/enterprise-factor-library', pageTitle: '企业因子库' },
             { key: 'organization-resource-library', label: '组织资源库', icon: 'el-icon-office-building', route: '/agent-center/apps/organization-resource-library', pageTitle: '组织资源库' },
-            { key: 'enterprise-product-library', label: '产品与物料库', icon: 'el-icon-goods', route: '/agent-center/apps/enterprise-product-library', pageTitle: '产品与物料库' },
+            { key: 'enterprise-product-library', label: '企业产品库', icon: 'el-icon-goods', route: '/agent-center/apps/enterprise-product-library', pageTitle: '企业产品库' },
             { key: 'product-sop-library', label: '产品SOP库', icon: 'el-icon-reading', route: '/agent-center/apps/product-sop-library', pageTitle: '产品SOP库' }
           ]
         },

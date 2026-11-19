@@ -1730,56 +1730,6 @@
   font-size: 9px;
 }
 
-/* ===== 子步骤进度 ===== */
-.sub-step-badge {
-  font-size: 10px;
-  color: #e67e22;
-  margin-left: 2px;
-}
-.sub-step-progress {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-}
-.sub-step-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  border-radius: 10px;
-  font-size: 11px;
-  color: #3d5068;
-  background: #f5f7fa;
-  transition: all 0.2s;
-}
-.sub-step-dot {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #ecf5ff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 9px;
-  font-weight: 600;
-  color: #fff;
-  flex-shrink: 0;
-}
-.sub-step-active {
-  background: #fafafa;
-  color: #0067FE;
-}
-.sub-step-active .sub-step-dot {
-  background: #0067FE;
-}
-.sub-step-done {
-  background: rgba(103,194,58,0.12);
-  color: #3d8a3d;
-}
-.sub-step-done .sub-step-dot {
-  background: #3d8a3d;
-}
-
 /* ===== 边界配置总览 ===== */
 .boundary-summary {
   display: flex;
@@ -1836,10 +1786,6 @@
 .boundary-edit-row:hover {
   border-color: #c0e3ff;
 }
-.boundary-edit-row.row-disabled {
-  background: #f9fafc;
-  opacity: 0.6;
-}
 .boundary-edit-label {
   font-size: 12px;
   font-weight: 600;
@@ -1847,6 +1793,8 @@
   white-space: nowrap;
   flex-shrink: 0;
   min-width: 80px;
+  width: 80px;
+  flex: 0 0 80px;
 }
 .boundary-edit-control {
   flex: 1 !important;
@@ -3820,6 +3768,28 @@
 .boundary-factor-row .flc-wrap { flex: 1; min-width: 0; width: 100%; }
 .flc-select { width: 100% !important; display: block; }
 .flc-select .el-input { width: 100%; }
+
+/* 电力因子精度 */
+.boundary-efm-select {
+  width: 180px !important;
+  flex: 0 0 180px;
+}
+.boundary-efm-select .el-input__inner {
+  height: 28px !important;
+  line-height: 28px !important;
+  font-size: 12px !important;
+}
+.efm-hint {
+  flex: 1;
+  min-width: 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #94a3b8;
+}
+.efm-hint-warn {
+  color: #b45309;
+}
+.efm-hint-warn i { margin-right: 3px; }
 .flc-select .el-input__inner { min-height: 32px; }
 .flc-select .el-select__tags { flex-wrap: wrap; gap: 4px; }
 .flc-select .el-select__tags-text { max-width: none; }
@@ -4075,3 +4045,462 @@
   font-size: 10.5px;
   color: #cbd5e1;
 }
+
+/* ===== 分时分区：市电活动数据 ===== */
+.ts-view-btn {
+  color: #0067FE !important;
+  font-size: 12px !important;
+  padding: 0 !important;
+}
+.ts-view-btn:hover { opacity: 0.75; }
+
+/* 弹窗 */
+.ts-dlg { font-size: 12px; }
+
+.ts-dlg-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr 0.8fr 0.8fr;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+.ts-dlg-sum-item { min-width: 0; }
+.ts-dlg-sum-label { font-size: 11px; color: #94a3b8; margin-bottom: 3px; }
+.ts-dlg-sum-val { font-size: 15px; font-weight: 700; color: #303133; }
+.ts-dlg-sum-val.ts-dlg-sm { font-size: 11px; font-weight: 500; line-height: 1.5; }
+.ts-dlg-unit { font-size: 10px; font-weight: 400; color: #94a3b8; margin-left: 2px; }
+
+.ts-dlg-datebar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #eff6ff;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+.ts-dlg-datebar-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e40af;
+  margin-right: 4px;
+}
+.ts-dlg-weekday {
+  font-size: 12px;
+  color: #64748b;
+  margin-left: 4px;
+}
+/* 日期栏右侧：当日用电 */
+.ts-dlg-daybar-kwh {
+  margin-left: auto;
+  font-size: 12px;
+  color: #64748b;
+  white-space: nowrap;
+}
+.ts-dlg-daybar-kwh b {
+  font-size: 13px;
+  color: #0067FE;
+  font-weight: 600;
+  margin: 0 2px;
+}
+
+.ts-dlg-table-wrap {
+  max-height: 300px;
+  overflow: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+}
+.ts-dlg-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.ts-dlg-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #f1f5f9;
+  color: #475569;
+  font-weight: 600;
+  font-size: 11px;
+  padding: 7px 10px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+}
+.ts-dlg-table tbody td {
+  padding: 5px 10px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+}
+.ts-dlg-table tbody tr:hover { background: #f8fafc; }
+.ts-dlg-table tbody tr.ts-dlg-row-stopped { background: #fafafa; color: #94a3b8; }
+.ts-dlg-table tbody tr.ts-dlg-row-stopped td { color: #94a3b8; }
+.ts-dlg-td-hour { font-family: Consolas, Monaco, monospace; color: #64748b; }
+.ts-dlg-td-num { text-align: right; font-family: Consolas, Monaco, monospace; }
+.ts-dlg-td-factor { color: #0067FE; font-weight: 600; }
+
+
+.ts-dlg-total-row td {
+  background: #f8fafc;
+  font-weight: 700;
+  color: #303133;
+  border-top: 2px solid #cbd5e1;
+  padding: 7px 10px;
+}
+
+.ts-dlg-foot-tip {
+  margin-top: 10px;
+  padding: 8px 10px;
+  background: #fffbeb;
+  border-left: 2px solid #f59e0b;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: #b45309;
+}
+.ts-dlg-foot-tip i { margin-right: 4px; }
+
+/* 分时分区：市电查看详情气泡 */
+.ts-bubble {
+  border-color: #fbbf24 !important;
+  background: #fffbeb !important;
+}
+.ts-bubble .io-name {
+  color: #92400e;
+  font-weight: 600;
+}
+.ts-bubble .ts-view-btn {
+  color: #b45309 !important;
+}
+.ts-bubble .ts-view-btn:hover {
+  color: #78350f !important;
+}
+
+/* 表头与数据行对齐 */
+.ts-dlg-table thead th {
+  padding: 8px 12px !important;
+  line-height: 18px;
+  white-space: nowrap;
+  text-align: center !important;
+}
+.ts-dlg-table tbody td {
+  padding: 6px 12px !important;
+  line-height: 18px;
+  height: 32px;
+}
+.ts-dlg-table thead th:first-child,
+.ts-dlg-table tbody td:first-child {
+  padding-left: 12px !important;
+}
+.ts-dlg-table thead th:last-child,
+.ts-dlg-table tbody td:last-child {
+  padding-right: 12px !important;
+}
+
+/* 佐证材料 */
+.ts-dlg-evidence {
+  margin-top: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.ts-ev-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+.ts-ev-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #303133;
+}
+.ts-ev-title i { color: #0067FE; margin-right: 4px; }
+.ts-ev-count { font-weight: 400; color: #94a3b8; }
+
+.ts-ev-list { padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; }
+.ts-ev-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  background: #f8fafc;
+  border-radius: 4px;
+  font-size: 12px;
+}
+.ts-ev-icon { font-size: 16px; color: #64748b; flex-shrink: 0; }
+.ts-ev-info { flex: 1; min-width: 0; }
+.ts-ev-name {
+  font-size: 12px;
+  color: #334155;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ts-ev-meta { font-size: 11px; color: #94a3b8; margin-top: 1px; }
+.ts-ev-del { color: #dc2626 !important; }
+
+.ts-ev-empty {
+  padding: 20px 12px;
+  text-align: center;
+  font-size: 12px;
+  color: #94a3b8;
+  line-height: 1.7;
+}
+.ts-ev-empty i { font-size: 20px; display: block; margin-bottom: 6px; color: #cbd5e1; }
+
+/* 分阶段弹窗：数据来源列 / 对比色 / 常规因子 */
+.ts-dlg-td-src {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* 电量手动调整输入框 */
+.ts-dlg-kwh-input {
+  width: 100%;
+}
+.ts-dlg-kwh-input .el-input__inner {
+  height: 24px !important;
+  line-height: 24px !important;
+  font-size: 12px;
+  text-align: right;
+  padding: 0 6px;
+  border-color: transparent;
+  background: transparent;
+}
+.ts-dlg-kwh-input:hover .el-input__inner {
+  border-color: #c0c4cc;
+  background: #fff;
+}
+.ts-dlg-kwh-input .el-input__inner:focus {
+  border-color: #0067FE;
+  background: #fff;
+}
+
+/* 佐证材料项（含 OCR 行） */
+.ts-ev-item-block {
+  display: block !important;
+  padding: 8px 10px;
+}
+.ts-ev-row-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ts-ev-row-main .ts-ev-info { flex: 1; min-width: 0; }
+.ts-ev-ocr {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 6px 8px;
+  background: #f1f5f9;
+  border-radius: 4px;
+  font-size: 11px;
+}
+.ts-ev-ocr-text { color: #475569; flex: 1; }
+.ts-ev-ocr-conf { color: #94a3b8; }
+.ts-ev-ocr-apply { padding: 0 !important; }
+
+/* 修改记录面板 */
+.ts-dlg-audit {
+  margin-top: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.ts-audit-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #f8fafc;
+  cursor: pointer;
+  user-select: none;
+}
+.ts-audit-header:hover { background: #f1f5f9; }
+.ts-audit-title { font-size: 12px; color: #475569; font-weight: 600; }
+.ts-audit-count { color: #94a3b8; font-weight: 400; }
+.ts-audit-toggle { font-size: 12px; color: #94a3b8; }
+.ts-audit-body {
+  max-height: 180px;
+  overflow: auto;
+  padding: 8px 12px;
+  border-top: 1px solid #e2e8f0;
+}
+.ts-audit-empty { font-size: 11px; color: #94a3b8; padding: 6px 0; }
+.ts-audit-item {
+  display: flex;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px dashed #f1f5f9;
+}
+.ts-audit-item:last-child { border-bottom: none; }
+.ts-audit-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #0067FE;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+.ts-audit-main { flex: 1; min-width: 0; }
+.ts-audit-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+}
+.ts-audit-line b { color: #303133; font-weight: 600; }
+.ts-audit-user { color: #0067FE; }
+.ts-audit-hour { color: #94a3b8; }
+.ts-audit-detail { font-size: 11px; color: #64748b; margin-top: 2px; }
+.ts-audit-old { color: #94a3b8; text-decoration: line-through; }
+.ts-audit-new { color: #16a34a; font-weight: 600; }
+.ts-audit-reason { color: #94a3b8; }
+.ts-dlg-td-src .ts-dlg-down { color: #16a34a; }
+.ts-dlg-td-src .ts-dlg-up { color: #dc2626; }
+
+/* 阶段7：分时因子标签 */
+.ts-factor-tag {
+  margin-left: 4px;
+  transform: scale(0.9);
+}
+
+/* 阶段8：电力因子口径对比卡片 */
+.ts-compare-card {
+  margin-top: 14px;
+  border: 1px solid #d6e4ff;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+.ts-cmp-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 14px;
+  background: linear-gradient(90deg, #eff6ff, #f8fafc);
+  border-bottom: 1px solid #d6e4ff;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e40af;
+}
+.ts-cmp-header i { color: #0067FE; }
+
+.ts-cmp-body { padding: 14px; }
+
+/* 左右对比 */
+.ts-cmp-pair {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.ts-cmp-side {
+  flex: 1;
+  padding: 12px 14px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+.ts-cmp-side-active {
+  background: #eff6ff;
+  border-color: #93c5fd;
+}
+.ts-cmp-side-label {
+  font-size: 11px;
+  color: #64748b;
+  margin-bottom: 6px;
+}
+.ts-cmp-side-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #303133;
+  line-height: 1.2;
+}
+.ts-cmp-side-active .ts-cmp-side-value { color: #0067FE; }
+.ts-cmp-unit {
+  font-size: 11px;
+  font-weight: 400;
+  color: #94a3b8;
+  margin-left: 3px;
+}
+.ts-cmp-side-sub {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+.ts-cmp-arrow {
+  display: flex;
+  align-items: center;
+  color: #93c5fd;
+  font-size: 20px;
+}
+
+/* 差异汇总 */
+.ts-cmp-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+.ts-cmp-sum-item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 12px;
+}
+.ts-cmp-sum-label { color: #94a3b8; }
+.ts-cmp-sum-val { font-weight: 600; color: #303133; }
+.ts-cmp-down { color: #16a34a; }
+.ts-cmp-up { color: #dc2626; }
+
+/* 分工序表 */
+.ts-cmp-table {
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.ts-cmp-tr {
+  display: flex;
+  align-items: center;
+  padding: 7px 12px;
+  font-size: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+.ts-cmp-tr:last-child { border-bottom: none; }
+.ts-cmp-th {
+  background: #f1f5f9;
+  font-weight: 600;
+  font-size: 11px;
+  color: #475569;
+}
+.ts-cmp-td-name { flex: 1.5; color: #334155; }
+.ts-cmp-td-num {
+  flex: 1;
+  text-align: right;
+  font-family: Consolas, Monaco, monospace;
+  color: #475569;
+}
+.ts-cmp-ts-factor { color: #0067FE; font-weight: 600; }
+
+.ts-cmp-tip {
+  font-size: 11px;
+  line-height: 1.7;
+  color: #94a3b8;
+  padding: 8px 10px;
+  background: #fffbeb;
+  border-left: 2px solid #f59e0b;
+  border-radius: 4px;
+}
+.ts-cmp-tip i { margin-right: 4px; color: #f59e0b; }
