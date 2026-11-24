@@ -1,4 +1,5 @@
 import { matchFactor, saveUserFactorOverride, normalizeQuantityAndUnit } from '@/utils/factorMatchingService'
+import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
 import { loadOrgStandardsForAgent, loadBjStandardsForAgent, ensureSeed } from '@/utils/policyStandardService'
 ﻿export default {
   data() {
@@ -2083,7 +2084,7 @@ import { loadOrgStandardsForAgent, loadBjStandardsForAgent, ensureSeed } from '@
         }
         localStorage.setItem('cfp_sops', JSON.stringify(savedSOPs))
         // 更新产品库（如有匹配的产品）
-        const savedProducts = JSON.parse(localStorage.getItem('cfp_products') || '[]')
+        const savedProducts = loadCfpProducts()
         const product = savedProducts.find(p => p.name === task.productName)
         if (product) {
           if (!product.sopIds) product.sopIds = []
@@ -2091,7 +2092,7 @@ import { loadOrgStandardsForAgent, loadBjStandardsForAgent, ensureSeed } from '@
             product.sopIds.push(newSOP.id)
           }
           newSOP.productId = product.id
-          localStorage.setItem('cfp_products', JSON.stringify(savedProducts))
+          saveCfpProducts(savedProducts)
         }
       } catch (e) { /* ignore */ }
       this.isSopPublished = true

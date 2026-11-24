@@ -1,6 +1,7 @@
 import * as XLSX from 'xlsx'
 import { matchFactor, saveUserFactorOverride, normalizeQuantityAndUnit } from '@/utils/factorMatchingService'
 import { loadPcfStandardsForAgent, ensureSeed } from '@/utils/policyStandardService'
+import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
 ﻿export default {
   data() {
     return {
@@ -49,20 +50,19 @@ import { loadPcfStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
       ],
       // 电力因子精度：regular=常规电网平均 | timespace=分时分区
       elecFactorMode: 'regular',
-      pageMode: 'task-list', // 'task-list'=任务列表模式 | 'task-active'=对话模式
+      pageMode: 'task-active', // 'task-active'=任务详情（九阶段）模式；原 'task-list' 页内任务列表模式已回退（任务列表/选品属工作台页面）
       taskList: [], // 历史任务列表（localStorage持久化）
       currentTaskId: null, // 当前活跃任务ID
       newTaskProductName: '', // 新建任务-产品名称
       newTaskStandard: '', // 新建任务-核算标准
-      tlDialogStep: 'welcome', // 对话流程步进: welcome | show-history
-      tlInputText: '', // 初始化对话输入框
+      // （原 tlDialogStep/tlInputText 系页内 task-list 对话模式状态，已随该模式回退移除）
       // 历史对话栏
       showHistorySidebar: false,
       conversationHistory: [],
       currentConversationId: null,
       currentStepIndex: 0,
       selectedStandard: '',
-      standardPickerOpen: false,   // 标准切换列表展开态
+      standardPickerOpen: true, // 兼容保留（旧展开态，模板已改用 el-select 下拉）
       selectedUnit: 'declaration',
       boundarySubStep: 0, // 阶段二内5个子步骤: 0-4
       isModelBuilt: false, // 是否构建了核算模型
@@ -227,34 +227,6 @@ import { loadPcfStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
       const list = this.standards || []
       return list.find(s => s.code === this.selectedStandard) || list[0] || null
     },
-    /** 量化口径：按标准 4.2.1 功能单位定义（按行驶里程 or 按产品数量） */
-    stdQuantBasis() {
-      const cfg = this.selectedStandardConfig || {}
-      const bt = cfg.boundaryTemplate || {}
-      const detail = bt.unitDetail || ''
-      const ut = bt.unitType || ''
-      // 按里程量化（乘用车场景）
-      if (/km|公里|行驶里程/.test(detail)) {
-        return '按行驶里程量化 — 每行驶 1km 的碳排放（kgCO₂e/km）'
-      }
-      // 按产品数量量化（一般产品场景）
-      if (ut === 'functional' || ut === 'declaration') {
-        return '按功能/声明单位量化 — 每单位产品的碳排放（kgCO₂e/' + (detail || '单位产品') + '）'
-      }
-      return detail || '—'
-    },
-
-    /** 数据质量要求（4.3.3） */
-    stdDataQuality() {
-      const cfg = this.selectedStandardConfig || {}
-      const arr = cfg.dataQuality || []
-      return Array.isArray(arr) ? arr : []
-    },
-
-    /** 标准不适用范围 */
-    stdScopeExcluded() {
-      return (this.selectedStandardConfig && this.selectedStandardConfig.scopeExcluded) || ''
-    },
     /** 完整性要求（4.3.3.4） */
     stdCompletenessRule() {
       const cfg = this.selectedStandardConfig || {}
@@ -279,11 +251,22 @@ import { loadPcfStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
       }
       return map[v] || v || '—'
     },
-    /** 标准规定的阶段名称清单 */
+    /** 标准规定的阶段名称清单（标准未配置 modelConfig.stages 时回落通用 5 阶段） */
     stdStageNames() {
       const cfg = this.selectedStandardConfig || {}
-      const arr = (cfg.modelConfig && cfg.modelConfig.stages) || []
-      return Array.isArray(arr) ? arr : []
+      const mc = cfg.modelConfig || {}
+      let arr = mc.stages || mc.lifecyclePhases || cfg.lifecyclePhases || []
+      if (!Array.isArray(arr)) arr = []
+      arr = arr.filter(Boolean)
+      if (arr.length) return arr
+      return ['原材料获取阶段', '生产制造阶段', '运输分销阶段', '产品使用阶段', '报废回收阶段']
+    },
+    /** 标准是否配置了阶段清单（用于区分「标准固定」与「通用 5 阶段兜底」） */
+    stdStagesFromStandard() {
+      const cfg = this.selectedStandardConfig || {}
+      const mc = cfg.modelConfig || {}
+      const arr = mc.stages || mc.lifecyclePhases || cfg.lifecyclePhases || []
+      return Array.isArray(arr) && arr.filter(Boolean).length > 0
     },
 
     /** 标准适用范围 */
@@ -323,12 +306,6 @@ import { loadPcfStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
       const cfg = this.selectedStandardConfig || {}
       return (cfg.boundaryTemplate && cfg.boundaryTemplate.timeBoundary) || ''
     },
-    /** 温室气体种类 */
-    stdGhgGases() {
-      const cfg = this.selectedStandardConfig || {}
-      const arr = cfg.ghgGases || []
-      return Array.isArray(arr) ? arr : []
-    },
     /** 纳入的碳排放源 */
     stdEmissionSources() {
       const cfg = this.selectedStandardConfig || {}
@@ -340,23 +317,6 @@ import { loadPcfStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
       const cfg = this.selectedStandardConfig || {}
       const arr = cfg.excludedSources || []
       return Array.isArray(arr) ? arr : []
-    },
-    /** 核算公式列表 */
-    stdFormulas() {
-      const cfg = this.selectedStandardConfig || {}
-      const cr = cfg.calcRule || {}
-      const fs = cr.formulas || {}
-      const labelMap = {
-        rawMaterial: '原材料获取阶段', component: '部件碳排放', leadBattery: '铅酸蓄电池',
-        lithiumBattery: '锂离子动力蓄电池', tire: '轮胎', fluid: '液体',
-        production: '整车生产阶段', usePhase: '使用阶段', fuelProduction: '燃料生产',
-        fuelUse: '燃料使用', total: '生命周期总量'
-      }
-      const out = []
-      Object.keys(fs).forEach(k => {
-        out.push({ key: k, label: labelMap[k] || k, formula: fs[k] })
-      })
-      return out
     },
 
     stageList() {
@@ -373,16 +333,6 @@ import { loadPcfStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
       const arr = (cfg && cfg.dataSchema && cfg.dataSchema.requiredFields) || []
       return arr.map(k => map[k] || k).join('、') || '—'
     },
-    dqrDimsText() {
-      const cfg = this.selectedStandardConfig
-      const arr = (cfg && cfg.dataSchema && cfg.dataSchema.dqrDimensions) || []
-      return arr.join('、') || '—'
-    },
-    factorPriorityText() {
-      const cfg = this.selectedStandardConfig
-      const arr = (cfg && cfg.factorPriority) || []
-      return arr.join(' > ') || '—'
-    },
     completenessThreshold() {
       const cfg = this.selectedStandardConfig
       return (cfg && cfg.validationRules && cfg.validationRules.completenessThreshold) || 95
@@ -391,15 +341,51 @@ import { loadPcfStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
       const cfg = this.selectedStandardConfig
       return (cfg && cfg.validationRules && cfg.validationRules.dqrScoreThreshold) || 3
     },
-    reportTemplateLabel() {
-      const cfg = this.selectedStandardConfig
-      const t = cfg && cfg.reportTemplate
-      const map = { 'PEF-DECLARATION': 'PEF 环境足迹声明', 'qct-1248': 'QC/T 1248 核算报告' }
-      return map[t] || t || '—'
-    },
     stdBoundary() {
       const cfg = this.selectedStandardConfig
       return (cfg && cfg.boundaryTemplate) || {}
+    },
+    /** 标准知识分组（标准库详情「标准知识」页签同源） */
+    stdKnowledgeDims() {
+      const cfg = this.selectedStandardConfig || {}
+      const arr = cfg.dimensions || []
+      return Array.isArray(arr) ? arr : []
+    },
+    stdKnowledgeGroupCount() {
+      return this.stdKnowledgeDims.length
+    },
+    stdKnowledgePointCount() {
+      let n = 0
+      this.stdKnowledgeDims.forEach(d => {
+        n += (d.type === 'table' ? (d.rows || []).length : (d.points || []).length)
+      })
+      return n
+    },
+    /** 解析出的核算公式 */
+    stdFormulaList() {
+      const cfg = this.selectedStandardConfig || {}
+      const arr = cfg.formulas || []
+      return Array.isArray(arr) ? arr : []
+    },
+    /** 解析出的参数与因子 */
+    stdParamList() {
+      const cfg = this.selectedStandardConfig || {}
+      const arr = cfg.parameters || []
+      return Array.isArray(arr) ? arr : []
+    },
+    /** 报告模板：章节与字段 */
+    stdReportSections() {
+      const cfg = this.selectedStandardConfig || {}
+      const tpl = cfg.reportTemplateDetail || null
+      if (!tpl) return []
+      const arr = Array.isArray(tpl) ? tpl : (tpl.sections || [])
+      return Array.isArray(arr) ? arr : []
+    },
+    stdReportTitle() {
+      const cfg = this.selectedStandardConfig || {}
+      const tpl = cfg.reportTemplateDetail || null
+      if (!tpl || Array.isArray(tpl)) return ''
+      return tpl.name || tpl.title || ''
     },
     standardsWithSelection() {
       // 按任务类型初筛：风机任务剔除汽车行业专属标准 QC/T 1248-2025（通用核算标准保留）
@@ -1170,7 +1156,6 @@ import { loadPcfStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
       if (conv) {
         this.messages = JSON.parse(JSON.stringify(conv.messages))
         this.currentConversationId = convId
-        this.tlDialogStep = 'welcome'
         this.$nextTick(() => {
           if (this.$refs.tlDialogMessages) this.$refs.tlDialogMessages.scrollTop = this.$refs.tlDialogMessages.scrollHeight
         })
@@ -1398,8 +1383,8 @@ import { loadPcfStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
           savedSOPs.unshift(newSOP)
         }
         localStorage.setItem('cfp_sops', JSON.stringify(savedSOPs))
-        // 更新产品库（如有匹配的产品）
-        const savedProducts = JSON.parse(localStorage.getItem('cfp_products') || '[]')
+        // 更新产品库（如有匹配的产品）——统一存取 cfp_products_v4 并广播变更
+        const savedProducts = loadCfpProducts()
         const product = savedProducts.find(p => p.name === task.productName)
         if (product) {
           if (!product.sopIds) product.sopIds = []
@@ -1407,7 +1392,7 @@ import { loadPcfStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
             product.sopIds.push(newSOP.id)
           }
           newSOP.productId = product.id
-          localStorage.setItem('cfp_products', JSON.stringify(savedProducts))
+          saveCfpProducts(savedProducts)
         }
       } catch (e) { /* ignore */ }
       this.isSopPublished = true
@@ -2713,6 +2698,20 @@ import { loadPcfStandardsForAgent, ensureSeed } from '@/utils/policyStandardServ
     if (this.pageMode === 'task-active') {
       this.initChatFlow()
       this.scrollToBottom()
+    }
+  },
+  watch: {
+    // 同一页面内 query 变化（工作台再次带 direct/taskId 进入）时同步当前任务，避免重复建任务
+    '$route.query': {
+      handler(nv, ov) {
+        if (!nv || nv.direct !== 'true') return
+        if (this.__directEntering) return
+        this.__directEntering = true
+        this.$nextTick(() => {
+          this.__directEntering = false
+          this.startDirectNineStage()
+        })
+      }
     }
   },
   updated() {

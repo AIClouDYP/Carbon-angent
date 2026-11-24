@@ -16,6 +16,7 @@ docs/
 
   agent-center/                <- 基础支撑模块（资源台账 + 运维管理）
     standards-library.md       <- 政策标准库（标准配置驱动源头）
+    skill-management.md        <- Skill 管理（Prompt 模板配置与业务页消费）
     # formula-library.md       <- 核算公式库（待编写）
     # platform-template-library.md <- 平台模板库（待编写）
   99history/                   <- 历史版本归档（见 4.2）
@@ -36,6 +37,14 @@ docs/
 3. **粒度**：按功能页面（路由）记录；跨页面的业务流程写在该模块主文档的“页面流转”节；
 4. **拆分阈值**：单个 md 超过 500 行时按子视图拆分为同文件夹下多个 md，并在模块索引节登记；
 5. **全局共享**：字段定义、术语口径只写在 _data-dictionary.md 与 _terms.md，页面文档引用不重复定义。
+6. **实现文档同步**：改动命中下列内容时，必须同步更新对应页面文档：
+   1. 新增、删除、重命名页面组件，或修改路由、页面参数、跨页面跳转。
+   2. 修改 localStorage key、默认数据、种子数据或数据模型字段。
+   3. 修改页面状态机、审核状态、发布/驳回、启用/禁用等核心逻辑。
+   4. 修改 Skill id、默认 Prompt 来源、变量规则或跨页面消费函数。
+   5. 改变“前端原型、模拟解析、不接大模型、不接后端”的边界。
+
+   只调整颜色、间距、字号可不展开记录；影响交互结构、可见文案、状态展示或滚动行为时仍需补充。文档与代码冲突时以代码为准，并立即修正文档。
 
 ## 四、页面索引
 
@@ -44,8 +53,9 @@ docs/
 | 模块 | 页面文档 | 路由 | 原型实现度 |
 |---|---|---|---|
 | report-submission | [智慧报告工作台](report-submission/ReportSubmissionCenter.md) | /#/agent-center/apps/report-submission | 已实现 |
-| footprint | 产品碳足迹工作台 | /#/agent-center/apps/footprint | 已实现 |
-| footprint | 数据采集 | （footprint 内嵌入口） | 已实现 |
+| footprint | [产品碳足迹工作台 + 任务详情](footprint/footprint.md) | /#/agent-center/apps/carbon-accounting | 已实现 |
+| footprint | [产品碳足迹任务详情（九阶段核算）](footprint/footprint.md) | /#/footprint/accounting/agent | 已实现 |
+| footprint | 数据采集 | /#/footprint/accounting/data-collection | 已实现 |
 | pef-accounting | 产品环境足迹工作台 | /#/agent-center/apps/pef-accounting | 已实现 |
 | org-accounting | [组织碳核算工作台](org-accounting/org-accounting.md) | /#/org-accounting/accounting/agent | 已实现 |
 | park-accounting | [园区碳核算工作台](park-accounting/park-accounting.md) | /#/park-accounting/accounting/agent | 已实现 |
@@ -53,6 +63,7 @@ docs/
 | zero-carbon-factory | 零碳工厂申报工作台 | /#/agent-center/apps/zero-carbon-factory | 已实现 |
 | green-factory | 绿色工厂申报辅助 | /#/agent-center/apps/green-factory | 演示数据 |
 | agent-center | 智能体中心 + 资源库群（多视图模块，按模块汇总记录；各视图清单见该文档第 3 节） | /#/agent-center/* | 已实现 |
+| agent-center | [Skill 管理](agent-center/skill-management.md) | /#/agent-center/apps/skill-management | 已实现 |
 | report-submission | [报送任务编排详情](report-submission/Orchestration.md) | （工作台任务模式内） | 已实现 |
 | zero-carbon-factory | [任务编排（六阶段）](zero-carbon-factory/TaskWorkbench.md) | （工作台任务模式内） | 已实现 |
 
@@ -73,5 +84,6 @@ docs/
 | 目录 | 定位 | 维护约定 |
 |---|---|---|
 | 99history/ | 历史版本归档（产品碳足迹 BRD/FRD、组织碳核算交互说明、数据校验规则详解等） | 不参与“文档先行”维护；**不适用 500 行拆分约定**（归档原文保留） |
+| 99history/newdocs-template/ | 早期通用交付模板（01~05 与 README），已由 `agent/docs/` 现行页面实现文档替代 | 历史模板与占位内容，仅供追溯参考；不参与当前文档维护 |
 
 > 2026-10-19 更新：三场景（园区/组织/北京）数据清单统一为 3 列参数表 + 计算式块；溯源抽屉改两段式（参数选中 → 凭证/匹配/记录）；新增参数更正与留痕；园区数据完整性按渠道化；新增 05园区碳核算 技术方案与功能设计文档。

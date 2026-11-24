@@ -4,7 +4,7 @@
     <div class="page-header">
       <div class="header-left">
         <h2 class="page-title"><i class="el-icon-coin"></i> 排放因子库</h2>
-        <p class="page-desc">覆盖能源、原材料、运输、废弃物等全品类排放因子，支撑碳足迹精准核算</p>
+        <p class="page-desc">覆盖全品类排放因子，支撑碳足迹精准核算</p>
       </div>
     </div>
 
@@ -16,7 +16,8 @@
         <el-select v-model="filterType" placeholder="库类型" size="small" clearable style="width: 140px; margin-left: 8px;">
           <el-option v-for="t in dbTypes" :key="t" :label="t" :value="t"></el-option>
         </el-select>
-        <el-button type="primary" size="small" icon="el-icon-plus" style="margin-left: auto;" @click="openDbAdd">新增因子库</el-button>
+        <el-button size="small" icon="el-icon-connection" style="margin-left: auto;" @click="openRuleConfig">匹配规则</el-button>
+        <el-button type="primary" size="small" icon="el-icon-plus" style="margin-left: 8px;" @click="openDbAdd">新增因子库</el-button>
       </div>
 
       <!-- 因子库表格 -->
@@ -61,6 +62,66 @@
           <el-pagination background layout="total, sizes, prev, pager, next, jumper" :total="filteredDatabases.length" :page-sizes="[10, 20, 50]" :page-size="pageSize" :current-page="currentPage" @size-change="handleSizeChange" @current-change="handlePageChange"></el-pagination>
         </div>
       </div>
+
+    <!-- 因子匹配规则配置对话框（关键词 → 因子映射，保存后即时生效） -->
+    <el-dialog title="因子匹配规则配置" :visible.sync="showRuleDialog" width="1200px" top="5vh" :close-on-click-modal="false" append-to-body>
+      <el-alert type="info" :closable="false" style="margin-bottom:12px;">
+        <template slot="title">
+          <i class="el-icon-info"></i>
+          维护物料匹配规则（关键词 → 因子）。新增物料、调整因子映射均无需改代码，保存后即时生效。
+          优先级越小越先匹配；关键词为正则表达式（如「铝|铸铝」）；电力规则含场景覆盖（地域敏感高级字段由开发管控，不在本界面展示）。
+        </template>
+      </el-alert>
+      <div class="rule-toolbar">
+        <el-button size="mini" type="primary" icon="el-icon-plus" @click="addRule">新增规则</el-button>
+        <el-button size="mini" icon="el-icon-refresh" @click="resetRules">恢复默认</el-button>
+        <span class="rule-tip">规则总数：{{ ruleList.length }} 条</span>
+      </div>
+      <div class="rule-table-scroll">
+        <el-table :data="ruleList" border size="small" style="width:100%;">
+          <el-table-column label="优先级" width="80" align="center">
+            <template slot-scope="{ row }">
+              <el-input-number v-model="row.priority" :min="1" size="mini" controls-position="right" style="width:80px;"></el-input-number>
+            </template>
+          </el-table-column>
+          <el-table-column label="规则名称" width="150">
+            <template slot-scope="{ row }"><el-input v-model="row.name" size="mini" placeholder="如：铝/铸铝"></el-input></template>
+          </el-table-column>
+          <el-table-column label="关键词(正则)" width="130">
+            <template slot-scope="{ row }"><el-input v-model="row.pattern" size="mini" placeholder="如：铝|铸铝"></el-input></template>
+          </el-table-column>
+          <el-table-column label="因子ID" width="130">
+            <template slot-scope="{ row }"><el-input v-model="row.factorId" size="mini" placeholder="如：CPCD-MA-003"></el-input></template>
+          </el-table-column>
+          <el-table-column label="因子名称" width="150">
+            <template slot-scope="{ row }"><el-input v-model="row.factorName" size="mini"></el-input></template>
+          </el-table-column>
+          <el-table-column label="因子值" width="90">
+            <template slot-scope="{ row }"><el-input v-model="row.factorValue" size="mini"></el-input></template>
+          </el-table-column>
+          <el-table-column label="单位" width="110">
+            <template slot-scope="{ row }"><el-input v-model="row.factorUnit" size="mini" placeholder="kgCO₂e/kg"></el-input></template>
+          </el-table-column>
+          <el-table-column label="来源库" width="130">
+            <template slot-scope="{ row }"><el-input v-model="row.dbName" size="mini"></el-input></template>
+          </el-table-column>
+          <el-table-column label="置信度" width="90" align="center">
+            <template slot-scope="{ row }">
+              <el-input-number v-model="row.confidence" :min="0" :max="1" :step="0.01" :precision="2" size="mini" controls-position="right" style="width:90px;"></el-input-number>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="60" align="center" fixed="right">
+            <template slot-scope="{ row }">
+              <el-button type="text" size="mini" style="color:#f56c6c;" @click="removeRule(row)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+      <span slot="footer">
+        <el-button @click="showRuleDialog = false">取消</el-button>
+        <el-button type="primary" @click="saveRules">保存规则</el-button>
+      </span>
+    </el-dialog>
     </template>
 
     <!-- ============ 第二层：分时分区电碳因子库（专用视图） ============ -->
@@ -736,6 +797,7 @@ import {
   buildTemplateCSV
 } from '@/utils/electricityFactorService'
 import { hourLabel, LEVEL_LABELS } from '@/utils/regionDict'
+import { loadMatchingRules, saveMatchingRules, resetMatchingRules } from '@/utils/factorMatchingService'
 
 // ===== 地区标准字典（因子匹配的地域结构化基础） =====
 // 标准名 → { code: activityId地区后缀, level: 层级, aliases: 别名 }
@@ -853,6 +915,9 @@ export default {
     return {
       currentView: 'list', // 'list' | 'detail'
       currentDb: null,
+      // 因子匹配规则配置（关键词 → 因子映射）
+      showRuleDialog: false,
+      ruleList: [],
       searchText: '',
       filterType: '',
       factorSearchText: '',
@@ -1146,6 +1211,50 @@ export default {
     }
   },
   methods: {
+    // ============ 因子匹配规则配置 ============
+    /** 打开规则配置（从因子库列表页入口进入） */
+    openRuleConfig() {
+      this.ruleList = loadMatchingRules()
+      this.showRuleDialog = true
+    },
+    addRule() {
+      this.ruleList.push({
+        id: 'custom-' + Date.now().toString().slice(-6),
+        name: '新规则',
+        pattern: '',
+        priority: this.ruleList.length + 1,
+        factorId: '', factorName: '', factorValue: '', factorUnit: '',
+        dbName: '', sourcePool: '企业自建(池4)', tech: '', geo: '全国', confidence: 0.90
+      })
+    },
+    removeRule(row) {
+      const idx = this.ruleList.indexOf(row)
+      if (idx > -1) this.ruleList.splice(idx, 1)
+    },
+    saveRules() {
+      for (const r of this.ruleList) {
+        if (!r.name || !r.pattern || !r.factorId || !r.factorValue || !r.factorUnit) {
+          this.$message.warning('规则「' + (r.name || '未命名') + '」存在必填项未填写（名称/关键词/因子ID/因子值/单位）')
+          return
+        }
+        try { new RegExp(r.pattern) } catch (e) {
+          this.$message.warning('规则「' + r.name + '」的关键词正则不合法：' + e.message)
+          return
+        }
+      }
+      const ok = saveMatchingRules(this.ruleList)
+      this.showRuleDialog = false
+      this.$message.success(ok ? '规则已保存，匹配即刻生效' : '保存失败，请重试')
+    },
+    resetRules() {
+      this.$confirm('确定恢复默认规则吗？当前配置将丢失。', '恢复确认', { type: 'warning' })
+        .then(() => {
+          resetMatchingRules()
+          this.ruleList = loadMatchingRules()
+          this.$message.success('已恢复默认规则')
+        }).catch(() => {})
+    },
+
     // ============ 分时分区电碳因子 ============
     /** 层级标签 */
     levelLabel(level) {
@@ -2006,6 +2115,12 @@ export default {
 .page-title { font-size: 20px; color: #303133; margin: 0 0 6px 0; }
 .page-title i { color: #0067FE; }
 .page-desc { font-size: 13px; color: #909399; margin: 0; }
+
+/* 因子匹配规则配置 */
+.rule-toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.rule-tip { margin-left: auto; font-size: 12px; color: #909399; }
+.rule-table-scroll { max-height: 60vh; overflow-y: auto; }
+.rule-table-scroll .el-input__inner { padding: 0 6px; font-size: 12px; }
 .stats-row { display: flex; gap: 16px; margin-bottom: 16px; flex-shrink: 0; }
 .stat-card {
   flex: 1; background: #fff; border-radius: 8px; padding: 16px 20px;

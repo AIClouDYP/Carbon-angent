@@ -2,7 +2,7 @@
  * 产品碳足迹核算模块路由配置
  *
  * 页面说明：
- *   - agent.vue：九阶段工作台（由智能体中心创建任务后跳转进入）
+ *   - agent.vue：任务详情页（九阶段核算，由工作台创建/进入任务后跳转）
  *   - data-collection.vue：数据采集页（通知面板入口）
  *   - emission-detail.vue：排放源明细页（通知面板入口）
  */
@@ -18,7 +18,7 @@ export const accountingRoutes = [
     component: Agent,
     name: 'AccountingAgent',
     meta: {
-      title: '碳足迹智能体',
+      title: '产品碳足迹任务详情',
       icon: 'el-icon-cpu',
       requireAuth: true,
       breadcrumb: [],

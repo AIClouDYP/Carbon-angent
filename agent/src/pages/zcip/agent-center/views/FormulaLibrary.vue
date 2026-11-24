@@ -4,7 +4,7 @@
     <div class="page-header">
       <div class="header-left">
         <h2 class="page-title"><i class="el-icon-s-operation"></i> 核算公式库</h2>
-        <p class="page-desc">以核算对象为核心组织计算公式，每个对象包含若干核算指标（输出）及公式参数（输入），供计算编排Skill解析调用</p>
+        <p class="page-desc">维护核算公式、参数与计算规则</p>
       </div>
     </div>
 
@@ -55,7 +55,13 @@
               <el-badge :value="row.params ? row.params.length : 0" type="primary"></el-badge>
             </template>
           </el-table-column>
-          <el-table-column label="关联标准" prop="appliedStandard" width="130" show-overflow-tooltip></el-table-column>
+          <el-table-column label="来源标准" width="170" show-overflow-tooltip>
+            <template slot-scope="{ row }">
+              <span v-if="row.appliedStandard">{{ row.appliedStandard }}</span>
+              <span v-else style="color:#c0c4cc;">人工维护</span>
+              <span v-if="row.sourceBatch" class="source-batch">{{ row.sourceBatch }}</span>
+            </template>
+          </el-table-column>
           <el-table-column label="版本" prop="version" width="60" align="center"></el-table-column>
           <el-table-column label="状态" prop="status" width="60" align="center">
             <template slot-scope="{ row }">
@@ -489,6 +495,12 @@ export default {
   padding: 2px 6px;
   border-radius: 3px;
   color: #E6A23C;
+}
+.source-batch {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted, #a8abb2);
+  margin-top: 2px;
 }
 .formula-code-lg {
   font-family: 'Courier New', monospace;

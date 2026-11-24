@@ -3,6 +3,7 @@
 > 所属菜单：运维管理 → 政策标准库
 > 页面路由：`/agent-center/apps/standards-library`（列表）、`/agent-center/apps/standards-library/detail`（详情）
 > 代码位置：`src/pages/zcip/agent-center/views/StandardsLibrary.vue`、`StandardsDetail.vue`
+> 文档定位：第 1~9 节是目标态规格与接口规划；第 10 节是当前前端原型实现快照，随代码同步维护。
 
 ---
 
@@ -878,3 +879,223 @@ PUT/DELETE /api/standards/{id}:
 | 初始化字段 | 9 个表单字段 + 原文文件 |
 | 初始化后状态 | `sourceSystem = local`、`publishStatus = 现行`、`parseStatus = 未解析`、`configStatus = 待确认` |
 | 后续动作 | 逐条触发解析（选 Skill）→ 人工确认 → 已生效 |
+
+---
+
+## 10. 当前前端原型实现快照
+
+> 本节记录 `StandardsLibrary.vue`、`StandardsDetail.vue`、`skillGroupTemplates.js`、`policyStandardService.js` 的当前行为。目标态章节如与本节冲突，以本节描述的前端原型为准。
+
+### 10.1 原型边界
+
+- 不接后端、不接真实大模型；
+- 解析使用「标准解析」Skill 的规则化模拟实现；
+- 标准库存放在 `localStorage.carbon-library-standards-v2`；
+- 准确性依赖详情页逐条核对、保存发布、驳回和版本机制；
+- 政策文件同步、定时任务、OCR、异步任务和后端接口均未实现。
+
+### 10.2 列表页上传与解析
+
+上传入口支持一次选择 1 个主文件 + 0-N 个附件：
+
+1. 文件去重，逐个校验类型（PDF / DOC / DOCX）和 20MB 大小；
+2. 第一项默认为主文件，可手动切换主文件；
+3. 删除主文件后，剩余首项自动升级为主文件；
+4. 文件卡显示「主文件 / 附件」标签，主文件高亮；
+5. 解析前必须存在主文件。
+
+解析流程：
+
+```text
+选择文件
+  → 前端校验
+  → 解析任务动画
+  → 检查 Skill「standard-parsing」是否启用
+  → 读取 Prompt 与模板状态
+  → runSkillParse() 规则化生成草稿
+  → 用户确认编号 / 名称 / 类型 / 场景
+  → confirmImport() 入库
+  → parseStatus = pending
+```
+
+Skill 禁用时 `runParseTask()` 收到 false 后直接中断，不生成草稿。
+
+`parseMeta` 记录：
+
+```js
+{
+  source: 'skill-simulated',
+  skillId: 'standard-parsing',
+  skillName: '标准解析',
+  promptModified: true,
+  promptUpdatedAt: '2026/11/24 10:00:00',
+  promptTemplate: '...',
+  fileName: '主文件名',
+  sourceFiles: [
+    { name: '主文件名', role: 'main', size: 1024 },
+    { name: '附件名', role: 'attachment', size: 2048 }
+  ]
+}
+```
+
+### 10.3 多文件解析口径
+
+- 主文件承载正文和核心条款，是解析基准；
+- 附件承载附录、参数表、因子表、报告模板、修订说明、补充规则；
+- 成果标注来源文件；
+- 主文件与附件冲突时以主文件优先；
+- 附件不能改变主文件的标准编号、名称、发布机构和适用范围；
+- 无法判断优先级的内容进入待人工确认；
+- 知识条目的 `clauseRefs` 支持 `[{ clause, fileName }]`，至少在文本中说明来源。
+
+入库后保留 `_sourceFile`（主文件名）和 `_sourceFiles`（完整来源列表）。
+
+### 10.4 详情页核对与发布
+
+详情页按标准知识、公式参数、报告模板三页签核对：
+
+| 内容 | 核对粒度 |
+| --- | --- |
+| 标准知识 | 每个 `point` |
+| 公式 | 每个 `formulas` 项 |
+| 参数 | 每个 `parameters` 项 |
+| 计算规则 | 每个 `calcRules` 项 |
+| 报告模板章节 | 每个 `sections` 项 |
+
+当前状态机：
+
+```text
+pending（解析草稿）
+  → 逐条核对
+  → 保存并发布 → effective
+  → 或驳回 → rejected
+  → 可重新编辑后再发布
+```
+
+详情页展示来源文件摘要：主文件名、附件数量和附件清单。旧数据只有 `fileName` 时做兼容展示。Skill 信息显示 `parseMeta.skillName || parseMeta.skillId || '标准解析'`，模板被修改时显示「模板已修改」。
+
+### 10.5 数据与分组
+
+- 存储 key：`carbon-library-standards-v2`；
+- 种子版本 key：`carbon-library-pcf-seed-version`；
+- 唯一标识：`code@version`，`code` 单独不是唯一键；
+- 场景分组模板由 `skillGroupTemplates.js` 预置，支持 PCF / PEF / ORG / BJ / PARK / GF / ZCF / REPORT；
+- `list` 分组承载条目与条款依据；`table` 分组承载附录参数表；
+- 模板归一化在服务层完成，避免旧缓存缺字段。
+
+### 10.6 与当前 Skill 管理的关系
+
+当前只消费 `standard-parsing`：
+
+```js
+if (!isSkillEnabled('standard-parsing')) return false
+const skillConfig = getSkillConfigById('standard-parsing')
+```
+
+Prompt 不在列表页硬编码，默认来源和用户修改都由 Skill 管理页维护。业务页只读取模板内容与启用状态，不修改 Skill 配置。
+
+### 10.7 上传对话框实现细节
+
+上传对话框按 `parseStep` 分三步：
+
+| `parseStep` | 内容 |
+| --- | --- |
+| `0` | 选择主文件和附件 |
+| `1` | 解析任务动画 |
+| `2` | 确认解析结果并入库 |
+
+解析任务动画由 `runParseTask(index)` 递归驱动，任务间隔是 `600 + Math.random() * 500` 毫秒。到最后一项时调用 `runSkillParse()`。该过程只是前端展示节奏，不是真实异步解析。
+
+`runSkillParse()` 按文件名推断元信息：
+
+| 文件名包含 | 推断编号 |
+| --- | --- |
+| `cbam` | `EU CBAM` |
+| `14067` | `ISO 14067:2018` |
+| `14064` | `ISO 14064-1:2018` |
+| `14044` | `ISO 14044:2006` |
+| `2050` | `PAS 2050:2011` |
+| `24067` | `GB/T 24067-2024` |
+| `pef` | `EU PEF` |
+
+政策类关键词命中「零碳工厂 / 指标体系 / 指导意见 / 管理办法 / 通知 / 建设方案」时推断为 ZCF 政策文件；否则默认 PCF 核算类。编号提取失败时使用 `CUSTOM-STD`，名称默认取文件名去掉扩展名。
+
+知识分组按第一个业务场景调用 `getGroupTemplate(scenario)` 生成。用户在结果确认表单中修改业务场景时，`onParseScenariosChange()` 按新主场景补齐模板分组、保留同 `key` 分组、更新 `structured.scenarioKind` 和 `parseMeta`。`REPORT` 无预设分组，只保留用户手动维护内容。
+
+入库时同 `code` 已存在则新版本号按 `V{n + 1}` 生成并提示版本并存；`_sourceFile` 保存主文件名，`_sourceFiles` 保存完整来源列表。
+
+### 10.8 详情页兼容与序列化
+
+详情页按 `code@version` 定位条目。加载后执行：
+
+1. `ensureStructuredShape()`：补齐 `dimensions`、`formulas`、`parameters`、`calcRules`、`reportTemplate.file` 和 `sections`；
+2. `normalizeDimensions()`：兼容旧分组、字符串知识点、表格列、行数据和缺失的 `verified`；
+3. `serializeStructured()`：发布前把编辑态字段转回持久化形态。
+
+编辑态与持久化字段对应：
+
+| 编辑态 | 持久化 |
+| --- | --- |
+| `dimension.columnsText` | `dimension.columns` |
+| `formula.paramRefsText` | `formula.paramRefs` |
+| `form.yearNum` | 条目 `year` / `yearNum` |
+
+长内容交互阈值：
+
+| 内容 | 阈值 |
+| --- | --- |
+| 知识点 `text` | 100 字 |
+| 公式表达式、参数定义、计算规则内容、`calcRule` | 60 字 |
+
+超长时切换多行编辑，避免单行输入框难以人工核对。
+
+### 10.9 核对、发布与驳回
+
+全局核对计数：
+
+```text
+标准知识 = dimension.points 中 verified=true 的数量
+公式参数 = formulas + parameters + calcRules 中 verified=true 的数量
+报告模板 = sections 中 verified=true 的章节数
+```
+
+存在未核对项时，「保存并发布」弹出二次确认。这是防误发布确认，不是硬拦截。
+
+发布流程：
+
+1. 校验 `code`、`name`；
+2. `normalizeDimensions(structured)`；
+3. 如存在指标权重，执行 `validateIndicatorsWeight()`，合计误差小于 0.001；
+4. 按 `code@version` 写回外层字段和 `structured`；
+5. `parseStatus = effective`；
+6. 首次发布调用 `recordDiffOnApprove()`，以参数 key 生成 added / changed / removed 差异；
+7. 同步更新政策标准库、核算公式库、平台模板库。
+
+驳回只在 `pending` 状态展示。`persistDetail()` 驳回时只写回 `parseStatus`、`rejectReason` 和 `structured`，不写回外层普通编辑字段。
+
+### 10.10 下游消费
+
+服务层只返回 `parseStatus === 'effective'` 的标准，同时要求：
+
+```js
+(std.scenarios || []).includes(scenarioKind)
+std.structured.scenarioKind === scenarioKind
+```
+
+产品碳足迹工作台阶段 1 读取 `selectedStandardConfig.dimensions`，按 `list` / `table` 渲染分组。其他场景分别通过 `loadPefStandardsForAgent()`、`loadOrgStandardsForAgent()`、`loadBjStandardsForAgent()`、`loadParkStandardsForAgent()` 消费，并有各自的编号优先级或白名单规则。
+
+排查「列表有标准但工作台不显示」时依次检查：审核状态、场景匹配、`scenarioKind`、PCF 可计算性、同编号最高版本过滤和场景白名单。
+
+### 10.11 后端化替换点
+
+真实解析服务接入时：
+
+1. `runSkillParse()` 替换为服务调用，入参包含主文件、附件、场景和 Prompt 配置；
+2. 服务返回结构尽量保持 `structured` 当前契约；
+3. 入库后仍必须 `parseStatus = pending`；
+4. 详情页人工核对、发布确认、版本并存、配置差异机制必须保留；
+5. `parseMeta.sourceFiles` 保持来源文件完整性；
+6. 文件对象当前不持久化，后端需补文件 ID、对象存储、解析任务 ID 和进度查询。
+
+建议把 `policyStandardService.js` 的存取方法抽成 API 适配层，页面不再直接读写 `localStorage`。
+

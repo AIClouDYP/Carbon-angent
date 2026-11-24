@@ -19,20 +19,44 @@
         <el-input placeholder="搜索任务..." prefix-icon="el-icon-search" size="mini" v-model="searchTask" style="width: 140px;"></el-input>
       </div>
       <div class="panel-grid">
-        <div class="task-card" v-for="task in filteredTasks" :key="task.id" @click="$emit('enter-task', task)">
+        <div class="task-card" v-for="task in filteredTasks" :key="task.id" :class="{ 'is-archived': task.isReportArchived }" @click="$emit('enter-task', task)">
           <div class="task-top">
+            <div class="task-icon" :class="'is-' + (task.status === '已完成' ? 'done' : task.status === '异常' ? 'error' : task.isReportArchived ? 'archived' : 'running')">
+              <i :class="task.isReportArchived ? 'el-icon-folder-checked' : task.status === '已完成' ? 'el-icon-circle-check' : task.status === '异常' ? 'el-icon-warning-outline' : 'el-icon-loading'"></i>
+            </div>
             <div class="task-name">{{ task.name }}</div>
-            <el-tag :type="statusType(task.status)" size="mini">{{ task.status }}</el-tag>
+            <div class="task-top-right">
+              <el-tag :type="statusType(task.status)" size="mini" effect="plain">{{ task.status }}</el-tag>
+              <el-popconfirm
+                v-if="!task.isReportArchived"
+                title="确定删除该任务吗？"
+                confirm-button-text="删除"
+                cancel-button-text="取消"
+                @confirm="$emit('delete-task', task)"
+              >
+                <el-button slot="reference" class="task-del-btn" size="mini" type="text" icon="el-icon-delete" @click.stop></el-button>
+              </el-popconfirm>
+              <el-tooltip v-else content="报告已归档，任务不可删除" placement="top">
+                <el-button class="task-del-btn is-archived" size="mini" type="text" icon="el-icon-lock" disabled @click.stop></el-button>
+              </el-tooltip>
+            </div>
           </div>
-          <div class="task-product">
-            <i class="el-icon-box"></i> {{ task.product }}
+          <div class="task-info">
+            <div class="task-info-row">
+              <span class="info-label">标准</span>
+              <span class="info-value">{{ task.product || '—' }}</span>
+            </div>
+            <div class="task-info-row">
+              <span class="info-label">阶段</span>
+              <span class="info-value">{{ task.currentStage || '—' }}</span>
+            </div>
           </div>
-          <div class="task-progress">
-            <el-progress :percentage="task.progress" :stroke-width="4" :color="task.status === '异常' ? dangerColor : primaryColor"></el-progress>
+          <div class="task-progress-row">
+            <el-progress class="task-progress" :percentage="task.progress" :stroke-width="4" :show-text="false" :color="task.status === '异常' ? dangerColor : primaryColor"></el-progress>
+            <span class="task-percent" :class="{ 'is-danger': task.status === '异常' }">{{ task.progress }}%</span>
           </div>
           <div class="task-bottom">
-            <span class="task-stage">{{ task.currentStage }}</span>
-            <span class="task-time">{{ task.updateTime }}</span>
+            <span class="task-time"><i class="el-icon-time"></i> {{ task.updateTime }}</span>
           </div>
         </div>
         <div v-if="filteredTasks.length === 0" class="empty-state">
@@ -57,24 +81,25 @@
       <div class="panel-grid">
         <div class="product-card" v-for="prod in filteredProducts" :key="prod.id">
           <div class="product-top">
+            <div class="product-icon"><i class="el-icon-goods"></i></div>
             <div class="product-name">{{ prod.name }}</div>
-            <el-tag size="mini" :type="prod.sopIds && prod.sopIds.length > 0 ? 'success' : 'info'">
+            <el-tag size="mini" :type="prod.sopIds && prod.sopIds.length > 0 ? 'success' : 'info'" effect="plain">
               {{ prod.sopIds && prod.sopIds.length > 0 ? '有SOP' : '待构建' }}
             </el-tag>
           </div>
-          <div class="product-meta-row">
-            <span class="product-cat">{{ prod.category }}</span>
-            <span class="product-std">{{ prod.standard }}</span>
-          </div>
-          <div class="product-completeness">
-            <span class="completeness-label">数据完整度</span>
-            <el-progress :percentage="prod.dataCompleteness" :stroke-width="4" :color="prod.dataCompleteness >= 80 ? '#0067fe' : prod.dataCompleteness >= 50 ? '#E6A23C' : '#F56C6C'"></el-progress>
+          <div class="product-info">
+            <div class="product-info-row">
+              <span class="info-label">品类</span>
+              <span class="info-value">{{ prod.category || '—' }}</span>
+            </div>
+            <div class="product-info-row">
+              <span class="info-label">型号</span>
+              <span class="info-value">{{ prod.standard || prod.specs || '—' }}</span>
+            </div>
           </div>
           <div class="product-bottom">
-            <span class="product-calc-count">已核算 {{ prod.calcCount }} 次</span>
-            <span v-if="prod.lastCalcResult" class="product-last-result">{{ prod.lastCalcResult }}</span>
-            <el-button size="mini" type="primary" plain class="calc-btn" @click="$emit('quick-calc', prod)">
-              核算
+            <el-button size="mini" type="primary" class="calc-btn" icon="el-icon-data-analysis" @click="$emit('quick-calc', prod)">
+              开始核算
             </el-button>
           </div>
         </div>
@@ -117,7 +142,8 @@ export default {
       return this.tasks.filter(t => !this.searchTask || t.name.includes(this.searchTask) || t.product.includes(this.searchTask))
     },
     filteredProducts() {
-      return (this.products || []).filter(p => !this.searchProduct || p.name.includes(this.searchProduct) || p.category.includes(this.searchProduct))
+      const list = (this.products || []).map(p => ({ ...p, standard: p.standard || p.specs || '' }))
+      return list.filter(p => !this.searchProduct || p.name.includes(this.searchProduct) || p.category.includes(this.searchProduct))
     }
   },
   methods: {
@@ -216,10 +242,10 @@ export default {
 
 /* 卡片通用 */
 .task-card, .conv-card {
-  padding: 16px;
+  padding: 14px;
   border: 1px solid #E4E7ED;
   background: #FFFFFF;
-  border-radius: 8px;
+  border-radius: 10px;
   margin-bottom: 12px;
   transition: all 0.3s;
   cursor: pointer;
@@ -229,13 +255,58 @@ export default {
   box-shadow: 0 4px 12px rgba(0, 103, 254, 0.1);
   transform: translateY(-2px);
 }
+.task-card.is-archived {
+  background: var(--bg-hover);
+}
 
 /* 任务卡片 */
 .task-top, .conv-top {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.task-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  background: rgba(0, 103, 254, 0.08);
+  color: #0067FE;
+}
+.task-icon.is-done {
+  background: rgba(103, 194, 58, 0.1);
+  color: #67C23A;
+}
+.task-icon.is-error {
+  background: rgba(245, 108, 108, 0.1);
+  color: #F56C6C;
+}
+.task-icon.is-archived {
+  background: rgba(144, 147, 153, 0.12);
+  color: #909399;
+}
+.task-top-right {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.task-del-btn {
+  padding: 2px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.task-del-btn:hover {
+  color: #F56C6C;
+}
+.task-del-btn.is-archived {
+  color: var(--text-placeholder);
+  cursor: not-allowed;
 }
 .task-name, .conv-name {
   font-size: 13px;
@@ -247,6 +318,18 @@ export default {
   flex: 1;
   padding-right: 8px;
 }
+.task-info {
+  background: var(--bg-hover);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+}
+.task-info-row {
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+  line-height: 20px;
+}
 .task-product, .conv-product {
   font-size: 12px;
   color: var(--text-secondary);
@@ -255,14 +338,36 @@ export default {
   gap: 4px;
   margin-bottom: 8px;
 }
-.task-progress {
+.task-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 8px;
+}
+.task-progress {
+  flex: 1;
+}
+.task-percent {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 32px;
+  text-align: right;
+}
+.task-percent.is-danger {
+  color: #F56C6C;
 }
 .task-bottom, .conv-bottom {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 11px;
   color: var(--text-muted);
+}
+.task-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* 空白状态 */
@@ -294,12 +399,13 @@ export default {
 
 /* 产品卡片 */
 .product-card {
-  padding: 16px;
+  padding: 14px;
   border: 1px solid #E4E7ED;
   background: #FFFFFF;
-  border-radius: 8px;
+  border-radius: 10px;
   margin-bottom: 12px;
   transition: all 0.3s;
+  cursor: default;
 }
 .product-card:hover {
   border-color: #0067FE;
@@ -308,9 +414,21 @@ export default {
 }
 .product-top {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.product-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(0, 103, 254, 0.08);
+  color: #0067FE;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
 }
 .product-name {
   font-size: 13px;
@@ -320,46 +438,37 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   flex: 1;
-  padding-right: 8px;
 }
-.product-meta-row {
-  display: flex;
-  gap: 8px;
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-bottom: 8px;
-}
-.product-cat {
+.product-info {
   background: var(--bg-hover);
-  padding: 1px 6px;
-  border-radius: 4px;
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
 }
-.product-std {
-  color: var(--text-secondary);
-}
-.product-completeness {
-  margin-bottom: 8px;
-}
-.completeness-label {
+.product-info-row {
+  display: flex;
+  align-items: center;
   font-size: 11px;
+  line-height: 20px;
+}
+.info-label {
   color: var(--text-muted);
-  display: block;
-  margin-bottom: 2px;
+  width: 30px;
+  flex-shrink: 0;
+}
+.info-value {
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .product-bottom {
   display: flex;
   align-items: center;
-  font-size: 11px;
-  color: var(--text-muted);
-  gap: 8px;
-}
-.product-last-result {
-  color: #0067fe;
-  font-weight: 500;
 }
 .calc-btn {
-  margin-left: auto;
-  padding: 4px 14px;
+  width: 100%;
   font-size: 12px;
+  border-radius: 6px;
 }
 </style>

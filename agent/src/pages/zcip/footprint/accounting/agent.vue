@@ -1,171 +1,9 @@
-﻿<template>
+<template>
   <div class="agent-page">
-    <!-- ===== 任务列表模式（对话式+左右分栏） ===== -->
-    <div v-if="pageMode === 'task-list'" class="tl-dialog-mode">
-      <div class="tl-dialog-body">
-        <!-- 最左：历史对话栏（可收缩） -->
-        <div :class="['fp-history-sidebar', { 'fp-history-collapsed': !showHistorySidebar }]">
-          <div class="fp-history-toggle" @click="toggleHistorySidebar">
-            <i :class="showHistorySidebar ? 'el-icon-d-arrow-left' : 'el-icon-d-arrow-right'"></i>
-            <span v-if="!showHistorySidebar" class="fp-history-vertical">历史对话</span>
-          </div>
-          <div v-if="showHistorySidebar" class="fp-history-content">
-            <div class="fp-history-head">
-              <span>历史对话</span>
-              <span class="fp-history-count">{{ conversationHistory.length }}</span>
-            </div>
-            <div class="fp-history-list">
-              <div v-for="conv in conversationHistory" :key="conv.id"
-                :class="['fp-history-item', { 'fp-history-active': currentConversationId === conv.id }]"
-                @click="loadConversation(conv.id)">
-                <div class="fp-history-title">{{ conv.title }}</div>
-                <div class="fp-history-time">{{ conv.timestamp }}</div>
-                <i class="el-icon-close fp-history-del" @click.stop="deleteConversation(conv.id)"></i>
-              </div>
-              <div v-if="conversationHistory.length === 0" class="fp-history-empty">
-                <i class="el-icon-chat-line-square"></i>
-                <span>暂无历史对话</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 左侧：对话消息区 -->
-        <div class="tl-dialog-left">
-          <div class="tl-dialog-header">
-            <div class="tl-header-left">
-              <span class="bot-avatar-sm">
-                <AgentIcon icon="ai-core" :size="26" />
-              </span>
-              <strong class="tl-header-name"><span class="chat-name-highlight" style="font-size:15px;">小易</span></strong>
-              <span class="bot-status-dot"></span>
-              <span class="tl-header-status">在线</span>
-            </div>
-            <div class="tl-header-actions">
-              <span class="token-counter" v-if="estimatedTokens > 0"><i class="el-icon-coin"></i> {{ formattedTokens }}</span>
-              <span class="header-onboarding-btn" @click="startOnboarding"><i class="el-icon-aim"></i> 新手引导</span>
-              <span class="toolbar-icon-sep" @click="newConversation"><i class="el-icon-plus"></i> 新建对话</span>
-            </div>
-          </div>
-          <div class="tl-dialog-messages" ref="tlDialogMessages">
-            <!-- Bot 欢迎消息 -->
-            <div class="tl-msg tl-msg-bot">
-              <div class="tl-msg-avatar">
-                <AgentIcon icon="ai-core" :size="26" />
-              </div>
-              <div class="tl-msg-bubble tl-bubble-bot">
-                <div class="tl-bubble-welcome">
-                  👋 欢迎使用产品碳足迹核算智能体！我是小易，将全程引导您完成核算。
-                </div>
-                <p class="tl-bubble-text">我将引导您对产品进行全生命周期（LCA）九阶段的碳足迹智能核算，包括目标与范围界定、清单分析、影响评价等全流程。</p>
-                <p class="tl-bubble-hint">💡 在下方输入产品名称并回车即可开始新核算，右侧可查看历史任务继续推进。</p>
-              </div>
-            </div>
-            <!-- 展示历史任务（在对话中） -->
-            <template v-if="tlDialogStep === 'show-history'">
-              <div class="tl-msg tl-msg-bot">
-                <div class="tl-msg-avatar">
-                  <AgentIcon icon="ai-core" :size="26" />
-                </div>
-                <div class="tl-msg-bubble tl-bubble-bot tl-bubble-history">
-                  <p class="tl-bubble-text">以下是您的历史核算任务，点击即可继续：</p>
-                  <div class="tl-history-cards">
-                    <div v-for="task in taskList" :key="task.id" class="tl-history-card" @click="continueTask(task)">
-                      <div class="tl-hc-top">
-                        <div class="tl-hc-icon" :style="{ backgroundColor: task.status === 'completed' ? '#52c41a' : '#0067FE' }">
-                          <i :class="task.status === 'completed' ? 'el-icon-circle-check' : 'el-icon-loading'"></i>
-                        </div>
-                        <div class="tl-hc-info">
-                          <div class="tl-hc-name">{{ task.productName }}</div>
-                          <div class="tl-hc-meta">
-                            <el-tag size="mini" :type="getTaskStatusType(task.status)" effect="dark">{{ getTaskStatusLabel(task.status) }}</el-tag>
-                            <span class="tl-hc-standard">{{ task.standard }}</span>
-                          </div>
-                        </div>
-                        <div @click.stop>
-                          <el-popconfirm title="确定删除该任务？" confirm-button-text="删除" cancel-button-text="取消" @confirm="deleteTask(task.id)">
-                            <i slot="reference" class="el-icon-delete tl-hc-delete"></i>
-                          </el-popconfirm>
-                        </div>
-                      </div>
-                      <div class="tl-hc-bottom">
-                        <span class="tl-hc-phase">阶段：{{ getTaskPhaseName(task.currentStepIndex) }}</span>
-                        <el-progress :percentage="Math.round(task.currentStepIndex / 8 * 100)" :stroke-width="4" :show-text="false" :color="task.status === 'completed' ? '#52c41a' : '#0067FE'" style="flex:1;margin-left:6px;"></el-progress>
-                        <span class="tl-hc-time">{{ task.updatedAt }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </template>
-          </div>
-          <!-- 底部输入框 -->
-          <div class="tl-input-area">
-            <div class="input-box">
-              <textarea
-                class="input-textarea"
-                v-model="tlInputText"
-                placeholder="输入消息或提问…"
-                rows="1"
-                @keydown.enter.exact="handleTlSendKey"
-                @input="autoResizeTlTextarea"
-                ref="tlInputTextareaRef"
-              ></textarea>
-              <div class="input-box-footer">
-                <div class="input-toolbar">
-                  <span class="toolbar-icon" title="常用指令" @click="showCmdHint"><i class="el-icon-s-opportunity"></i></span>
-                  <span class="toolbar-icon" title="语音输入" @click="$message.info('语音输入功能开发中')"><i class="el-icon-microphone"></i></span>
-                  <span class="toolbar-icon" title="图片上传" @click="$message.info('图片上传功能开发中')"><i class="el-icon-picture"></i></span>
-                  <span class="toolbar-icon" title="附件上传（Excel 核算清单）" @click="triggerUpload"><i class="el-icon-upload2"></i></span>
-                  <input ref="tlFileInput" type="file" accept=".xlsx,.xls" style="display:none" @change="handleInputFileChange" />
-                </div>
-                <button class="send-btn" :disabled="!tlInputText.trim()" @click="handleTlSend">
-                  <i class="el-icon-s-promotion"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 右侧：历史任务面板 -->
-        <div class="tl-dialog-right">
-          <div class="tl-right-header">
-            <span class="tl-right-title"><i class="el-icon-folder-opened"></i> 历史核算任务</span>
-            <span class="tl-right-count">{{ taskList.length }} 条记录</span>
-          </div>
-          <div class="tl-right-list">
-            <el-empty v-if="taskList.length === 0" description="暂无历史任务" :image-size="80"></el-empty>
-            <div v-for="task in taskList" :key="task.id" class="tl-right-card" @click="continueTask(task)">
-              <div class="tl-rc-top">
-                <div class="tl-rc-icon" :style="{ backgroundColor: task.status === 'completed' ? '#52c41a' : '#0067FE' }">
-                  <i :class="task.status === 'completed' ? 'el-icon-circle-check' : 'el-icon-loading'"></i>
-                </div>
-                <div class="tl-rc-info">
-                  <div class="tl-rc-name">{{ task.productName }}</div>
-                  <div class="tl-rc-meta">
-                    <el-tag size="mini" :type="getTaskStatusType(task.status)" effect="dark">{{ getTaskStatusLabel(task.status) }}</el-tag>
-                    <span class="tl-rc-standard">{{ task.standard }}</span>
-                  </div>
-                </div>
-                <div @click.stop>
-                  <el-popconfirm title="确定删除该任务？" confirm-button-text="删除" cancel-button-text="取消" @confirm="deleteTask(task.id)">
-                    <i slot="reference" class="el-icon-delete tl-rc-delete"></i>
-                  </el-popconfirm>
-                </div>
-              </div>
-              <div class="tl-rc-bottom">
-                <span class="tl-rc-phase">阶段：{{ getTaskPhaseName(task.currentStepIndex) }}</span>
-                <el-progress :percentage="Math.round(task.currentStepIndex / 8 * 100)" :stroke-width="4" :show-text="false" :color="task.status === 'completed' ? '#52c41a' : '#0067FE'" style="flex:1;margin-left:6px;"></el-progress>
-              </div>
-              <div class="tl-rc-time">{{ task.updatedAt }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== 任务对话模式（原有九阶段界面） ===== -->
-    <div v-if="pageMode === 'task-active'" class="task-active-mode">
+    <!-- ===== 任务详情页（九阶段核算） ===== -->
+    <!-- 说明：任务列表/选品入口属工作台（#/agent-center/apps/carbon-accounting），
+         本页面为任务详情页，直接进入九阶段流程；页内原 task-list 模式已回退移除。 -->
+    <div class="task-active-mode">
 
     <div class="agent-body">
       <!-- 左侧：智能体对话框 -->
@@ -317,43 +155,24 @@
           </div>
         </div>
 
-        <!-- 阶段0：上部核算标准（当前标准 + 切换） -->
+        <!-- 阶段0：上部核算标准（下拉选择框） -->
         <div v-if="currentStepIndex === 0" class="sidebar-upper">
-          <div class="upper-header">
-            <div class="upper-title-row">
+          <div class="content-header upper-header">
+            <div class="content-header-row">
               <i class="el-icon-reading"></i>
-              <span class="upper-title">政策标准</span>
-              <el-button v-if="standardsWithSelection.length > 1" type="text" size="mini" class="std-switch-btn"
-                @click="standardPickerOpen = !standardPickerOpen">
-                {{ standardPickerOpen ? '收起' : '切换标准' }}
-                <i :class="standardPickerOpen ? 'el-icon-arrow-up' : 'el-icon-arrow-down'"></i>
-              </el-button>
+              <span class="content-header-title">政策标准</span>
             </div>
           </div>
-
-          <div v-if="!standardPickerOpen && selectedStandardConfig" class="std-current">
-            <i class="el-icon-document-checked std-current-icon"></i>
-            <div class="std-current-main">
-              <span class="std-current-code">{{ selectedStandardConfig.code }}</span>
-              <span class="std-current-name">{{ selectedStandardConfig.name }}</span>
-            </div>
-            <span class="std-current-tag">已选中</span>
-          </div>
-
-          <div v-else class="standards-list">
-            <div v-for="std in standardsWithSelection" :key="std.code"
-              :class="['standard-item', { 'standard-selected': std.code === selectedStandard }]"
-              @click="selectStandard(std.code)">
-              <div :class="['std-icon', { 'std-icon-selected': std.code === selectedStandard }]">
-                <i :class="std.code === selectedStandard ? 'el-icon-folder-opened' : 'el-icon-folder'"></i>
+          <el-select v-model="selectedStandard" size="small" class="std-select"
+            placeholder="请选择本次核算采用的依据标准">
+            <el-option v-for="std in standardsWithSelection" :key="std.code"
+              :label="std.code" :value="std.code">
+              <div class="std-option">
+                <span class="std-option-code">{{ std.code }}</span>
+                <span class="std-option-name">{{ std.name }}</span>
               </div>
-              <div class="std-info">
-                <div class="std-code">{{ std.code }}</div>
-                <div class="std-name">{{ std.name }}</div>
-              </div>
-              <el-tag v-if="std.code === selectedStandard" size="mini" type="success" effect="dark">已选中</el-tag>
-            </div>
-          </div>
+            </el-option>
+          </el-select>
         </div>
 
         <!-- 阶段0分割线 -->
@@ -367,98 +186,58 @@
             <p>请从上方选择一个标准<br>查看其解析内容</p>
           </div>
 
-          <!-- 阶段 0：标准解析结果（随选中标准动态渲染） -->
+          <!-- 阶段0未完成引导：核算模型尚未构建时，不应展示空的模型骨架 -->
+          <div v-if="currentStepIndex >= 2 && modelStages.length === 0" class="lower-empty model-empty">
+            <i class="el-icon-s-grid"></i>
+            <p>核算模型尚未构建</p>
+            <p class="model-empty-sub">请先完成【政策标准】与【核算边界】的确认，系统将依据标准自动生成生命周期核算模型。</p>
+            <el-button type="primary" size="small" @click="jumpToPhase(1)">返回核算边界</el-button>
+          </div>
+
+          <!-- 阶段 0：标准知识（与政策标准库详情「标准知识」页签同源，逐组展示） -->
           <div v-if="currentStepIndex === 0 && selectedStandardConfig" class="parsing-section">
             <div class="content-header">
               <div class="content-header-row">
                 <i class="el-icon-document"></i>
-                <span class="content-header-title">标准内容解析</span>
+                <span class="content-header-title">标准知识</span>
+                <span class="content-header-sub">{{ stdKnowledgeGroupCount }} 个分组 · {{ stdKnowledgePointCount }} 条</span>
               </div>
             </div>
 
             <div class="parsing-cards">
-              <div class="parsing-card">
+              <div class="parsing-card" v-for="(dim, di) in stdKnowledgeDims" :key="'k' + di">
                 <div class="parsing-card-header">
                   <span class="parsing-card-icon scope-icon"></span>
-                  <span class="parsing-card-title">适用范围</span>
+                  <span class="parsing-card-title">{{ dim.name || dim.key }}</span>
+                  <span class="parsing-card-count">
+                    {{ dim.type === 'table' ? ((dim.rows || []).length + ' 项') : ((dim.points || []).length + ' 条') }}
+                  </span>
                 </div>
                 <div class="parsing-card-body">
-                  <p v-if="stdScope">{{ stdScope }}</p>
-                  <p v-if="stdScopeExcluded">{{ stdScopeExcluded }}</p>
-                </div>
-              </div>
-
-              <div class="parsing-card">
-                <div class="parsing-card-header">
-                  <span class="parsing-card-icon boundary-icon"></span>
-                  <span class="parsing-card-title">生命周期阶段</span>
-                </div>
-                <div class="parsing-card-body">
-                  <p>应覆盖以下 {{ stageList.length }} 个生命周期阶段：</p>
-                  <p>{{ stageList.join(' · ') }}</p>
-                </div>
-              </div>
-
-              <div class="parsing-card">
-                <div class="parsing-card-header">
-                  <span class="parsing-card-icon boundary-icon"></span>
-                  <span class="parsing-card-title">边界量化规则</span>
-                </div>
-                <div class="parsing-card-body">
-                  <p>量化口径：<b>{{ stdQuantBasis }}</b></p>
-                  <p>量化单位：<b>{{ stdUnitTypeLabel }}</b> — {{ stdUnitDetail || '—' }}</p>
-                  <p>分配规则：<b>{{ stdAllocationLabel }}</b></p>
-                  <p>取舍准则：{{ stdCutoff || '—' }}</p>
-                </div>
-              </div>
-
-              <div class="parsing-card">
-                <div class="parsing-card-header">
-                  <span class="parsing-card-icon scope-icon"></span>
-                  <span class="parsing-card-title">数据与因子要求</span>
-                </div>
-                <div class="parsing-card-body">
-                  <p v-if="stdDataQuality.length">数据质量要求：</p>
-                  <p v-for="(dq, di) in stdDataQuality" :key="di">
-                    · <b>{{ dq.label }}：</b>{{ dq.desc }}
-                  </p>
-                  <p>DQR 评估维度：{{ dqrDimsText }}</p>
-                  <p>因子优先序：{{ factorPriorityText }}</p>
-                </div>
-              </div>
-
-              <div class="parsing-card" v-if="stdGhgGases.length">
-                <div class="parsing-card-header">
-                  <span class="parsing-card-icon scope-icon"></span>
-                  <span class="parsing-card-title">温室气体种类</span>
-                </div>
-                <div class="parsing-card-body">
-                  <p>核算 <b>{{ stdGhgGases.length }}</b> 种温室气体（GWP100）：</p>
-                  <p>{{ stdGhgGases.map(g => g.symbol + ' ' + g.name + (g.gwp100 !== undefined ? '（GWP=' + g.gwp100 + '）' : '')).join(' · ') }}</p>
-                </div>
-              </div>
-
-
-              <div class="parsing-card" v-if="stdFormulas.length">
-                <div class="parsing-card-header">
-                  <span class="parsing-card-icon scope-icon"></span>
-                  <span class="parsing-card-title">核算公式</span>
-                </div>
-                <div class="parsing-card-body">
-                  <p v-for="(f, fi) in stdFormulas" :key="fi">
-                    <b>{{ f.label }}：</b>{{ f.formula }}
-                  </p>
-                </div>
-              </div>
-
-              <div class="parsing-card">
-                <div class="parsing-card-header">
-                  <span class="parsing-card-icon scope-icon"></span>
-                  <span class="parsing-card-title">校验与报告要求</span>
-                </div>
-                <div class="parsing-card-body">
-                  <p v-if="stdCompletenessRule">{{ stdCompletenessRule }}</p>
-                  <p>报告模板：{{ reportTemplateLabel }}</p>
+                  <!-- 列表型分组 -->
+                  <template v-if="dim.type !== 'table'">
+                    <div v-for="(pt, pi) in (dim.points || [])" :key="pi" class="kn-item">
+                      <div class="kn-text">{{ pt.text }}</div>
+                      <div v-if="(pt.clauseRefs || []).length" class="kn-refs">
+                        <span v-for="(r, ri) in pt.clauseRefs" :key="ri" class="kn-ref">{{ r }}</span>
+                      </div>
+                    </div>
+                  </template>
+                  <!-- 表格型分组 -->
+                  <template v-else>
+                    <table class="kn-table">
+                      <thead>
+                        <tr>
+                          <th v-for="(col, ci) in splitColumns(dim.columnsText)" :key="ci">{{ col }}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="(row, ri) in (dim.rows || [])" :key="ri">
+                          <td v-for="(cell, ci) in row" :key="ci">{{ cell }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </template>
                 </div>
               </div>
             </div>
@@ -1481,7 +1260,7 @@
         </div>
 
         <!-- 阶段 2+：展示工艺模型与因子绑定 -->
-          <div v-else class="parsing-section">
+          <div v-else-if="modelStages.length" class="parsing-section">
             <div class="content-header" v-if="currentStepIndex !== 6">
               <div class="content-header-row">
                 <i :class="phases[currentStepIndex] ? phases[currentStepIndex].icon : 'el-icon-s-grid'"></i>
@@ -1909,22 +1688,11 @@
       </div>
     </el-dialog>
 
-    <!-- 新手引导浮层 -->
-    <onboarding-guide
-      :visible="showOnboarding"
-      :step="onboardingStep"
-      :steps-override="onboardingSteps"
-      @skip="finishOnboarding"
-      @prev="onboardingStep--"
-      @next="onboardingStep++"
-      @finish="finishOnboarding"
-    />
   </div>
 </template>
 
 <script>
 import AgentIcon from '@/pages/zcip/common/AgentIcon.vue'
-import OnboardingGuide from '../../agent-center/components/OnboardingGuide.vue'
 import agentCoreMixin from './agentCoreMixin'
 import agentChatMixin from './agentChatMixin'
 import { isTimespaceElec, buildDayDetail, daysBetween, calcPeriodWeightedFactor } from '@/utils/timespaceElec'
@@ -1932,11 +1700,11 @@ import { normalizeRegion } from '@/utils/regionDict'
 
 export default {
   name: 'CarbonFootprintAgent',
-  components: { AgentIcon, OnboardingGuide },
+  components: { AgentIcon },
   mixins: [agentCoreMixin, agentChatMixin],
   data() {
     return {
-      showOnboarding: false,
+      // 任务列表/选品入口由工作台承载，本页只保留任务详情状态
       activeActivityRow: null,  // 数据清单当前选中行（对话联动）
       selectedFactorLibs: [],
       // 分时分区：市电活动数据详情弹窗
@@ -1952,58 +1720,7 @@ export default {
       // 分时电量修改记录（按工序名索引）
       tsAuditMap: {},
       // 修改记录面板展开态
-      tsAuditExpanded: false,
-      onboardingStep: 0,
-      onboardingSteps: [
-        {
-          icon: 'el-icon-data-analysis',
-          title: '欢迎使用产品碳足迹核算智能体',
-          text: '这里是产品碳足迹核算工作空间。基于LCA生命周期方法，为您提供九阶段智能核算服务，涵盖目标与范围界定、清单分析、影响评价、结果解读全流程。',
-          features: [
-            { icon: 'el-icon-s-data', title: '九阶段流程', desc: '目标界定→清单分析→影响评价→结果解读', color: '#0067FE' },
-            { icon: 'el-icon-connection', title: '因子匹配', desc: '排放因子库自动匹配，支持自定义替换', color: '#0067FE' },
-            { icon: 'el-icon-share', title: '全链溯源', desc: '结果→公式→参数→来源→凭证逐级可溯', color: '#ED7B2F' }
-          ],
-          tip: '首次使用建议依次浏览全部引导内容，约需1分钟。',
-          iconStyle: {}
-        },
-        {
-          icon: 'el-icon-chat-dot-round',
-          title: '智能对话区',
-          text: '页面中间为对话区，直接向小易提问或下达指令。输入产品名称即可开始核算，小易会引导您完成九阶段流程。',
-          features: [
-            { icon: 'el-icon-video-play', title: '快速开始', desc: '输入产品名称即可创建核算任务', color: '#0067FE' },
-            { icon: 'el-icon-magic-stick', title: '智能问答', desc: '核算方法、因子来源即问即答', color: '#0067FE' },
-            { icon: 'el-icon-s-opportunity', title: '常用指令', desc: '点击灯泡图标呼出指令面板', color: '#ED7B2F' }
-          ],
-          tip: '试试输入产品名称开始一次碳足迹核算。',
-          iconStyle: {}
-        },
-        {
-          icon: 'el-icon-chat-line-square',
-          title: '历史对话栏',
-          text: '页面左侧为历史对话栏，点击可展开查看历史对话记录，支持新建、切换和删除对话。',
-          features: [
-            { icon: 'el-icon-folder-opened', title: '对话记录', desc: '自动保存每次对话，按时间倒序排列', color: '#0067FE' },
-            { icon: 'el-icon-plus', title: '新建对话', desc: '点击「新建」开启全新对话', color: '#0067FE' },
-            { icon: 'el-icon-d-arrow-left', title: '可收缩', desc: '点击边条可展开/收缩历史栏', color: '#909399' }
-          ],
-          tip: '窄屏下历史栏自动隐藏。',
-          iconStyle: {}
-        },
-        {
-          icon: 'el-icon-folder-opened',
-          title: '核算任务列表',
-          text: '页面右侧为核算任务列表，展示所有已创建的产品碳足迹核算任务。点击任务卡片即可继续推进九阶段核算流程。',
-          features: [
-            { icon: 'el-icon-aim', title: '进度跟踪', desc: '实时显示每个任务的当前阶段和进度', color: '#0067FE' },
-            { icon: 'el-icon-right', title: '一键进入', desc: '点击卡片即可继续推进核算', color: '#0067FE' },
-            { icon: 'el-icon-delete', title: '任务管理', desc: '支持删除已完成的核算任务', color: '#F56C6C' }
-          ],
-          tip: '进入任务后，右侧将切换为九阶段进度面板。',
-          iconStyle: {}
-        }
-      ]
+      tsAuditExpanded: false
     }
   },
   created() {
@@ -2033,6 +1750,10 @@ export default {
     }
   },
   methods: {
+    /** 解析表格型知识分组的列名 */
+    splitColumns(text) {
+      return String(text || '').split(/[,，]/).map(s => s.trim()).filter(Boolean)
+    },
     // ===== 分时分区电碳因子（仅生产阶段市电）=====
     /** 该输入流是否适用分时分区因子 */
     isTsElec(inp, stage) {
@@ -2636,13 +2357,6 @@ export default {
       if (on) this.selectedFactorLibs = this.availableFactorLibs().map(l => l.key)
       else this.selectedFactorLibs = this.requiredFactorLibs().slice()
     },
-    startOnboarding() {
-      this.onboardingStep = 0
-      this.showOnboarding = true
-    },
-    finishOnboarding() {
-      this.showOnboarding = false
-    },
     goBackHome() {
       this.$router.push('/agent-center/apps/carbon-accounting').catch(() => {})
     },
@@ -2651,7 +2365,6 @@ export default {
       this.saveConversation()
       this.messages = []
       this.currentConversationId = null
-      this.tlDialogStep = 'welcome'
       this.$message.success('已开启新对话')
     }
   }

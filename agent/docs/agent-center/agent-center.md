@@ -28,7 +28,7 @@
 | 编号 | 视图 | 路由 | 说明 | 原型实现度 |
 |---|---|---|---|---|
 | A-01 | AgentCenter.vue（623 行） | /#/agent-center/apps | 智能体应用中心主页（应用卡片 + 分类导航） | 已实现 |
-| A-02 | CarbonAccountingCenter.vue（538 行） | /#/agent-center/apps/carbon-accounting | 产品碳足迹智能体中心（第二层：任务列表 + 对话） | 已实现 |
+| A-02 | CarbonAccountingCenter.vue | /#/agent-center/apps/carbon-accounting | 产品碳足迹工作台（左侧历史对话 + 中间对话/创建任务表单 + 右侧任务列表/企业产品库两页签） | 已实现 |
 
 ### 3.2 公共布局与引导组件
 
@@ -48,7 +48,7 @@
 | A-09 | FormulaLibrary.vue（559 行） | /formula-library | 核算公式库 | 已实现 |
 | A-10 | ProcessLibrary.vue（568 行） | /process-library | 单元过程库（工艺流程与单元过程数据） | 已实现 |
 | A-11 | PlatformTemplateLibrary.vue（1141 行） | /platform-template-library | 平台模板库（法定报表表样与 prefill 配置载体） | 已实现 |
-| A-12 | SkillManagement.vue（609 行） | /skill-management | Skill 管理（AI Prompt 编排） | 已实现 |
+| A-12 | [SkillManagement.vue](skill-management.md) | /skill-management | Skill 管理（Prompt 模板配置、启用禁用、默认模板恢复、详情查看） | 已实现 |
 | A-13 | AccountingTemplateLibrary.vue（326 行） | /accounting-template-library | 组织模板库（企业侧核算模板） | 已实现 |
 
 ### 3.4 资源库群 · 私域台账库
@@ -67,10 +67,10 @@
 
 ### 4.1 应用中心（A-01 / A-02）
 - **位置**：模块入口页；A-02 为应用二层页
-- **交互**：应用卡片按分类展示，点击进入对应智能体工作台；二层页左侧对话、右侧任务列表，支持新建核算任务并跳转
-- **边界**：应用中心只做入口导航与任务清单，不承载核算逻辑（核算在工作台内）
+- **交互**：应用卡片按分类展示，点击进入对应智能体工作台；产品碳足迹工作台左侧为历史对话栏、中间为对话与创建任务表单、右侧为任务列表和企业产品库两页签，可新建核算任务并跳转任务详情
+- **边界**：工作台只做历史对话、任务入口与产品库入口，不承载九阶段核算逻辑；核算在独立任务详情页 `/#/footprint/accounting/agent` 内完成
 - **数据**：智能体应用清单、核算任务列表（会话与任务索引）
-- **验收**：[ ] 卡片点击进入正确工作台；[ ] 二层页可新建任务并跳转
+- **验收**：[ ] 卡片点击进入正确工作台；[ ] 工作台可新建任务并跳转独立任务详情页
 
 ### 4.2 公共布局与引导（A-03~A-06）
 - **位置**：被各智能体应用复用（组件级）
@@ -92,6 +92,7 @@
 |---|---|
 | **A-08 排放因子库** | 因子智能匹配的数据源；支持自定义因子替换与适用条件维护；分模块存储国内官方因子 / 企业实测因子 / 分时分区电力碳因子 / 国际主流因子，含可信度评分与版本回溯 |
 | **A-07 政策标准库** | 标准条文结构化存储（标准解析 → 结构化配置段）与详情穿透（独立路由）；支撑知识向量库构建；上传解析标准后进入“待人工审核”，审核通过方对智能体生效 |
+| **A-12 Skill 管理** | 默认 Skill 配置唯一来源在 `skillPrompts.js`；管理页只维护 Prompt 与启用状态，保存到 `carbon-skill-templates`；业务页通过 `getSkillConfigById()` / `isSkillEnabled()` 读取配置。当前“标准解析”已接入政策标准库的规则化模拟解析入口 |
 | **A-11 平台模板库** | 报告模板载体：`reportType / docName / version / prefill / variants / matchFields / periods / sections / body / caliber`；智慧报告按 `reportType` 匹配模板，`caliber.standardCode` 引用政策标准库规则集 |
 | **A-14 组织资源库** | 主体与表计档案台账，是资格核验（法人 / 规模 / 名单）与场景路由（行业 / 领域）的数据来源 |
 | **A-15 企业因子库** | 与 A-08 公因数**分库**：企业实测与历史记忆（P-1 / P0）私域存放，人工纠偏结果回写本库 |

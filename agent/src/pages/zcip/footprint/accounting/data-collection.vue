@@ -408,7 +408,7 @@ export default {
         const loading = this.$loading({ text: '正在提交数据...' })
         setTimeout(() => {
           loading.close()
-          this.$message.success('数据已成功提交，正在跳转到核算工作台...')
+          this.$message.success('数据已成功提交，正在跳转到任务详情...')
           setTimeout(() => {
             this.$router.push('/footprint/accounting/agent?direct=true&id=TASK-20260624002')
           }, 800)

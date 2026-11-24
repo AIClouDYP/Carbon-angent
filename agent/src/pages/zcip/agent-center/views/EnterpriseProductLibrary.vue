@@ -214,83 +214,23 @@ export default {
     },
     loadProducts() {
       try {
-        const saved = localStorage.getItem('cfp_products_v3')
+        const saved = localStorage.getItem('cfp_products_v4')
         if (saved) {
           this.products = JSON.parse(saved)
         }
         if (!this.products || this.products.length === 0) {
           this.products = [
             {
-              id: 'EP-001', name: '燃油轿车 ICE-A160 1.6L手动', category: '燃油乘用车',
-              weight: 1320, grossWeight: 1345,
-              specs: 'A160-MT-2024', packagingInfo: '裸车发运+防撞护角, 约25kg',
-              serviceLife: '15年/150,000km', usePhaseEnergy: '汽油消耗6.5L/100km', productionLocation: '武汉整车制造基地', discontinued: false
+              id: 'EP-001', name: '小米SU7', category: '新能源乘用车',
+              weight: 2205, grossWeight: 2230,
+              specs: 'SU7-MAX-2024', packagingInfo: '裸车发运+防撞护角, 约25kg',
+              serviceLife: '15年/300,000km', usePhaseEnergy: '电耗14.8kWh/100km', productionLocation: '北京亦庄智能制造基地', discontinued: false
             },
             {
-              id: 'EP-002', name: '燃油轿车 ICE-A160 1.6L自动', category: '燃油乘用车',
-              weight: 1340, grossWeight: 1365,
-              specs: 'A160-CVT-2024', packagingInfo: '裸车发运+防撞护角, 约25kg',
-              serviceLife: '15年/150,000km', usePhaseEnergy: '汽油消耗6.8L/100km', productionLocation: '武汉整车制造基地', discontinued: false
-            },
-            {
-              id: 'EP-003', name: '燃油SUV ICE-X200 2.0T', category: '燃油乘用车',
-              weight: 1680, grossWeight: 1705,
-              specs: 'X200-2.0T-2024', packagingInfo: '裸车发运+防撞护角, 约25kg',
-              serviceLife: '15年/150,000km', usePhaseEnergy: '汽油消耗8.8L/100km', productionLocation: '武汉整车制造基地', discontinued: false
-            },
-            {
-              id: 'EP-004', name: '纯电动轿车 EV-C60', category: '新能源乘用车',
-              weight: 1650, grossWeight: 1675,
-              specs: 'C60-EV-2024', packagingInfo: '裸车发运+防撞护角, 约25kg',
-              serviceLife: '15年/300,000km', usePhaseEnergy: '电耗14.5kWh/100km', productionLocation: '武汉新能源制造基地', discontinued: false
-            },
-            {
-              id: 'EP-005', name: '纯电动SUV EV-X80', category: '新能源乘用车',
-              weight: 2100, grossWeight: 2125,
-              specs: 'X80-EV-2024', packagingInfo: '裸车发运+防撞护角, 约25kg',
-              serviceLife: '15年/300,000km', usePhaseEnergy: '电耗18.2kWh/100km', productionLocation: '武汉新能源制造基地', discontinued: false
-            },
-            {
-              id: 'EP-006', name: '插电混动轿车 PHEV-A180', category: '新能源乘用车',
-              weight: 1510, grossWeight: 1535,
-              specs: 'A180-PHEV-2024', packagingInfo: '裸车发运+防撞护角, 约25kg',
-              serviceLife: '15年/200,000km', usePhaseEnergy: '纯电14kWh/100km + 混动4.2L/100km', productionLocation: '武汉新能源制造基地', discontinued: false
-            },
-            {
-              id: 'EP-007', name: '三元锂电池包 NCM70', category: '动力电池',
-              weight: 350, grossWeight: 395,
-              specs: 'NCM70-355V', packagingInfo: '木箱+防震衬垫, 约45kg',
-              serviceLife: '8年/1500次循环', usePhaseEnergy: '充放电效率95%, 循环能耗0.15kWh/km', productionLocation: '荆门电池工厂', discontinued: false
-            },
-            {
-              id: 'EP-008', name: '磷酸铁锂电池包 LFP55', category: '动力电池',
-              weight: 420, grossWeight: 465,
-              specs: 'LFP55-322V', packagingInfo: '木箱+防震衬垫, 约45kg',
-              serviceLife: '10年/3000次循环', usePhaseEnergy: '充放电效率96%, 循环能耗0.16kWh/km', productionLocation: '荆门电池工厂', discontinued: false
-            },
-            {
-              id: 'EP-009', name: '1.5T涡轮增压发动机', category: '核心零部件',
-              weight: 118, grossWeight: 135,
-              specs: '4A15T-130kW', packagingInfo: '木托盘+防锈膜, 约17kg',
-              serviceLife: '15年/200,000km', usePhaseEnergy: '燃油消耗(装配于整车)', productionLocation: '襄阳发动机工厂', discontinued: false
-            },
-            {
-              id: 'EP-010', name: '永磁同步驱动电机 160kW', category: '核心零部件',
-              weight: 68, grossWeight: 82,
-              specs: 'PMSM-160kW-12kr', packagingInfo: '纸箱+防静电袋, 约14kg',
-              serviceLife: '15年/300,000km', usePhaseEnergy: '效率96%, 自损耗4%', productionLocation: '襄阳电机工厂', discontinued: false
-            },
-            {
-              id: 'EP-011', name: '燃油MPV ICE-M300 2.0L', category: '燃油乘用车',
-              weight: 1850, grossWeight: 1875,
-              specs: 'M300-2.0L-2023', packagingInfo: '裸车发运+防撞护角, 约25kg',
-              serviceLife: '15年/150,000km', usePhaseEnergy: '汽油消耗9.5L/100km', productionLocation: '武汉整车制造基地', discontinued: true
-            },
-            {
-              id: 'EP-012', name: '增程式电动SUV EREV-X90', category: '新能源乘用车',
-              weight: 1980, grossWeight: 2005,
-              specs: 'X90-EREV-2024', packagingInfo: '裸车发运+防撞护角, 约25kg',
-              serviceLife: '15年/300,000km', usePhaseEnergy: '纯电16kWh/100km + 增程5.5L/100km', productionLocation: '武汉新能源制造基地', discontinued: false
+              id: 'EP-002', name: '小米YU7', category: '新能源乘用车',
+              weight: 2400, grossWeight: 2425,
+              specs: 'YU7-MAX-2025', packagingInfo: '裸车发运+防撞护角, 约25kg',
+              serviceLife: '15年/300,000km', usePhaseEnergy: '电耗16.5kWh/100km', productionLocation: '北京亦庄智能制造基地', discontinued: false
             },
           ]
           this.persist()
@@ -298,7 +238,11 @@ export default {
       } catch (e) { /* ignore */ }
     },
     persist() {
-      try { localStorage.setItem('cfp_products_v3', JSON.stringify(this.products)) } catch (e) { /* ignore */ }
+      try {
+        localStorage.setItem('cfp_products_v4', JSON.stringify(this.products))
+        // 广播产品库变更（同一页面内 storage 事件不触发，需自定义事件）
+        window.dispatchEvent(new CustomEvent('cfp-products-changed'))
+      } catch (e) { /* ignore */ }
     },
     openAddDialog() {
       this.editMode = false

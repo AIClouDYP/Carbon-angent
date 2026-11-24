@@ -1,4 +1,4 @@
-﻿import * as echarts from 'echarts'
+import * as echarts from 'echarts'
 
 export default {
   methods: {
@@ -169,6 +169,8 @@ export default {
     // ===== 任务管理方法 =====
     persistTaskList() {
       try { localStorage.setItem('cfp_task_list', JSON.stringify(this.taskList)) } catch (e) { /* ignore */ }
+      // 通知工作台（CarbonAccountingCenter）实时刷新任务列表
+      try { window.dispatchEvent(new CustomEvent('cfp-tasks-changed')) } catch (e2) { /* ignore */ }
     },
     saveStageSnapshot() {
       if (!this.currentTaskId) return
@@ -197,6 +199,9 @@ export default {
         modelStages: JSON.parse(JSON.stringify(this.modelStages || [])),
         emissionValueMap: JSON.parse(JSON.stringify(this.emissionValueMap || {})),
         standards: JSON.parse(JSON.stringify(this.standards || [])),
+        // 任务标识：快照落库后任何入口都不应把它再当成「空壳/副本」重建
+        taskId: task.id,
+        productName: task.productName,
         messages: JSON.parse(JSON.stringify(this.messages || []))
       }
       this.persistTaskList()
@@ -219,33 +224,25 @@ export default {
       this.uncertaintyParams = snapshot.uncertaintyParams ? JSON.parse(JSON.stringify(snapshot.uncertaintyParams)) : this.uncertaintyParams
       this.isReportArchived = snapshot.isReportArchived || false
       this.isSopPublished = snapshot.isSopPublished || false
-      this.modelStages = snapshot.modelStages ? JSON.parse(JSON.stringify(snapshot.modelStages)) : this.modelStages
+      this.modelStages = (snapshot.modelStages && snapshot.modelStages.length)
+        ? JSON.parse(JSON.stringify(snapshot.modelStages))
+        : this.modelStages
       this.emissionValueMap = snapshot.emissionValueMap ? JSON.parse(JSON.stringify(snapshot.emissionValueMap)) : this.emissionValueMap
       this.standards = snapshot.standards ? JSON.parse(JSON.stringify(snapshot.standards)) : this.standards
       this.messages = snapshot.messages ? JSON.parse(JSON.stringify(snapshot.messages)) : this.messages
     },
-    handleTlSend(e) {
-      if (e && e.shiftKey) return // Shift+Enter换行不发送
-      if (!this.tlInputText.trim()) return
-      const text = this.tlInputText.trim()
-      this.tlInputText = ''
-      // 用户输入任何内容都视为新建核算任务并进入九阶段
-      this.startNewTask(text)
-    },
-    handleTlSendKey(e) {
-      if (e.shiftKey) return
-      e.preventDefault()
-      this.handleTlSend()
-    },
-    autoResizeTlTextarea() {
-      const el = this.$refs.tlInputTextareaRef
-      if (el) {
-        el.style.height = 'auto'
-        el.style.height = Math.min(el.scrollHeight, 120) + 'px'
-      }
-    },
+    // （原 handleTlSend/handleTlSendKey/autoResizeTlTextarea 系页内 task-list 对话输入，已随该模式回退移除）
     // 从第二层直接跳转进入九阶段（跳过初始化对话）
     startDirectNineStage() {
+      // 工作台点击已有任务进入：按 query.taskId 恢复对应任务（有快照恢复快照，无快照走兼容路径）
+      var queryTaskId = this.$route.query.taskId ? decodeURIComponent(this.$route.query.taskId) : ''
+      if (queryTaskId) {
+        var existTask = this.taskList.find(t => t.id === queryTaskId)
+        if (existTask) {
+          this.continueTask(existTask)
+          return
+        }
+      }
       // 检查是否有SOP继承数据
       let inheritData = null
       if (this.$route.query.inheritSop === '1') {
@@ -257,6 +254,60 @@ export default {
           }
         } catch (e) { /* ignore */ }
       }
+      // 显式任务优先；无显式任务时复用最近流程或唯一任务。
+      // 禁止默认新建：返回、刷新或路由残留都必须还原既有任务。
+      var queryProductNameForReuse = this.$route.query.productName ? decodeURIComponent(this.$route.query.productName) : ''
+      var candidates = this.taskList.filter(t =>
+        t && t.id && t.id !== 'task-wind-preset' && t.id !== 'task-ice-a160-preset' &&
+        (t.stageSnapshot || (t.currentStepIndex || 0) > 0 || t.status === 'completed') &&
+        (!queryProductNameForReuse || t.productName === queryProductNameForReuse)
+      )
+      var reusableTask = candidates.find(t => t.id === this.currentTaskId) ||
+        candidates.find(t => t.stageSnapshot && t.stageSnapshot.messages && t.stageSnapshot.messages.length) ||
+        candidates.find(t => t.stageSnapshot && t.stageSnapshot.isModelBuilt) ||
+        (candidates.length === 1 ? candidates[0] : null)
+      var existsSameProduct = queryProductNameForReuse && this.taskList.some(t =>
+        t && t.productName === queryProductNameForReuse && t.id !== 'task-wind-preset' && t.id !== 'task-ice-a160-preset'
+      )
+      if (existsSameProduct && !reusableTask) {
+        reusableTask = this.taskList.find(t => t.productName === queryProductNameForReuse)
+      }
+      var hasActiveFlow = inheritData || !!reusableTask || (
+        this.currentTaskId &&
+        ((this.messages && this.messages.length > 1) || this.currentStepIndex > 0 || this.isModelBuilt)
+      )
+      if (hasActiveFlow) {
+        if (reusableTask && reusableTask.id !== this.currentTaskId) {
+          this.continueTask(reusableTask)
+          return
+        }
+        if (reusableTask) this.currentTaskId = reusableTask.id
+        this.pageMode = 'task-active'
+        this.saveStageSnapshot()
+        this.$nextTick(() => { this.scrollToBottom() })
+        return
+      }
+      // 只有创建表单/产品一键核算显式声明 create=1 才允许创建。
+      // 返回、刷新、页签切换、残留 query 一律不允许触发新建。
+      if (this.$route.query.create !== '1') {
+        var fallbackTask = this.taskList.find(t => t && t.id && t.id !== 'task-wind-preset' && t.id !== 'task-ice-a160-preset') ||
+          this.taskList.find(t => t && (t.id === 'task-wind-preset' || t.id === 'task-ice-a160-preset'))
+        if (fallbackTask) {
+          this.continueTask(fallbackTask)
+          return
+        }
+        this.pageMode = 'task-active'
+        this.initChatFlow()
+        this.$nextTick(() => { this.scrollToBottom() })
+        return
+      }
+      // 落库前先按 id 去重（防御：历史遗留的重复任务一次性收敛）
+      const seen = {}
+      this.taskList = this.taskList.filter(t => {
+        if (!t || !t.id || seen[t.id]) return false
+        seen[t.id] = true
+        return true
+      })
       const id = 'task-' + Date.now()
       // 产品名优先级：SOP继承 > query参数 > 默认值
       var queryProductName = this.$route.query.productName ? decodeURIComponent(this.$route.query.productName) : ''
@@ -273,7 +324,6 @@ export default {
       this.taskList.unshift(task)
       this.persistTaskList()
       this.currentTaskId = id
-      this.tlDialogStep = 'welcome'
       this.resetSession()
 
       if (inheritData && inheritData.modelSnapshot) {
@@ -325,7 +375,6 @@ export default {
       this.taskList.unshift(task)
       this.persistTaskList()
       this.currentTaskId = id
-      this.tlDialogStep = 'welcome'
       // 记录最近产品
       if (productName) {
         this.addRecentProduct(productName)
@@ -335,24 +384,38 @@ export default {
       this.pageMode = 'task-active'
       this.initChatFlow()
     },
+    /** 工作台右栏产品库页签：读企业产品库（cfp_products_v4，与 EnterpriseProductLibrary 同源）。任务详情页已回退页签，本方法供外部复用 */
+    loadTlProducts() {
+      try {
+        const saved = localStorage.getItem('cfp_products_v4')
+        if (saved) {
+          const arr = JSON.parse(saved)
+          if (Array.isArray(arr) && arr.length) return arr
+        }
+      } catch (e) { /* ignore */ }
+      return []
+    },
     createNewTask() {
       if (!this.newTaskProductName.trim()) {
         this.$message.warning('请输入产品名称')
         return
       }
       const id = 'task-' + Date.now()
+      const nowStr = new Date().toLocaleString('zh-CN')
       const task = {
         id: id,
         productName: this.newTaskProductName.trim(),
         standard: this.newTaskStandard || 'QC/T 1248-2025',
         currentStepIndex: 0,
-        createdAt: new Date().toLocaleString('zh-CN'),
-        updatedAt: new Date().toLocaleString('zh-CN'),
+        createdAt: nowStr,
+        updatedAt: nowStr,
         status: 'in-progress'
       }
       this.taskList.unshift(task)
       this.persistTaskList()
       this.currentTaskId = id
+      // 立即落一份基础快照：「已建任务」不等于空壳，避免工作台把它当脏数据清掉
+      this.saveStageSnapshot()
       this.newTaskProductName = ''
       this.newTaskStandard = ''
       // 初始化新任务的对话会话
@@ -394,22 +457,30 @@ export default {
       this.pageMode = 'task-active'
     },
     deleteTask(taskId) {
+      // 已归档任务不可删除（保护核算留痕）：进行中/已完成未归档均可删
+      const target = this.taskList.find(t => t.id === taskId)
+      if (target && target.isReportArchived) {
+        this.$message.warning('该任务已完成报告归档，归档任务不可删除')
+        return
+      }
       this.taskList = this.taskList.filter(t => t.id !== taskId)
       this.persistTaskList()
       if (this.currentTaskId === taskId) {
         this.currentTaskId = null
-        this.pageMode = 'task-list'
+        // 删除当前任务后回工作台（原页内 task-list 模式已回退）
+        this.$router.push('/agent-center/apps/carbon-accounting').catch(() => {})
       }
     },
     goBackToTaskList() {
-      // 保存当前任务完整快照
+      // 页内任务列表模式已回退：返回即回工作台（与 goBackToUpper 一致）
       this.saveStageSnapshot()
-      this.pageMode = 'task-list'
-      this.tlDialogStep = 'welcome'
+      var taskFlag = this.currentTaskId ? ('?taskId=' + encodeURIComponent(this.currentTaskId)) : ''
+      this.$router.push('/agent-center/apps/carbon-accounting' + taskFlag).catch(() => {})
     },
     goBackToUpper() {
       this.saveStageSnapshot()
-      this.$router.push('/agent-center/apps/carbon-accounting').catch(() => {})
+      var taskFlag = this.currentTaskId ? ('?taskId=' + encodeURIComponent(this.currentTaskId)) : ''
+      this.$router.push('/agent-center/apps/carbon-accounting' + taskFlag).catch(() => {})
     },
     showCmdHint() {
       this.messages.push({
@@ -429,6 +500,27 @@ export default {
     },
     getTaskPhaseName(stepIndex) {
       return this.phases[stepIndex] ? this.phases[stepIndex].name : '未开始'
+    },
+    /** 任务卡片"当前卡点"摘要：让快速进入变成快速决策 */
+    getTaskSummary(task) {
+      if (!task) return ''
+      if (task.isReportArchived) return '报告已归档'
+      const idx = task.currentStepIndex
+      const snap = task.stageSnapshot || {}
+      // 阶段6：有校验异常项时提示处理
+      if (idx === 5 && Array.isArray(snap.validationItems)) {
+        const abnormal = snap.validationItems.filter(v => v.status && v.status !== 'normal' && v.status !== 'passed').length
+        if (abnormal > 0) return `校验中 · ${abnormal} 项数据待处理`
+      }
+      // 阶段3：模型未搭好
+      if (idx === 2 && snap.isModelBuilt === false) return '核算模型待搭建'
+      // 阶段4：数据清单缺项提示
+      if (idx === 3 && typeof snap.missingDataCount === 'number' && snap.missingDataCount > 0) {
+        return `活动数据 · 缺 ${snap.missingDataCount} 项待补充`
+      }
+      // 兜底：进行中显示当前阶段动作，已完成显示可进入下一环节
+      if (task.status === 'completed') return '已走完全部阶段 · 可查看报告'
+      return `${this.getTaskPhaseName(idx)} · 进行中`
     },
     resetSession() {
       this.currentStepIndex = 0
@@ -1594,6 +1686,43 @@ export default {
     handleChartResize() {
       const all = [].concat(this._chartInstances || [], this._analysisChartInstances || [])
       all.forEach(c => { try { c && c.resize() } catch (e) { /* ignore */ } })
+    },
+    // 载入示例任务（燃油汽车 / 陆上风电机组），已存在则跳过；返回新增条数
+    loadPresetTasks() {
+      let added = 0
+      // 预置燃油汽车产品碳足迹计算任务（基于0714燃油汽车产品碳模型样例）
+      const iceTaskId = 'task-ice-a160-preset'
+      if (!this.taskList.find(t => t.id === iceTaskId)) {
+        this.taskList.unshift({
+          id: iceTaskId,
+          productName: '燃油汽车 ICE-A160 产品碳足迹',
+          standard: 'ISO 14067',
+          sopId: 'SOP-ICE-A160',
+          currentStepIndex: 1,
+          createdAt: '2026/7/14 20:30:00',
+          updatedAt: '2026/7/14 20:39:00',
+          status: 'in-progress'
+        })
+        added++
+      }
+      // 预置陆上风电机组产品碳足迹任务（基于远景《风机碳足迹与低碳发展报告2023》公开数据：
+      // EN-171/6.5 机型度电碳足迹 5.56 gCO2e/kWh；五环节 LCA：原材料开采/零部件生产/风场建设安装/运营维护/废弃回收；
+      // 碳排放占比：零部件生产 49.3% > 风场建设 40.1% > 运维最低；年发电小时数 3500~4500h、设计年限 20 年）
+      const windTaskId = 'task-wind-preset'
+      if (!this.taskList.find(t => t.id === windTaskId)) {
+        this.taskList.unshift({
+          id: windTaskId,
+          productName: '6.5MW陆上风电机组产品碳足迹',
+          standard: 'GB/T 24067-2024',
+          currentStepIndex: 0,
+          createdAt: '2026/9/10 09:00:00',
+          updatedAt: '2026/9/10 09:10:00',
+          status: 'in-progress'
+        })
+        added++
+      }
+      if (added) this.persistTaskList()
+      return added
     }
   },
   created() {
@@ -1602,52 +1731,34 @@ export default {
       this._onWinResize = () => this.handleChartResize()
       window.addEventListener('resize', this._onWinResize)
     }
-    // 从localStorage加载历史任务列表
-    // 仅保留两个预置任务（燃油汽车 / 陆上风电机组），清理其余历史任务
-    const ALLOWED_TASK_IDS = ['task-ice-a160-preset', 'task-wind-preset']
+    // 从localStorage加载历史任务列表（按 id 去重，历史遗留的重复任务一次性收敛）
     try {
       const saved = localStorage.getItem('cfp_task_list')
       if (saved) {
         const parsed = JSON.parse(saved)
         if (Array.isArray(parsed)) {
-          this.taskList = parsed.filter(t => t && ALLOWED_TASK_IDS.indexOf(t.id) > -1)
-          // 若过滤后与原始数据不同，回写清理后的列表
-          if (this.taskList.length !== parsed.length) {
-            try { localStorage.setItem('cfp_task_list', JSON.stringify(this.taskList)) } catch (e2) { /* ignore */ }
-          }
+          const seen = {}
+          this.taskList = parsed.filter(t => {
+            if (!t || !t.id || seen[t.id]) return false
+            seen[t.id] = true
+            // 预置示例任务保留
+            if (t.id === 'task-wind-preset' || t.id === 'task-ice-a160-preset') return true
+            // 剔除旧 bug 产生、从未保存过进度的空壳任务（无对话快照且未建模型）
+            var snap = t.stageSnapshot
+            var hasSnap = snap && ((snap.messages && snap.messages.length) || snap.isModelBuilt)
+            return !!hasSnap
+          })
+          // 立即回写，避免旧数据的空壳任务在工作台再次出现
+          try { localStorage.setItem('cfp_task_list', JSON.stringify(this.taskList)) } catch (e2) { /* ignore */ }
         }
       }
     } catch (e) { /* ignore */ }
-    // 预置燃油汽车产品碳足迹计算任务（基于0714燃油汽车产品碳模型样例）
-    const iceTaskId = 'task-ice-a160-preset'
-    if (!this.taskList.find(t => t.id === iceTaskId)) {
-      this.taskList.unshift({
-        id: iceTaskId,
-        productName: '燃油汽车 ICE-A160 产品碳足迹',
-        standard: 'ISO 14067',
-        sopId: 'SOP-ICE-A160',
-        currentStepIndex: 1,
-        createdAt: '2026/7/14 20:30:00',
-        updatedAt: '2026/7/14 20:39:00',
-        status: 'in-progress'
-      })
-      this.persistTaskList()
-    }
-    // 预置陆上风电机组产品碳足迹任务（基于远景《风机碳足迹与低碳发展报告2023》公开数据：
-    // EN-171/6.5 机型度电碳足迹 5.56 gCO2e/kWh；五环节 LCA：原材料开采/零部件生产/风场建设安装/运营维护/废弃回收；
-    // 碳排放占比：零部件生产 49.3% > 风场建设 40.1% > 运维最低；年发电小时数 3500~4500h、设计年限 20 年）
-    const windTaskId = 'task-wind-preset'
-    if (!this.taskList.find(t => t.id === windTaskId)) {
-      this.taskList.unshift({
-        id: windTaskId,
-        productName: '6.5MW陆上风电机组产品碳足迹',
-        standard: 'GB/T 24067-2024',
-        currentStepIndex: 0,
-        createdAt: '2026/9/10 09:00:00',
-        updatedAt: '2026/9/10 09:10:00',
-        status: 'in-progress'
-      })
-      this.persistTaskList()
+    // 示例任务按需载入：默认不再自动插入（用户要求任务列表保持精简），
+    // 只有显式设置 cfp_preset_tasks_enabled = '1' 时才载入示例任务。
+    const presetFlag = localStorage.getItem('cfp_preset_tasks_enabled')
+    // 兼容旧值：'0' = 已关闭（不再插入）；'1' = 显式开启；null/undefined = 保持历史默认（插入示例任务，不擅自删除用户可见数据）
+    if (presetFlag !== '0') {
+      this.loadPresetTasks()
     }
   },
   beforeDestroy() {

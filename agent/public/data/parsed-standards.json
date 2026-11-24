@@ -1,0 +1,1109 @@
+[
+  {
+    "code": "乘用车生命周期碳排放核算技术规范",
+    "name": "乘用车生命周期碳排放核算技术规范（中汽中心）",
+    "type": "行业规范",
+    "issuer": "中汽中心（中国汽车技术研究中心）",
+    "yearNum": 2025,
+    "version": "V1",
+    "scenarios": [
+      "PCF"
+    ],
+    "scope": "最大设计总质量不超过 3500kg 的 M1 类车辆（汽油/柴油乘用车、不可外接充电式混动、插电式混动、纯电动乘用车）",
+    "scopeExcluded": "不适用于燃用气体燃料或醇醚类燃料的 M1 类车辆",
+    "status": "现行",
+    "parseStatus": "effective",
+    "desc": "乘用车生命周期碳排放核算的行业技术规范：核算范围覆盖原材料获取、整车生产、使用三个阶段，规定功能单位（单位行驶里程）、系统边界（23类材料1%取舍）、数据质量要求（时间/地理/技术代表性）与12个计算公式，附录含材料重量缺省值、碳排放因子、报告模板。",
+    "sourceFile": "乘用车碳排放核算技术规范.pdf",
+    "structured": {
+      "kind": "accounting",
+      "scenarioKind": "PCF",
+      "dimensions": [
+        {
+          "key": "principle",
+          "name": "基本原则与术语",
+          "type": "list",
+          "points": [
+            {
+              "text": "核算范围：规定了中国境内生产或销售的乘用车生命周期碳排放的核算技术规范",
+              "clauseRefs": [
+                "第1章 范围"
+              ]
+            },
+            {
+              "text": "适用对象：最大设计总质量不超过3500kg的M1类车辆，含单一燃用汽油或柴油乘用车、不可外接充电式混合动力乘用车、插电式混合动力乘用车和纯电动乘用车",
+              "clauseRefs": [
+                "第1章 范围"
+              ]
+            },
+            {
+              "text": "不适用对象：不适用于燃用气体燃料或醇醚类燃料的M1类车辆",
+              "clauseRefs": [
+                "第1章 范围"
+              ]
+            },
+            {
+              "text": "M1类车辆定义：包括驾驶员座位在内座位数不超过九座的载客车辆",
+              "clauseRefs": [
+                "第3.1条 M1类车辆"
+              ]
+            },
+            {
+              "text": "乘用车定义：主要用于载运乘客及其随身行李或临时物品的汽车，最多不超过9个座位",
+              "clauseRefs": [
+                "第3.2条 乘用车"
+              ]
+            },
+            {
+              "text": "生命周期定义：从自然界或自然资源中获取原材料直至最终处置的一系列阶段",
+              "clauseRefs": [
+                "第3.5条 生命周期"
+              ]
+            },
+            {
+              "text": "碳排放源口径：考虑能源利用、燃烧过程、化学反应、运行、废物处理过程中的碳排放；不考虑土地利用和土地利用变化",
+              "clauseRefs": [
+                "第4.2.4条 碳排放源"
+              ]
+            },
+            {
+              "text": "温室气体范围：《京都议定书》规定的七种温室气体（二氧化碳、甲烷、氧化亚氮、氢氟碳化物、全氟碳化物、六氟化硫、三氟化氮）",
+              "clauseRefs": [
+                "第4.2.3条 碳（温室气体）"
+              ]
+            },
+            {
+              "text": "二氧化碳当量：等于给定温室气体质量乘以其全球增温潜势值，GWP取100年时间框架（GWP 100a）",
+              "clauseRefs": [
+                "第3.16条 全球增温潜势",
+                "第3.17条 二氧化碳当量"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "objective",
+          "name": "研究目的与核算对象",
+          "type": "list",
+          "points": [
+            {
+              "text": "功能单位：乘用车生命周期碳排放核算围绕功能单位进行，结果相对于功能单位计算；功能单位为单位行驶里程（1km）",
+              "clauseRefs": [
+                "第4.1.2条 功能单位",
+                "第4.2.1条"
+              ]
+            },
+            {
+              "text": "生命周期行驶里程：乘用车生命周期行驶里程按 1.5×10⁵ km 计算",
+              "clauseRefs": [
+                "第4.4.3条 使用阶段"
+              ]
+            },
+            {
+              "text": "产品性能描述：报告应详细描述核算的对象、功能单位和产品性能，列出产品材料构成与技术参数",
+              "clauseRefs": [
+                "第5.2.2.1条 核算范围"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "pcr",
+          "name": "产品类别规则与行业要求",
+          "type": "list",
+          "points": [
+            {
+              "text": "规范性引用文件：GB/T 3730.1、GB/T 15089、GB/T 18386、GB/T 19233、GB 19578、GB/T 19596、GB/T 19753、GB/T 24040、GB/T 24044、GB 27999、GB/T 30512、GB/T 32150、GB/T 32694、ISO 14067",
+              "clauseRefs": [
+                "第2章 规范性引用文件"
+              ]
+            },
+            {
+              "text": "燃料消耗量试验方法：汽油/柴油M1类车采用GB/T 19233；不可外接充电式混合动力采用GB/T 19753；纯电动采用GB/T 18386",
+              "clauseRefs": [
+                "第4.4.3条 使用阶段"
+              ]
+            },
+            {
+              "text": "禁用物质要求：材料使用应符合 GB/T 30512 汽车禁用物质要求",
+              "clauseRefs": [
+                "第2章 规范性引用文件"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "boundary",
+          "name": "系统边界与生命周期",
+          "type": "list",
+          "points": [
+            {
+              "text": "生命周期视角：核算包括原材料获取阶段、整车生产阶段和使用阶段三个阶段",
+              "clauseRefs": [
+                "第4.1.1条 生命周期视角"
+              ]
+            },
+            {
+              "text": "原材料获取阶段核算范围：包括资源开采、加工提纯、生产制造等过程；材料生产制造边界不含使用与废弃环节",
+              "clauseRefs": [
+                "第4.2.2.2条"
+              ]
+            },
+            {
+              "text": "材料取舍准则：材料重量占比或碳排放占比大于各部门1%但未列入表1的其他均质材料，必须纳入核算范围；≤1%可不纳入",
+              "clauseRefs": [
+                "第4.2.2.2条 原材料获取阶段核算范围"
+              ]
+            },
+            {
+              "text": "整车生产阶段核算范围：包括冲压、焊接、涂装、总装和动力站房等生产制造过程",
+              "clauseRefs": [
+                "第4.2.2.3条 整车生产阶段核算范围"
+              ]
+            },
+            {
+              "text": "使用阶段核算范围：包括燃料生产、燃料使用、轮胎更换、铅酸蓄电池更换、液体更换和制冷剂逸散",
+              "clauseRefs": [
+                "第4.2.2.4条 使用阶段核算范围"
+              ]
+            },
+            {
+              "text": "使用阶段更换次数假设：轮胎按更换2次（每次更换4条）计算，铅酸蓄电池按更换2次计算，制冷剂按逸散1次计算",
+              "clauseRefs": [
+                "第4.2.2.4条"
+              ]
+            },
+            {
+              "text": "系统边界图示：原材料获取阶段（能源/资源输入）→生产阶段（冲压/焊接/涂装/总装/动力站房）→使用阶段（燃料生产/燃料使用/轮胎更换/铅酸蓄电池更换/液体更换与制冷剂逃逸）",
+              "clauseRefs": [
+                "图1 乘用车生命周期碳排放系统边界"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "data",
+          "name": "数据收集与质量管理",
+          "type": "list",
+          "points": [
+            {
+              "text": "数据收集优先级：对于系统边界内所有过程，应收集具体场地数据；当收集具体场地数据不可行时，可使用缺省值",
+              "clauseRefs": [
+                "第4.3.1条 数据收集"
+              ]
+            },
+            {
+              "text": "数据混用规则：具体场地数据和缺省值可混合使用；仅当材料重量使用具体场地数据时材料碳排放因子才可以使用具体场地数据",
+              "clauseRefs": [
+                "第4.3.1条 数据收集"
+              ]
+            },
+            {
+              "text": "分配原则（五项）：识别公用过程分配前后应平衡；分配前后总和相等；多种分配程序需说明；多重输出按产品功能/经济关联性变化；多重输入基于实际关系",
+              "clauseRefs": [
+                "第4.3.2条 数据分配"
+              ]
+            },
+            {
+              "text": "分配处理程序：优先避免或减少分配；其次使用物理关系（重量、数量、体积、面积、热值）；最后使用经济关系（产值、利润，一般不推荐）",
+              "clauseRefs": [
+                "第4.3.2条 数据分配"
+              ]
+            },
+            {
+              "text": "时间代表性：应收集最近连续生产3个月到1年的平均水平数据；优先使用最近连续生产1年的平均水平数据",
+              "clauseRefs": [
+                "第4.3.3.1条 时间范围"
+              ]
+            },
+            {
+              "text": "地理代表性：应收集实际生产地理区域的数据",
+              "clauseRefs": [
+                "第4.3.3.2条 地理范围"
+              ]
+            },
+            {
+              "text": "技术代表性：应收集实际生产工艺技术或技术组合的数据",
+              "clauseRefs": [
+                "第4.3.3.3条 技术范围"
+              ]
+            },
+            {
+              "text": "完整性：应收集涵盖产品系统边界范围的数据",
+              "clauseRefs": [
+                "第4.3.3.4条 完整性"
+              ]
+            },
+            {
+              "text": "重现性：应保证独立从业人员可以重现产品碳排放的核算结果",
+              "clauseRefs": [
+                "第4.3.3.5条 重现性"
+              ]
+            },
+            {
+              "text": "数据来源说明：应对数据的获得方式和来源均予以说明",
+              "clauseRefs": [
+                "第4.3.3.6条 数据来源"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "allocation",
+          "name": "分配原则与特殊处理",
+          "type": "list",
+          "points": [
+            {
+              "text": "铅酸蓄电池核算：按材料组分分别核算（式3），使用阶段更换2次",
+              "clauseRefs": [
+                "第4.4.1条 式(3)",
+                "第4.2.2.4条"
+              ]
+            },
+            {
+              "text": "锂离子动力电池两种算法：材料法（式4，按材料组分核算）或重量法（式5，按电池重量×因子核算）",
+              "clauseRefs": [
+                "第4.4.1条 式(4)/式(5)"
+              ]
+            },
+            {
+              "text": "单一燃用汽油或柴油乘用车动力蓄电池重量按0计算",
+              "clauseRefs": [
+                "第4.4.1条"
+              ]
+            },
+            {
+              "text": "轮胎核算：出厂轮胎按5条（含1条备胎）计算；更换轮胎按每次4条计算",
+              "clauseRefs": [
+                "第4.4.1条 式(6)"
+              ]
+            },
+            {
+              "text": "制冷剂逸散：使用阶段按逸散1次计算",
+              "clauseRefs": [
+                "第4.2.2.4条 使用阶段核算范围"
+              ]
+            },
+            {
+              "text": "燃油车电池基准：单一燃用汽油或柴油乘用车的动力蓄电池重量按0计算",
+              "clauseRefs": [
+                "第4.4.1条"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "method",
+          "name": "核算方法与结果评价",
+          "type": "list",
+          "points": [
+            {
+              "text": "核算原则：生命周期视角、功能单位为基准、科学方法优先、一致性、精确度（计算结果四舍五入至小数点后两位）、透明度、避免重复计算",
+              "clauseRefs": [
+                "第4.1条 核算原则"
+              ]
+            },
+            {
+              "text": "科学方法优先顺序：优先选择自然科学（物理、化学、生物学）方法",
+              "clauseRefs": [
+                "第4.1.3条 科学方法的优先顺序"
+              ]
+            },
+            {
+              "text": "精确度要求：所有计算结果四舍五入至小数点后两位",
+              "clauseRefs": [
+                "第4.1.5条 精确度"
+              ]
+            },
+            {
+              "text": "避免重复计算：每个部分只能计算一次，避免重复计算和遗漏",
+              "clauseRefs": [
+                "第4.1.7条 避免重复计算"
+              ]
+            },
+            {
+              "text": "原材料获取阶段计算：C_Materials = C_Parts + C_Lead acid battery + C_Li-ion battery + C_Tyres + C_Fluids",
+              "clauseRefs": [
+                "第4.4.1条 式(1)"
+              ]
+            },
+            {
+              "text": "整车生产阶段计算：C_Production = Σ(E_r × CEF_r + E_r × NCV_r × CEF'_r) + M_CO₂，含焊接CO₂逸散",
+              "clauseRefs": [
+                "第4.4.2条 式(8)"
+              ]
+            },
+            {
+              "text": "使用阶段计算：C_Use = C_Fuel production + C_Fuel use + C_Tyres r + C_Lead acid battery r + C_Fluids r",
+              "clauseRefs": [
+                "第4.4.3条 式(9)"
+              ]
+            },
+            {
+              "text": "单位：碳排放量单位为千克二氧化碳当量（kgCO₂e），最终结果为单位行驶里程碳排放量（kgCO₂e/km）",
+              "clauseRefs": [
+                "第4.4条 计算方法",
+                "第5.2.2.3条"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "report",
+          "name": "报告披露与核查要求",
+          "type": "list",
+          "points": [
+            {
+              "text": "编制依据：按本文件给出的核算原则、范围、数据要求及计算公式核算，并编制核算报告，参见附录G",
+              "clauseRefs": [
+                "第5.1条 编制依据"
+              ]
+            },
+            {
+              "text": "基本信息内容：报告信息（报告编号、编制人员、审核人员、发布日期）与核算者信息（单位全称、统一社会信用代码、地址、联系人、联系方式）",
+              "clauseRefs": [
+                "第5.2.1条 基本信息"
+              ]
+            },
+            {
+              "text": "车辆信息标注：报告应标注乘用车主要技术参数和功能，包括车辆型号、注册商标、上市时间、整备质量、燃料类型",
+              "clauseRefs": [
+                "第5.2.1条 基本信息"
+              ]
+            },
+            {
+              "text": "核算范围描述：详细描述核算对象、功能单位和产品性能，列出材料构成与技术参数，绘制并说明系统边界",
+              "clauseRefs": [
+                "第5.2.2.1条 核算范围"
+              ]
+            },
+            {
+              "text": "清单分析要求：提供生命周期阶段、每个阶段清单数据及具体场地数据或缺省值；涉及数据分配情况应说明分配方法和结果",
+              "clauseRefs": [
+                "第5.2.2.2条 清单分析"
+              ]
+            },
+            {
+              "text": "碳排放量披露：报告中应提供按4.4核算方法核算的单位行驶里程的碳排放量",
+              "clauseRefs": [
+                "第5.2.2.3条 碳排放量"
+              ]
+            },
+            {
+              "text": "具体场地数据核算报告：材料碳排放因子具体场地数据需按照附录E提交核算报告",
+              "clauseRefs": [
+                "第4.3.1条 数据收集"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "appendix",
+          "name": "附录",
+          "type": "table",
+          "columnsText": "附录编号,名称,性质,主要内容",
+          "rows": [
+            [
+              "附录A",
+              "材料重量及更换次数缺省值",
+              "资料性",
+              "部件重量/出厂轮胎重量/更换轮胎重量/铅酸蓄电池重量的缺省计算式"
+            ],
+            [
+              "附录B",
+              "材料碳排放因子核算范围及缺省值",
+              "资料性",
+              "各类材料（钢铁/铝合金/塑料/橡胶等）碳排放因子缺省值"
+            ],
+            [
+              "附录C",
+              "整车生产碳排放核算范围及缺省值",
+              "资料性",
+              "冲压/焊接/涂装/总装/动力站房生产过程碳排放缺省值"
+            ],
+            [
+              "附录D",
+              "碳（温室气体）类别",
+              "规范性",
+              "《京都议定书》规定的七种温室气体"
+            ],
+            [
+              "附录E",
+              "材料碳排放因子具体场地数据核算报告模板",
+              "规范性",
+              "具体场地数据核算报告格式"
+            ],
+            [
+              "附录F",
+              "能源/燃料碳排放因子",
+              "规范性",
+              "能源生产碳排放因子（表F.1）与燃料使用转换系数"
+            ],
+            [
+              "附录G",
+              "乘用车生命周期碳排放核算报告模板",
+              "规范性",
+              "核算报告完整模板（基本信息/核算范围/清单分析/碳排放量）"
+            ]
+          ]
+        }
+      ],
+      "formulas": [
+        {
+          "code": "CAR-MAT-001",
+          "name": "原材料获取阶段碳排放量",
+          "expression": "C_Materials = C_Parts + C_Lead acid battery + C_Li-ion battery + C_Tyres + C_Fluids",
+          "resultIndicator": "原材料获取阶段碳排放量",
+          "resultUnit": "kgCO₂e",
+          "paramRefsText": "C_Parts, C_Lead acid battery, C_Li-ion battery, C_Tyres, C_Fluids",
+          "clauseRef": "式(1)"
+        },
+        {
+          "code": "CAR-MAT-002",
+          "name": "部件碳排放量",
+          "expression": "C_Parts = Σ(M_Port material_i × CEF_Port material_i)",
+          "resultIndicator": "部件碳排放量",
+          "resultUnit": "kgCO₂e",
+          "paramRefsText": "M_Port material_i, CEF_Port material_i",
+          "clauseRef": "式(2)"
+        },
+        {
+          "code": "CAR-MAT-003",
+          "name": "铅酸蓄电池碳排放量",
+          "expression": "C_Lead acid battery = Σ(M_Lead acid battery material_i × CEF_Lead acid battery material_i)",
+          "resultIndicator": "铅酸蓄电池碳排放量",
+          "resultUnit": "kgCO₂e",
+          "paramRefsText": "M_Lead acid battery material_i, CEF_Lead acid battery material_i",
+          "clauseRef": "式(3)"
+        },
+        {
+          "code": "CAR-MAT-004",
+          "name": "锂离子动力电池碳排放量（材料法）",
+          "expression": "C_Li-ion battery = Σ(M_Li-ion battery material_i × CEF_Li-ion battery material_i)",
+          "resultIndicator": "锂离子动力电池碳排放量",
+          "resultUnit": "kgCO₂e",
+          "paramRefsText": "M_Li-ion battery material_i, CEF_Li-ion battery material_i",
+          "clauseRef": "式(4)"
+        },
+        {
+          "code": "CAR-MAT-005",
+          "name": "锂离子动力电池碳排放量（重量法）",
+          "expression": "C_Li-ion battery = R_Li-ion battery × CEF_Li-ion battery",
+          "resultIndicator": "锂离子动力电池碳排放量",
+          "resultUnit": "kgCO₂e",
+          "paramRefsText": "R_Li-ion battery, CEF_Li-ion battery",
+          "clauseRef": "式(5)"
+        },
+        {
+          "code": "CAR-MAT-006",
+          "name": "轮胎碳排放量",
+          "expression": "C_Tyres = Σ(M_Tyre material_i × CEF_Tyres material_i)",
+          "resultIndicator": "轮胎碳排放量",
+          "resultUnit": "kgCO₂e",
+          "paramRefsText": "M_Tyre material_i, CEF_Tyres material_i",
+          "clauseRef": "式(6)"
+        },
+        {
+          "code": "CAR-MAT-007",
+          "name": "液体碳排放量",
+          "expression": "C_Fluids = Σ(M_Fluid material_i × CEF_Fluid material_i)",
+          "resultIndicator": "液体碳排放量",
+          "resultUnit": "kgCO₂e",
+          "paramRefsText": "M_Fluid material_i, CEF_Fluid material_i",
+          "clauseRef": "式(7)"
+        },
+        {
+          "code": "CAR-PROD-001",
+          "name": "整车生产阶段碳排放量",
+          "expression": "C_Production = Σ(E_r × CEF_r + E_r × NCV_r × CEF'_r) + M_CO₂",
+          "resultIndicator": "整车生产阶段碳排放量",
+          "resultUnit": "kgCO₂e",
+          "paramRefsText": "E_r, CEF_r, NCV_r, CEF'_r, M_CO₂",
+          "clauseRef": "式(8)"
+        },
+        {
+          "code": "CAR-USE-001",
+          "name": "使用阶段碳排放量",
+          "expression": "C_Use = C_Fuel production + C_Fuel use + C_Tyres r + C_Lead acid battery r + C_Fluids r",
+          "resultIndicator": "使用阶段碳排放量",
+          "resultUnit": "kgCO₂e",
+          "paramRefsText": "C_Fuel production, C_Fuel use, C_Tyres r, C_Lead acid battery r, C_Fluids r",
+          "clauseRef": "式(9)"
+        },
+        {
+          "code": "CAR-USE-002",
+          "name": "燃料生产碳排放量（汽柴油/不可外接充电/纯电动）",
+          "expression": "C_Fuel production = FC × CEF_Fuel × L / 100",
+          "resultIndicator": "燃料生产碳排放量",
+          "resultUnit": "kgCO₂e",
+          "paramRefsText": "FC, CEF_Fuel, L",
+          "clauseRef": "式(10)"
+        },
+        {
+          "code": "CAR-USE-003",
+          "name": "燃料生产碳排放量（插电式混合动力）",
+          "expression": "C_Fuel production = FC_weighted × CEF_Gasoline × L / 100 + EC_weighted × CEF_Electricity × L / 1000",
+          "resultIndicator": "燃料生产碳排放量",
+          "resultUnit": "kgCO₂e",
+          "paramRefsText": "FC_weighted, CEF_Gasoline, EC_weighted, CEF_Electricity, L",
+          "clauseRef": "式(11)"
+        },
+        {
+          "code": "CAR-USE-004",
+          "name": "燃料使用过程碳排放量",
+          "expression": "C_Fuel use = FC × K_CO₂ × L / 100",
+          "resultIndicator": "燃料使用过程碳排放量",
+          "resultUnit": "kgCO₂e",
+          "paramRefsText": "FC, K_CO₂, L",
+          "clauseRef": "式(12)"
+        },
+        {
+          "code": "CAR-TOTAL-001",
+          "name": "生命周期碳排放总量",
+          "expression": "C_Life cycle = C_Materials + C_Production + C_Use",
+          "resultIndicator": "生命周期碳排放总量",
+          "resultUnit": "kgCO₂e",
+          "paramRefsText": "C_Materials, C_Production, C_Use",
+          "clauseRef": "第4.4条"
+        },
+        {
+          "code": "CAR-UNIT-001",
+          "name": "单位行驶里程碳排放量",
+          "expression": "C_Unit = C_Life cycle / L",
+          "resultIndicator": "单位行驶里程碳排放量",
+          "resultUnit": "kgCO₂e/km",
+          "paramRefsText": "C_Life cycle, L",
+          "clauseRef": "第5.2.2.3条"
+        }
+      ],
+      "parameters": [
+        {
+          "key": "L",
+          "name": "生命周期行驶里程",
+          "definition": "乘用车生命周期行驶里程",
+          "unit": "km",
+          "source": "标准规定值",
+          "value": "150000",
+          "clauseRef": "第4.4.3条"
+        },
+        {
+          "key": "CM",
+          "name": "整备质量",
+          "definition": "乘用车整备质量",
+          "unit": "kg",
+          "source": "企业实测/车辆规格",
+          "value": "",
+          "clauseRef": "附录A"
+        },
+        {
+          "key": "FC",
+          "name": "燃料消耗量",
+          "definition": "汽油/柴油M1类车按GB/T 19233测定；不可外接充电式混动按GB/T 19753；纯电动按GB/T 18386",
+          "unit": "L/100km 或 kWh/100km",
+          "source": "型式认证值",
+          "value": "",
+          "clauseRef": "第4.4.3条 式(10)"
+        },
+        {
+          "key": "CEF_Fuel",
+          "name": "燃料生产碳排放因子",
+          "definition": "燃料生产环节的碳排放因子",
+          "unit": "kgCO₂e/L 或 kgCO₂e/kWh",
+          "source": "附录F表F.1",
+          "value": "",
+          "clauseRef": "附录F 表F.1"
+        },
+        {
+          "key": "CEF_Electricity",
+          "name": "电力生产碳排放因子",
+          "definition": "电力生产环节的碳排放因子",
+          "unit": "kgCO₂e/kWh",
+          "source": "附录F表F.1",
+          "value": "",
+          "clauseRef": "附录F 表F.1"
+        },
+        {
+          "key": "CEF_Gasoline",
+          "name": "汽油生产碳排放因子",
+          "definition": "汽油生产环节的碳排放因子",
+          "unit": "kgCO₂e/L",
+          "source": "附录F表F.1",
+          "value": "",
+          "clauseRef": "附录F 表F.1"
+        },
+        {
+          "key": "K_CO2",
+          "name": "燃料使用转换系数",
+          "definition": "参考GB 27999-2019：汽油2.37 kg/L，柴油2.60 kg/L，纯电动为0",
+          "unit": "kgCO₂e/L",
+          "source": "GB 27999-2019",
+          "value": "",
+          "clauseRef": "式(12)"
+        },
+        {
+          "key": "CEF_material",
+          "name": "材料碳排放因子",
+          "definition": "单位材料重量的碳排放因子",
+          "unit": "kgCO₂e/kg",
+          "source": "附录B缺省值 或 具体场地数据",
+          "value": "",
+          "clauseRef": "附录B"
+        },
+        {
+          "key": "CEF_Li-ion battery",
+          "name": "锂离子动力电池碳排放因子（重量法）",
+          "definition": "单位电池重量/容量的碳排放因子",
+          "unit": "kgCO₂e/kWh",
+          "source": "附录B",
+          "value": "",
+          "clauseRef": "式(5)"
+        },
+        {
+          "key": "R_Li-ion battery",
+          "name": "锂离子动力电池容量",
+          "definition": "锂离子动力电池容量",
+          "unit": "kWh",
+          "source": "企业实测/车辆规格",
+          "value": "",
+          "clauseRef": "式(5)"
+        },
+        {
+          "key": "NCV_r",
+          "name": "能源平均低位发热量",
+          "definition": "能源或燃料的平均低位发热量",
+          "unit": "GJ/t 或 GJ/10⁴m³",
+          "source": "标准规定值",
+          "value": "",
+          "clauseRef": "式(8)"
+        },
+        {
+          "key": "CEF_r",
+          "name": "能源生产碳排放因子",
+          "definition": "能源或燃料生产的碳排放因子",
+          "unit": "kgCO₂e/kWh、kgCO₂e/m³ 或 kgCO₂e/kg",
+          "source": "附录F",
+          "value": "",
+          "clauseRef": "式(8)"
+        },
+        {
+          "key": "CEF'_r",
+          "name": "能源使用碳排放因子",
+          "definition": "能源或燃料使用的碳排放因子",
+          "unit": "tCO₂e/GJ",
+          "source": "附录F",
+          "value": "",
+          "clauseRef": "式(8)"
+        },
+        {
+          "key": "M_CO2",
+          "name": "焊接CO₂逸散量",
+          "definition": "焊接过程中产生的CO₂逸散的量",
+          "unit": "kgCO₂e",
+          "source": "附录C缺省值 或 具体场地数据",
+          "value": "",
+          "clauseRef": "式(8)"
+        },
+        {
+          "key": "P_Part",
+          "name": "部件重量比例缺省值",
+          "definition": "部件的重量比例缺省值",
+          "unit": "%",
+          "source": "附录A表A.1",
+          "value": "",
+          "clauseRef": "附录A"
+        },
+        {
+          "key": "P_tyre",
+          "name": "出厂轮胎重量比例缺省值",
+          "definition": "出厂轮胎（5条含1条备胎）的重量比例缺省值",
+          "unit": "%",
+          "source": "附录A表A.1",
+          "value": "",
+          "clauseRef": "附录A"
+        }
+      ],
+      "calcRules": [
+        {
+          "type": "适用规则",
+          "content": "适用于最大设计总质量不超过3500kg的M1类车辆；含汽油、柴油、不可外接充电式混动、插电式混动、纯电动乘用车；不适用于燃用气体燃料或醇醚类燃料车辆",
+          "target": "全部公式",
+          "clauseRef": "第1章 范围"
+        },
+        {
+          "type": "适用规则",
+          "content": "功能单位为单位行驶里程（1km），生命周期行驶里程固定按 1.5×10⁵ km 计算",
+          "target": "全部公式",
+          "clauseRef": "第4.2.1条、第4.4.3条"
+        },
+        {
+          "type": "数据规则",
+          "content": "具体场地数据优先；不可行时可用缺省值；两者可混合使用",
+          "target": "全部公式",
+          "clauseRef": "第4.3.1条"
+        },
+        {
+          "type": "数据规则",
+          "content": "仅当材料重量使用具体场地数据时材料碳排放因子才可以使用具体场地数据",
+          "target": "CAR-MAT-002~007",
+          "clauseRef": "第4.3.1条"
+        },
+        {
+          "type": "数据规则",
+          "content": "时间代表性：应收集最近连续生产3个月到1年的平均水平数据；优先使用最近连续生产1年的数据",
+          "target": "全部公式",
+          "clauseRef": "第4.3.3.1条"
+        },
+        {
+          "type": "数据规则",
+          "content": "地理代表性：应收集实际生产地理区域的数据；技术代表性：应收集实际生产工艺技术的数据",
+          "target": "全部公式",
+          "clauseRef": "第4.3.3.2条、第4.3.3.3条"
+        },
+        {
+          "type": "分配规则",
+          "content": "分配优先级：避免或减少分配 > 物理关系（重量/数量/体积/面积/热值）> 经济关系（产值/利润，一般不推荐）",
+          "target": "全部公式",
+          "clauseRef": "第4.3.2条"
+        },
+        {
+          "type": "分配规则",
+          "content": "多重输出按产品功能和经济关联性变化；多重输入基于实际关系；分配前后总和应相等",
+          "target": "全部公式",
+          "clauseRef": "第4.3.2条"
+        },
+        {
+          "type": "处理规则",
+          "content": "材料取舍：材料重量占比或碳排放占比大于各部门1%的其他均质材料必须纳入；≤1%可不纳入",
+          "target": "CAR-MAT-002",
+          "clauseRef": "第4.2.2.2条"
+        },
+        {
+          "type": "处理规则",
+          "content": "使用阶段更换假设：轮胎按更换2次（每次4条）计算，铅酸蓄电池按更换2次计算，制冷剂按逸散1次计算",
+          "target": "CAR-USE-001",
+          "clauseRef": "第4.2.2.4条"
+        },
+        {
+          "type": "处理规则",
+          "content": "锂离子动力电池可选用材料法（式4）或重量法（式5）核算；单一燃用汽油或柴油乘用车动力蓄电池重量按0计算",
+          "target": "CAR-MAT-004/CAR-MAT-005",
+          "clauseRef": "第4.4.1条"
+        },
+        {
+          "type": "精度规则",
+          "content": "所有计算结果四舍五入（圆整）至小数点后两位",
+          "target": "全部公式",
+          "clauseRef": "第4.1.5条 精确度"
+        },
+        {
+          "type": "校验规则",
+          "content": "避免重复计算：每个部分只能计算一次，避免重复计算和遗漏",
+          "target": "CAR-TOTAL-001",
+          "clauseRef": "第4.1.7条 避免重复计算"
+        },
+        {
+          "type": "校验规则",
+          "content": "温室气体范围：《京都议定书》规定的七种（CO₂、CH₄、N₂O、HFCs、PFCs、SF₆、NF₃），GWP取100年时间框架",
+          "target": "全部公式",
+          "clauseRef": "第4.2.3条、第3.16条"
+        },
+        {
+          "type": "校验规则",
+          "content": "碳排放源范围：考虑能源利用、燃烧过程、化学反应、运行、废物处理；不考虑土地利用和土地利用变化",
+          "target": "CAR-TOTAL-001",
+          "clauseRef": "第4.2.4条"
+        },
+        {
+          "type": "单位规则",
+          "content": "碳排放量单位为千克二氧化碳当量（kgCO₂e）；材料重量单位为千克（kg），圆整至小数点后两位",
+          "target": "全部公式",
+          "clauseRef": "第4.4条、第4.4.1条"
+        }
+      ],
+      "reportTemplate": {
+        "file": {
+          "name": "乘用车生命周期碳排放核算报告模板（附录G）",
+          "pages": "3",
+          "uploadedAt": "2026-11-19"
+        },
+        "sections": [
+          {
+            "name": "一、基本信息",
+            "type": "form",
+            "fields": [
+              {
+                "name": "报告编号",
+                "type": "text",
+                "unit": "",
+                "required": true,
+                "calcRule": ""
+              },
+              {
+                "name": "编制人员",
+                "type": "text",
+                "unit": "",
+                "required": true,
+                "calcRule": ""
+              },
+              {
+                "name": "审核人员",
+                "type": "text",
+                "unit": "",
+                "required": true,
+                "calcRule": ""
+              },
+              {
+                "name": "发布日期",
+                "type": "date",
+                "unit": "",
+                "required": true,
+                "calcRule": ""
+              },
+              {
+                "name": "核算单位全称",
+                "type": "text",
+                "unit": "",
+                "required": true,
+                "calcRule": ""
+              },
+              {
+                "name": "统一社会信用代码",
+                "type": "text",
+                "unit": "",
+                "required": true,
+                "calcRule": ""
+              },
+              {
+                "name": "单位地址",
+                "type": "text",
+                "unit": "",
+                "required": false,
+                "calcRule": ""
+              },
+              {
+                "name": "联系人",
+                "type": "text",
+                "unit": "",
+                "required": true,
+                "calcRule": ""
+              },
+              {
+                "name": "联系方式",
+                "type": "text",
+                "unit": "",
+                "required": true,
+                "calcRule": ""
+              },
+              {
+                "name": "车辆型号",
+                "type": "text",
+                "unit": "",
+                "required": true,
+                "calcRule": ""
+              },
+              {
+                "name": "注册商标",
+                "type": "text",
+                "unit": "",
+                "required": true,
+                "calcRule": ""
+              },
+              {
+                "name": "上市时间",
+                "type": "date",
+                "unit": "",
+                "required": false,
+                "calcRule": ""
+              },
+              {
+                "name": "整备质量",
+                "type": "number",
+                "unit": "kg",
+                "required": true,
+                "calcRule": ""
+              },
+              {
+                "name": "燃料类型",
+                "type": "text",
+                "unit": "",
+                "required": true,
+                "calcRule": ""
+              },
+              {
+                "name": "动力电池容量",
+                "type": "number",
+                "unit": "kWh",
+                "required": false,
+                "calcRule": ""
+              }
+            ]
+          },
+          {
+            "name": "二、核算范围",
+            "type": "form",
+            "fields": [
+              {
+                "name": "功能单位",
+                "type": "text",
+                "unit": "",
+                "required": true,
+                "calcRule": ""
+              },
+              {
+                "name": "生命周期行驶里程",
+                "type": "number",
+                "unit": "km",
+                "required": true,
+                "calcRule": ""
+              },
+              {
+                "name": "产品性能描述",
+                "type": "text",
+                "unit": "",
+                "required": true,
+                "calcRule": ""
+              },
+              {
+                "name": "系统边界说明",
+                "type": "text",
+                "unit": "",
+                "required": true,
+                "calcRule": ""
+              },
+              {
+                "name": "材料构成与技术参数",
+                "type": "text",
+                "unit": "",
+                "required": true,
+                "calcRule": ""
+              }
+            ]
+          },
+          {
+            "name": "三、清单分析",
+            "type": "table",
+            "fields": [
+              {
+                "name": "生命周期阶段",
+                "type": "text",
+                "unit": "",
+                "required": true,
+                "calcRule": ""
+              },
+              {
+                "name": "清单项目",
+                "type": "text",
+                "unit": "",
+                "required": true,
+                "calcRule": ""
+              },
+              {
+                "name": "数量",
+                "type": "number",
+                "unit": "",
+                "required": true,
+                "calcRule": ""
+              },
+              {
+                "name": "单位",
+                "type": "text",
+                "unit": "",
+                "required": true,
+                "calcRule": ""
+              },
+              {
+                "name": "数据来源",
+                "type": "text",
+                "unit": "",
+                "required": true,
+                "calcRule": ""
+              },
+              {
+                "name": "数据类型",
+                "type": "text",
+                "unit": "",
+                "required": true,
+                "calcRule": ""
+              },
+              {
+                "name": "分配方法",
+                "type": "text",
+                "unit": "",
+                "required": false,
+                "calcRule": ""
+              }
+            ]
+          },
+          {
+            "name": "四、碳排放量",
+            "type": "table",
+            "fields": [
+              {
+                "name": "生命周期阶段",
+                "type": "text",
+                "unit": "",
+                "required": true,
+                "calcRule": ""
+              },
+              {
+                "name": "碳排放量",
+                "type": "number",
+                "unit": "kgCO₂e",
+                "required": true,
+                "calcRule": ""
+              },
+              {
+                "name": "占比",
+                "type": "number",
+                "unit": "%",
+                "required": false,
+                "calcRule": ""
+              }
+            ]
+          },
+          {
+            "name": "五、结果",
+            "type": "form",
+            "fields": [
+              {
+                "name": "生命周期碳排放总量",
+                "type": "number",
+                "unit": "kgCO₂e",
+                "required": true,
+                "calcRule": "C_Materials + C_Production + C_Use"
+              },
+              {
+                "name": "单位行驶里程碳排放量",
+                "type": "number",
+                "unit": "kgCO₂e/km",
+                "required": true,
+                "calcRule": "C_Life cycle / L"
+              },
+              {
+                "name": "主要排放环节说明",
+                "type": "text",
+                "unit": "",
+                "required": true,
+                "calcRule": ""
+              },
+              {
+                "name": "数据质量说明",
+                "type": "text",
+                "unit": "",
+                "required": true,
+                "calcRule": ""
+              },
+              {
+                "name": "不确定性说明",
+                "type": "text",
+                "unit": "",
+                "required": false,
+                "calcRule": ""
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+]

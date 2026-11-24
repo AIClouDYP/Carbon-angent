@@ -104,6 +104,7 @@
 import AgentAppLayout from './components/AgentAppLayout.vue'
 import CarbonRightPanel from './components/CarbonRightPanel.vue'
 import OnboardingGuide from '../components/OnboardingGuide.vue'
+import { loadCfpProducts } from '@/utils/productStore'
 
 export default {
   name: 'PefAccountingCenter',
@@ -155,35 +156,27 @@ export default {
       return t + ' tokens'
     }
   },
+  beforeDestroy() {
+    window.removeEventListener('cfp-products-changed', this._onProductsChanged)
+  },
   mounted() {
-    // 从 localStorage 加载产品数据
+    // 从企业产品库统一存取（cfp_products_v4，与 EnterpriseProductLibrary 同源）
     try {
-      const savedProducts = localStorage.getItem('pef_products')
-      if (savedProducts) {
-        this.enterpriseProducts = JSON.parse(savedProducts)
-      }
-      if (!this.enterpriseProducts || this.enterpriseProducts.length === 0) {
-        this.enterpriseProducts = [
-          { id: 'EP-001', name: '三元锂电池组 EV700', category: '动力电池', standard: 'ISO 14067', sopIds: ['SOP-001'], calcCount: 3, lastCalcResult: '12.5 kgCO₂e/kWh', dataCompleteness: 92 },
-          { id: 'EP-002', name: '永磁同步驱动电机 200kW', category: '驱动电机', standard: 'ISO 14067', sopIds: [], calcCount: 1, lastCalcResult: '8.2 kgCO₂e/kW', dataCompleteness: 45 },
-          { id: 'EP-003', name: '直流快充桩 120kW', category: '充电设备', standard: 'ISO 14067', sopIds: ['SOP-002'], calcCount: 2, lastCalcResult: '185.6 kgCO₂e/台', dataCompleteness: 88 },
-          { id: 'EP-004', name: '真皮电动座椅总成', category: '汽车内饰', standard: 'ISO 14067', sopIds: [], calcCount: 0, lastCalcResult: '', dataCompleteness: 30 },
-          { id: 'EP-005', name: '压铸铝合金前舱盖', category: '车身件', standard: 'ISO 14067', sopIds: [], calcCount: 1, lastCalcResult: '', dataCompleteness: 60 }
-        ]
-        localStorage.setItem('cfp_products', JSON.stringify(this.enterpriseProducts))
-      }
+      this.enterpriseProducts = loadCfpProducts()
+      // 兼容字段补齐：v4 产品无 sopIds（SOP 关联由 cfp_sops 反查），缺省为空
+      this.enterpriseProducts.forEach(p => { if (!p.sopIds) p.sopIds = [] })
       const savedSOPs = localStorage.getItem('cfp_sops')
       if (savedSOPs) {
         this.productSOPs = JSON.parse(savedSOPs)
       }
-      if (!this.productSOPs || this.productSOPs.length === 0) {
-        this.productSOPs = [
-          { id: 'SOP-001', name: '动力电池碳足迹核算模型', productId: 'EP-001', sourceTaskId: 'T-001', publishTime: '2026-06-29', version: 'v1.0', verified: true, standard: 'ISO 14067' },
-          { id: 'SOP-002', name: '直流快充桩碳足迹核算模型', productId: 'EP-003', sourceTaskId: 'T-005', publishTime: '2026-06-26', version: 'v1.0', verified: true, standard: 'ISO 14067' }
-        ]
-        localStorage.setItem('cfp_sops', JSON.stringify(this.productSOPs))
-      }
     } catch (e) { /* ignore */ }
+
+    // 企业产品库增删改后实时刷新（自定义事件广播）
+    this._onProductsChanged = () => {
+      this.enterpriseProducts = loadCfpProducts()
+      this.enterpriseProducts.forEach(p => { if (!p.sopIds) p.sopIds = [] })
+    }
+    window.addEventListener('cfp-products-changed', this._onProductsChanged)
 
     // 首次访问自动弹出新手引导
     try {

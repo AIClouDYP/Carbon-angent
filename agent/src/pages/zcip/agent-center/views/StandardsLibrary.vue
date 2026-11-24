@@ -140,7 +140,7 @@
       <div v-if="parseStep === 0" class="std-upload-zone">
         <div class="std-agent-tip">
           <i class="el-icon-cpu"></i>
-          <span>请上传标准文件（PDF / Word），智能助手将自动解析标准内容并生成核算配置。</span>
+          <span>请上传标准文件（PDF / Word）。前端原型按「标准解析 Skill」规范执行模拟解析，生成待人工核对的草稿。</span>
         </div>
         <div class="std-drop-zone"
           :class="{ 'drop-active': isDragOver }"
@@ -148,18 +148,22 @@
           @dragleave.prevent="isDragOver = false"
           @drop.prevent="handleFileDrop"
           @click="triggerFileInput">
-          <input type="file" ref="fileInput" accept=".pdf,.doc,.docx" style="display:none" @change="handleFileSelect" />
+          <input type="file" ref="fileInput" accept=".pdf,.doc,.docx" multiple style="display:none" @change="handleFileSelect" />
           <i class="el-icon-upload std-drop-icon"></i>
-          <div class="std-drop-text">点击选择文件，或拖拽文件到此处</div>
-          <div class="std-drop-hint">支持 .pdf / .doc / .docx，单文件不超过 20MB</div>
+          <div class="std-drop-text">点击选择文件，或拖拽主文件与附件到此处</div>
+          <div class="std-drop-hint">支持 .pdf / .doc / .docx；首个文件默认为主文件，单文件不超过 20MB</div>
         </div>
-        <div v-if="uploadFile" class="std-file-card">
+        <div v-for="(item, index) in uploadFiles" :key="item.file.name + '-' + index" class="std-file-card" :class="{ 'is-main': item.role === 'main' }">
           <i class="el-icon-document std-file-icon"></i>
           <div class="std-file-info">
-            <div class="std-file-name">{{ uploadFile.name }}</div>
-            <div class="std-file-size">{{ formatFileSize(uploadFile.size) }}</div>
+            <div class="std-file-name">
+              {{ item.file.name }}
+              <el-tag size="mini" :type="item.role === 'main' ? 'primary' : 'info'" effect="plain">{{ item.role === 'main' ? '主文件' : '附件' }}</el-tag>
+            </div>
+            <div class="std-file-size">{{ formatFileSize(item.file.size) }}</div>
           </div>
-          <i class="el-icon-close std-file-remove" @click.stop="removeFile"></i>
+          <el-button v-if="item.role !== 'main'" type="text" size="mini" @click.stop="setMainFile(item)">设为主文件</el-button>
+          <i class="el-icon-close std-file-remove" @click.stop="removeFile(item)"></i>
         </div>
       </div>
 
@@ -206,7 +210,7 @@
               <el-option v-for="sc in scenarioEnum" :key="sc.key" :label="sc.label" :value="sc.key"></el-option>
             </el-select>
             <div v-if="parsedStd.scenarios && parsedStd.scenarios.length" class="std-parse-hint" style="margin-top:4px;color:#909399;font-size:12px;">
-              已按场景 {{ parsedStd.scenarios.join(' / ') }} 生成参数化解析模板
+              已按「标准解析 Skill」的 {{ parsedStd.scenarios.join(' / ') }} 分组模板生成草稿，请在标准详情页逐项核对
             </div>
           </el-form-item>
           <el-form-item label="简介">
@@ -216,9 +220,9 @@
       </div>
 
       <span slot="footer" class="dialog-footer">
-        <el-button v-if="parseStep === 2" @click="parseStep = 0; removeFile()">重新上传</el-button>
+        <el-button v-if="parseStep === 2" @click="parseStep = 0; resetUpload()">重新上传</el-button>
         <el-button @click="showUploadDialog = false">取消</el-button>
-        <el-button v-if="parseStep === 0" type="primary" :disabled="!uploadFile" @click="startParse">开始解析</el-button>
+        <el-button v-if="parseStep === 0" type="primary" :disabled="!uploadFiles.length" @click="startParse">开始解析</el-button>
         <el-button v-if="parseStep === 2" type="primary" @click="confirmImport">提交待审核</el-button>
       </span>
     </el-dialog>
@@ -312,6 +316,8 @@ import {
   // 保证「标准库管理页」与「智慧报告智能体」读到同一份种子，且 ensureSeed 可统一入库。
   REPORT_SEEDS as EXTRA_STANDARDS
 } from '@/utils/policyStandardService'
+import { getGroupTemplate } from '@/pages/zcip/agent-center/data/skillGroupTemplates'
+import { getSkillConfigById, isSkillEnabled } from '@/pages/zcip/agent-center/data/skillPrompts'
 
 export default {
   name: 'StandardsLibrary',
@@ -333,7 +339,7 @@ export default {
       // ===== 上传解析标准 =====
       showUploadDialog: false,
       parseStep: 0,
-      uploadFile: null,
+      uploadFiles: [],
       isDragOver: false,
       parseTasks: [],
       parsedStd: null,
@@ -580,30 +586,43 @@ export default {
       this.$refs.fileInput.click()
     },
     handleFileSelect(e) {
-      const file = e.target.files[0]
-      if (file) this.validateAndSetFile(file)
+      this.appendFiles(Array.from(e.target.files || []))
+      if (this.$refs.fileInput) this.$refs.fileInput.value = ''
     },
     handleFileDrop(e) {
       this.isDragOver = false
-      const file = e.dataTransfer.files[0]
-      if (file) this.validateAndSetFile(file)
+      this.appendFiles(Array.from(e.dataTransfer.files || []))
     },
-    validateAndSetFile(file) {
+    appendFiles(files) {
       const validExts = ['pdf', 'doc', 'docx']
-      const ext = file.name.split('.').pop().toLowerCase()
-      if (!validExts.includes(ext)) {
-        this.$message.warning('仅支持 PDF / Word 格式的标准文件')
-        return
-      }
-      if (file.size > 20 * 1024 * 1024) {
-        this.$message.warning('文件大小不能超过 20MB')
-        return
-      }
-      this.uploadFile = file
+      files.forEach(file => {
+        const ext = file.name.split('.').pop().toLowerCase()
+        if (!validExts.includes(ext)) {
+          this.$message.warning(`「${file.name}」仅支持 PDF / Word 格式`)
+          return
+        }
+        if (file.size > 20 * 1024 * 1024) {
+          this.$message.warning(`「${file.name}」不能超过 20MB`)
+          return
+        }
+        if (this.uploadFiles.some(item => item.file.name === file.name && item.file.size === file.size)) return
+        const role = this.uploadFiles.length === 0 ? 'main' : 'attachment'
+        this.uploadFiles.push({ file, role })
+      })
     },
-    removeFile() {
-      this.uploadFile = null
-      if (this.$refs.fileInput) this.$refs.fileInput.value = ''
+    setMainFile(item) {
+      this.uploadFiles.forEach(file => { file.role = file === item ? 'main' : 'attachment' })
+    },
+    removeFile(item) {
+      this.uploadFiles = this.uploadFiles.filter(file => file !== item)
+      if (this.uploadFiles.length && !this.uploadFiles.some(file => file.role === 'main')) {
+        this.uploadFiles[0].role = 'main'
+      }
+      if (!this.uploadFiles.length && this.$refs.fileInput) this.$refs.fileInput.value = ''
+    },
+    mainFile() {
+      const item = this.uploadFiles.find(file => file.role === 'main')
+      return item ? item.file : null
     },
     formatFileSize(bytes) {
       if (bytes < 1024) return bytes + ' B'
@@ -611,14 +630,14 @@ export default {
       return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
     },
     startParse() {
-      if (!this.uploadFile) return
+      if (!this.mainFile()) return
       this.parseStep = 1
       this.parseTasks = [
-        { label: '版式解析（表格结构 / 字段 / 填报说明）', done: false, running: true, result: '' },
-        { label: '条款抽取（申报条件 / 指标定义 / 材料要求）', done: false, running: false, result: '' },
-        { label: '指标体系结构化（指标 - 两级要求 - 统计口径）', done: false, running: false, result: '' },
-        { label: '映射关系建立（指标 ↔ 数据源 / 因子 / 公式）', done: false, running: false, result: '' },
-        { label: '识别条目信息（编号 / 名称 / 类型 / 机构 / 年份）', done: false, running: false, result: '' }
+        { label: '文档读取与版式解析', done: false, running: true, result: '' },
+        { label: '标准解析 Skill · 知识分组与条款抽取', done: false, running: false, result: '' },
+        { label: '标准解析 Skill · 公式参数与计算规则', done: false, running: false, result: '' },
+        { label: '标准解析 Skill · 报告模板字段', done: false, running: false, result: '' },
+        { label: '解析结果映射与草稿生成', done: false, running: false, result: '' }
       ]
       this.runParseTask(0)
     },
@@ -631,13 +650,16 @@ export default {
         this.$set(this.parseTasks[index], 'done', true)
         this.$set(this.parseTasks[index], 'running', false)
         if (index === 4) {
-          this.mockParseStdInfo()
+          const parseOk = this.runSkillParse()
+          if (!parseOk) return
         }
         const results = [
-          `已解析 ${Math.round(this.uploadFile.size / 1024)}KB 文档版式`,
-          '申报条件 / 指标定义条款已抽取',
-          '指标两级要求与统计口径已结构化',
-          '指标-数据源-因子-公式映射已建立',
+          `已解析 ${this.uploadFiles.length} 个文件 · ${Math.round(this.uploadFiles.reduce((total, item) => total + item.file.size, 0) / 1024)}KB`,
+          this.parsedStd ? this.parsedStd.structured.dimensions.length + ' 个知识分组' : '',
+          this.parsedStd && this.parsedStd.structured.formulas
+            ? this.parsedStd.structured.formulas.length + ' 个公式 · ' + this.parsedStd.structured.parameters.length + ' 个参数'
+            : '按场景模板生成计算资产',
+          this.parsedStd ? this.parsedStd.structured.reportTemplate.sections.length + ' 个模板章节' : '',
           this.parsedStd ? (this.parsedStd.code + ' · ' + this.parsedStd.type) : ''
         ]
         this.$set(this.parseTasks[index], 'result', results[index])
@@ -647,9 +669,16 @@ export default {
         this.runParseTask(index + 1)
       }, 600 + Math.random() * 500)
     },
-    // 模拟解析标准信息（基于文件名智能推断）
-    mockParseStdInfo() {
-      const fileName = this.uploadFile.name.toLowerCase()
+    // 前端原型无法接入大模型：以「标准解析 Skill」为规范，用规则化模拟器生成同构草稿。
+    // 后续接真实模型时，只需把 runSkillParse 换成服务调用，并保留本映射层。
+    runSkillParse() {
+      if (!isSkillEnabled('standard-parsing')) {
+        this.$message.warning('「标准解析」Skill 已禁用，无法执行解析')
+        return false
+      }
+      const skillConfig = getSkillConfigById('standard-parsing')
+      const mainFile = this.mainFile()
+      const fileName = mainFile.name.toLowerCase()
       // 政策类文件识别（申报政策/管理办法/通知/指导意见）
       const isPolicy = ['零碳工厂', '指标体系', '指导意见', '管理办法', '通知', '建设方案'].some(k => fileName.includes(k))
       let info = { code: 'CUSTOM-STD', name: '', type: isPolicy ? '政策文件' : '规范/指南', scope: isPolicy ? '园区碳核算' : '产品碳足迹', issuer: '', year: String(new Date().getFullYear()), desc: '' }
@@ -668,36 +697,154 @@ export default {
       } else if (fileName.includes('pef')) {
         info = { code: 'EU PEF', name: '欧盟产品环境足迹方法论（PEF）', type: '国际标准', scope: '产品碳足迹', issuer: '欧盟委员会', year: '2021', desc: '欧盟产品环境足迹评估方法，包含16个环境影响类别，是欧盟绿色新政的核心工具。' }
       } else {
-        const match = this.uploadFile.name.match(/([A-Z]+\/?[A-Z]*\s*\d+[-:]?\d*)/)
+        const match = mainFile.name.match(/([A-Z]+\/?[A-Z]*\s*\d+[-:]?\d*)/)
         if (match) info.code = match[1]
-        info.name = this.uploadFile.name.replace(/\.(pdf|doc|docx)$/i, '')
+        info.name = mainFile.name.replace(/\.(pdf|doc|docx)$/i, '')
         info.desc = isPolicy ? '用户上传的自定义政策文件。' : '用户上传的自定义核算标准文件。'
       }
-      // 解析流水线输出（R040201 STORY-004）：按场景模板产出结构化配置
-      // 场景由文件名推断；用户可在步骤3「业务场景」多选中调整（调整后骨架按首个场景重建）
-      if (!info.structured) {
-        if (isPolicy) {
-          info.structured = makePolicySkeleton()
-          info.scenarios = ['ZCF']
-        } else {
-          info.structured = makeGenericAccountingSkeleton()
-          info.scenarios = ['PCF']
-        }
+      const scenario = isPolicy ? 'ZCF' : 'PCF'
+      info.scenarios = [scenario]
+      const groups = getGroupTemplate(scenario)
+      const fileStem = mainFile.name.replace(/\.(pdf|doc|docx)$/i, '')
+      const clauseBase = isPolicy ? ['第一章', '第二章', '第三章'] : ['第5.1条', '第6.2条', '第7.3条']
+      const attachmentFiles = this.uploadFiles.filter(item => item.role !== 'main').map(item => item.file.name)
+      const materialSuffix = attachmentFiles.length ? `；附件覆盖：${attachmentFiles.join('、')}` : ''
+
+      // 按 Skill Prompt 的三类成果生成同构 JSON：
+      // standardKnowledge → structured.dimensions
+      // formulaParams → structured.formulas / parameters / calcRules
+      // reportTemplate → structured.reportTemplate
+      const dimensions = groups.map((g, gi) => ({
+        key: g.key,
+        name: g.name,
+        label: g.name,
+        desc: g.desc,
+        type: g.type || 'list',
+        points: [{
+          text: `（待人工核对）主文件「${fileStem}」中「${g.name}」相关条款，覆盖：${g.desc}${materialSuffix}。`,
+          clauseRefs: [clauseBase[Math.min(gi, clauseBase.length - 1)]]
+        }]
+      }))
+
+      const formulas = scenario === 'PCF' ? [{
+        code: 'CUSTOM-CF-001',
+        name: '产品碳足迹总量（待人工核对）',
+        expression: 'CF = Σ(AD_i × EF_i)',
+        resultIndicator: '产品碳足迹',
+        resultUnit: 'kgCO₂e',
+        paramRefsText: 'AD_i, EF_i',
+        clauseRef: '第6.2条'
+      }] : []
+
+      const parameters = scenario === 'PCF' ? [
+        { key: 'AD_i', name: '活动数据（待人工核对）', definition: '生命周期各过程的活动数据', unit: '按过程确定', source: '标准原文', value: '', clauseRef: '第6.2条' },
+        { key: 'EF_i', name: '排放因子（待人工核对）', definition: '活动数据对应排放因子', unit: 'kgCO₂e/活动单位', source: '标准原文', value: '', clauseRef: '第6.3条' }
+      ] : []
+
+      const calcRules = [{
+        type: '数据规则',
+        content: '（待人工核对）按标准原文确认初级与次级数据优先级。',
+        target: formulas.length ? '公式 CUSTOM-CF-001' : '全部指标',
+        clauseRef: '第6.2条'
+      }]
+
+      info.structured = {
+        kind: isPolicy ? 'policy' : 'accounting',
+        scenarioKind: scenario,
+        parseMeta: {
+          source: 'skill-simulated',
+          skillId: 'standard-parsing',
+          skillName: skillConfig ? skillConfig.name : '标准解析',
+          promptModified: Boolean(skillConfig && skillConfig.modified),
+          promptUpdatedAt: skillConfig ? skillConfig.updatedAt : '',
+          promptTemplate: skillConfig ? skillConfig.promptTemplate : '',
+          fileName: mainFile.name,
+          sourceFiles: this.uploadFiles.map(item => ({
+            name: item.file.name,
+            role: item.role === 'main' ? 'main' : 'attachment',
+            size: item.file.size
+          })),
+          parsedAt: new Date().toISOString()
+        },
+        dimensions
       }
+      if (scenario === 'PCF') {
+        info.structured.formulas = formulas
+        info.structured.parameters = parameters
+        info.structured.calcRules = calcRules
+      }
+      info.structured.reportTemplate = {
+        file: { name: mainFile.name, pages: '', uploadedAt: new Date().toLocaleDateString('zh-CN') },
+        sections: [{
+          name: '基本信息（待人工核对）',
+          type: 'form',
+          fields: [
+            { name: '标准编号', type: 'text', unit: '', required: true, calcRule: '' },
+            { name: '核算对象', type: 'text', unit: '', required: true, calcRule: '' }
+          ]
+        }]
+      }
+
       if (!info.scenarios || !info.scenarios.length) info.scenarios = ['PCF']
       this.parsedStd = info
+      return true
     },
-    // 场景变更时按新场景重建解析骨架（仅条款包形态切换，参数内容待解析/人工填充）
+    // 场景变更时按 Skill 分组模板重建知识草稿；其余结构保留，人工在详情页核对。
     onParseScenariosChange() {
       if (!this.parsedStd) return
+      const mainFile = this.mainFile()
       const primary = (this.parsedStd.scenarios || [])[0]
-      if (primary === 'PCF' && (!this.parsedStd.structured || this.parsedStd.structured.scenarioKind !== 'PCF')) {
-        this.parsedStd.structured = makePcfSkeleton()
-      } else if ((primary === 'ZCF' || primary === 'GF') && this.parsedStd.structured.kind !== 'policy') {
-        this.parsedStd.structured = makePolicySkeleton()
-      } else if (!['PCF', 'ZCF', 'GF'].includes(primary) && this.parsedStd.structured.scenarioKind) {
-        this.parsedStd.structured = makeGenericAccountingSkeleton()
+      const groups = getGroupTemplate(primary)
+      if (!groups.length) {
+        if (!this.parsedStd.structured) this.parsedStd.structured = {}
+        if (!Array.isArray(this.parsedStd.structured.dimensions)) this.parsedStd.structured.dimensions = []
+        this.parsedStd.structured.parseMeta = {
+          source: 'skill-simulated',
+          skillId: 'standard-parsing',
+          fileName: mainFile ? mainFile.name : '',
+          sourceFiles: this.uploadFiles.map(item => ({
+            name: item.file.name,
+            role: item.role === 'main' ? 'main' : 'attachment',
+            size: item.file.size
+          })),
+          parsedAt: new Date().toISOString()
+        }
+        return
       }
+      const old = Array.isArray(this.parsedStd.structured && this.parsedStd.structured.dimensions)
+        ? this.parsedStd.structured.dimensions : []
+      const byKey = {}
+      old.forEach(g => { if (g && g.key) byKey[g.key] = g })
+      const fileName = mainFile ? mainFile.name : ''
+      const fileStem = fileName.replace(/\.(pdf|doc|docx)$/i, '')
+      const clauseBase = ['第1条', '第2条', '第3条']
+      this.parsedStd.structured.scenarioKind = primary
+      this.parsedStd.structured.parseMeta = {
+        source: 'skill-simulated',
+        skillId: 'standard-parsing',
+        fileName,
+        sourceFiles: this.uploadFiles.map(item => ({
+          name: item.file.name,
+          role: item.role === 'main' ? 'main' : 'attachment',
+          size: item.file.size
+        })),
+        parsedAt: new Date().toISOString()
+      }
+      this.parsedStd.structured.dimensions = groups.map((g, gi) => {
+        const cur = byKey[g.key]
+        if (cur) return cur
+        return {
+          key: g.key,
+          name: g.name,
+          label: g.name,
+          desc: g.desc,
+          type: g.type || 'list',
+          points: [{
+            text: `（待人工核对）主文件「${fileStem}」中「${g.name}」相关条款，覆盖：${g.desc}。`,
+            clauseRefs: [clauseBase[Math.min(gi, clauseBase.length - 1)]]
+          }]
+        }
+      })
     },
     scenarioLabel(key) {
       const sc = this.scenarioEnum.find(s => s.key === key)
@@ -735,7 +882,12 @@ export default {
         status: '现行',
         // 入库状态机：上传解析后进入「待人工审核」，审核通过后方对智能体生效
         parseStatus: 'pending',
-        _sourceFile: this.uploadFile.name,
+        _sourceFile: (this.mainFile() || {}).name || '',
+        _sourceFiles: this.uploadFiles.map(item => ({
+          name: item.file.name,
+          role: item.role === 'main' ? 'main' : 'attachment',
+          size: item.file.size
+        })),
         _importedAt: new Date().toLocaleString('zh-CN')
       }
       const exists = this.standards.find(s => s.code === newStd.code)
@@ -770,7 +922,7 @@ export default {
     },
     resetUpload() {
       this.parseStep = 0
-      this.uploadFile = null
+      this.uploadFiles = []
       this.parseTasks = []
       this.parsedStd = null
       this.isDragOver = false
@@ -940,9 +1092,14 @@ export default {
   display: flex; align-items: center; gap: 10px; margin-top: 12px;
   padding: 10px 12px; background: #f0f7ff; border: 1px solid rgba(0,103,254,0.15); border-radius: 8px;
 }
+.std-file-card.is-main {
+  background: rgba(0,103,254,0.08);
+  border-color: rgba(0,103,254,0.28);
+}
 .std-file-icon { font-size: 22px; color: #0067FE; flex-shrink: 0; }
 .std-file-info { flex: 1; min-width: 0; }
 .std-file-name { font-size: 13px; font-weight: 600; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.std-file-name .el-tag { margin-left: 6px; }
 .std-file-size { font-size: 11px; color: #94a3b8; }
 .std-file-remove { cursor: pointer; color: #94a3b8; font-size: 14px; padding: 4px; border-radius: 4px; }
 .std-file-remove:hover { color: #f56c6c; background: rgba(245,108,108,0.1); }

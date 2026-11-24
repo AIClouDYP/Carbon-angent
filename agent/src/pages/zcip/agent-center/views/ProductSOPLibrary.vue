@@ -109,6 +109,8 @@
 </template>
 
 <script>
+import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
+
 export default {
   name: 'ProductSOPLibrary',
   data() {
@@ -161,10 +163,7 @@ export default {
           ]
           this.persist()
         }
-        const savedProducts = localStorage.getItem('cfp_products')
-        if (savedProducts) {
-          this.products = JSON.parse(savedProducts)
-        }
+        const savedProducts = loadCfpProducts()
         try {
           const savedProcesses = localStorage.getItem('cfp_processes')
           if (savedProcesses) {
@@ -227,13 +226,13 @@ export default {
         this.sops = this.sops.filter(s => s.id !== sop.id)
         this.persist()
         try {
-          const products = JSON.parse(localStorage.getItem('cfp_products') || '[]')
+          const products = loadCfpProducts()
           products.forEach(p => {
             if (p.sopIds) {
               p.sopIds = p.sopIds.filter(id => id !== sop.id)
             }
           })
-          localStorage.setItem('cfp_products', JSON.stringify(products))
+          saveCfpProducts(products)
           this.products = products
         } catch (e) { /* ignore */ }
         this.$message.success('SOP已删除')

@@ -229,6 +229,7 @@
 
 <script>
 import { mockProducts } from '../mock/data'
+import { loadCfpProducts } from '@/utils/productStore'
 
 export default {
   name: 'CreateTaskDialog',
@@ -340,8 +341,8 @@ export default {
   },
   mounted() {
     try {
-      const products = localStorage.getItem('pef_products')
-      if (products) this.epProducts = JSON.parse(products)
+      const products = loadCfpProducts()
+      if (products.length) this.epProducts = products
       const sops = localStorage.getItem('pef_sops')
       if (sops) this.epSOPs = JSON.parse(sops)
       const processes = localStorage.getItem('cfp_processes')

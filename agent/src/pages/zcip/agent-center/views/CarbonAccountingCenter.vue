@@ -54,6 +54,7 @@
         :sops="productSOPs"
         @tab-switch="onTabSwitch"
         @enter-task="enterTask"
+        @delete-task="deleteTask"
         @start-create="startCreateTask"
         @quick-calc="quickCalcWithSOP"
         @go-to-product-library="goToProductLibrary"
@@ -92,9 +93,10 @@
   <onboarding-guide
     :visible="showOnboarding"
     :step="onboardingStep"
+    :steps-override="onboardingSteps"
     @skip="finishOnboarding"
     @prev="onboardingStep--"
-    @next="onboardingStep++"
+    @next="onboardingStep < onboardingSteps.length - 1 ? onboardingStep++ : finishOnboarding()"
     @finish="finishOnboarding"
   />
   </div>
@@ -104,6 +106,7 @@
 import AgentAppLayout from './components/AgentAppLayout.vue'
 import CarbonRightPanel from './components/CarbonRightPanel.vue'
 import OnboardingGuide from '../components/OnboardingGuide.vue'
+import { loadCfpProducts } from '@/utils/productStore'
 
 export default {
   name: 'CarbonAccountingCenter',
@@ -117,12 +120,83 @@ export default {
       rightPanel: 'tasks',
       showOnboarding: false,
       onboardingStep: 0,
+      onboardingSteps: [
+        {
+          icon: 'el-icon-s-home',
+          title: '欢迎使用产品碳足迹工作台',
+          text: '本页面负责任务入口与管理：左侧为历史对话栏，中间为对话区和创建任务表单，右侧可在「任务列表」与「企业产品库」之间切换。创建或选择任务后，将进入独立的任务详情页完成九阶段核算。',
+          features: [
+            { icon: 'el-icon-s-grid', title: '三栏布局', desc: '左历史对话 / 中对话 / 右任务与产品', color: '#0067FE' },
+            { icon: 'el-icon-s-operation', title: '两页签', desc: '任务列表 + 企业产品库', color: '#0067FE' },
+            { icon: 'el-icon-right', title: '双页分工', desc: '工作台管理入口，任务详情承载核算', color: '#ED7B2F' }
+          ],
+          tip: '首次使用建议依次浏览全部引导内容，约需 1 分钟。',
+          iconStyle: {}
+        },
+        {
+          icon: 'el-icon-chat-dot-round',
+          title: '中间对话与创建任务',
+          text: '在中间对话区输入「新建任务」可调出内嵌创建任务表单，填写任务名称、选择企业产品与核算标准。创建后系统保存任务并跳转到任务详情页。',
+          features: [
+            { icon: 'el-icon-edit-outline', title: '内嵌表单', desc: '任务名称 / 产品 / 标准一次填写', color: '#0067FE' },
+            { icon: 'el-icon-magic-stick', title: '对话驱动', desc: '也可直接输入需求或快捷指令', color: '#0067FE' },
+            { icon: 'el-icon-right', title: '创建即进入', desc: '创建成功后进入独立任务详情页', color: '#ED7B2F' }
+          ],
+          tip: '试试输入「新建任务」调出创建表单。',
+          iconStyle: {}
+        },
+        {
+          icon: 'el-icon-chat-line-square',
+          title: '左侧历史对话栏',
+          text: '工作台左侧展示历史对话条目及消息数、更新时间；点击条目可查看恢复提示。标题栏「新建对话」会重置当前会话并重新显示欢迎语。',
+          features: [
+            { icon: 'el-icon-clock', title: '历史索引', desc: '按条目查看历史咨询和更新时间', color: '#0067FE' },
+            { icon: 'el-icon-plus', title: '新建对话', desc: '标题栏可清空当前会话', color: '#0067FE' },
+            { icon: 'el-icon-aim', title: '重新引导', desc: '标题栏「新手引导」可再次打开本说明', color: '#909399' }
+          ],
+          tip: '历史对话属于工作台左栏，不在任务详情页展示。',
+          iconStyle: {}
+        },
+        {
+          icon: 'el-icon-s-order',
+          title: '右侧任务列表',
+          text: '右侧第一个页签为近期核算任务。卡片显示产品、阶段、进度、状态和更新时间；点击任务进入任务详情页继续九阶段核算，已归档任务不允许删除。',
+          features: [
+            { icon: 'el-icon-aim', title: '进度跟踪', desc: '卡片显示当前阶段与完成进度', color: '#0067FE' },
+            { icon: 'el-icon-right', title: '一键续作', desc: '点击卡片进入任务详情页', color: '#0067FE' },
+            { icon: 'el-icon-lock', title: '归档保护', desc: '已归档任务隐藏删除入口', color: '#F56C6C' }
+          ],
+          tip: '进行中、已完成未归档可删；只有已归档不可删。',
+          iconStyle: {}
+        },
+        {
+          icon: 'el-icon-s-goods',
+          title: '右侧企业产品库',
+          text: '右侧第二个页签展示产品品类、型号以及「有SOP / 待构建」状态。点击「开始核算」可直接发起核算：有 SOP 可继承模型，待构建则从零建模；齿轮按钮可前往产品库管理。',
+          features: [
+            { icon: 'el-icon-box', title: '产品信息', desc: '卡片显示品类与型号', color: '#0067FE' },
+            { icon: 'el-icon-document-checked', title: 'SOP 状态', desc: '有SOP可继承，待构建需新建模型', color: '#0067FE' },
+            { icon: 'el-icon-data-analysis', title: '开始核算', desc: '从产品卡片直接进入任务详情', color: '#ED7B2F' }
+          ],
+          tip: '工作台产品卡片不展示数据完整度和历史核算次数。',
+          iconStyle: {}
+        },
+        {
+          icon: 'el-icon-success',
+          title: '一切就绪！',
+          text: '您已了解工作台与任务详情页的分工：工作台负责历史对话、创建任务、任务列表和企业产品库；任务详情页负责左侧对话与右侧九阶段核算。',
+          features: [
+            { icon: 'el-icon-s-data', title: '任务详情', desc: '左对话、右九阶段，顶部可返回工作台', color: '#0067FE' },
+            { icon: 'el-icon-refresh', title: '重置会话', desc: '任务详情顶部可重置当前核算会话', color: '#0067FE' },
+            { icon: 'el-icon-aim', title: '独立页签', desc: '工作台与任务详情分别激活页签', color: '#722ED1' }
+          ],
+          tip: '如需再次查看本引导，点击标题栏「新手引导」按钮。',
+          iconStyle: { color: 'var(--success)' }
+        }
+      ],
       newTask: { name: '', productId: '', product: '', standard: 'ISO 14067', sopId: null },
       messages: [],
-      tasks: [
-        { id: 7, name: '6.5MW陆上风电机组碳足迹核算', product: '6.5MW陆上风电机组 (叶轮171m)', status: '运行中', progress: 15, currentStage: '阶段2·LCI数据采集', updateTime: '2026-09-11', taskId: 'TASK-WIND-171' },
-        { id: 6, name: '燃油汽车ICE-A160碳足迹核算', product: '燃油汽车 ICE-A160 (1.6L)', status: '运行中', progress: 25, currentStage: '阶段2·LCI数据采集', updateTime: '2026-07-14', taskId: 'TASK-ICE-A160' }
-      ],
+      tasks: [],
       conversations: [
         { id: 'C-001', name: '动力电池碳足迹核算咨询', preview: '关于三元锂电池组EV700的碳足迹核算流程...', messageCount: 12, updateTime: '2026-07-14 10:30' },
         { id: 'C-002', name: '驱动电机LCA标准选择', preview: 'ISO 14067与GHG Protocol在电机核算中的差异...', messageCount: 8, updateTime: '2026-07-12 15:20' },
@@ -150,35 +224,34 @@ export default {
       return t + ' tokens'
     }
   },
+  beforeDestroy() {
+    window.removeEventListener('cfp-products-changed', this._onProductsChanged)
+    window.removeEventListener('cfp-tasks-changed', this._onTasksChanged)
+  },
   mounted() {
-    // 从 localStorage 加载产品数据
+    // 从企业产品库统一存取（cfp_products_v4，与 EnterpriseProductLibrary 同源）
     try {
-      const savedProducts = localStorage.getItem('cfp_products')
-      if (savedProducts) {
-        this.enterpriseProducts = JSON.parse(savedProducts)
-      }
-      if (!this.enterpriseProducts || this.enterpriseProducts.length === 0) {
-        this.enterpriseProducts = [
-          { id: 'EP-001', name: '三元锂电池组 EV700', category: '动力电池', standard: 'ISO 14067', sopIds: ['SOP-001'], calcCount: 3, lastCalcResult: '12.5 kgCO₂e/kWh', dataCompleteness: 92 },
-          { id: 'EP-002', name: '永磁同步驱动电机 200kW', category: '驱动电机', standard: 'ISO 14067', sopIds: [], calcCount: 1, lastCalcResult: '8.2 kgCO₂e/kW', dataCompleteness: 45 },
-          { id: 'EP-003', name: '直流快充桩 120kW', category: '充电设备', standard: 'ISO 14067', sopIds: ['SOP-002'], calcCount: 2, lastCalcResult: '185.6 kgCO₂e/台', dataCompleteness: 88 },
-          { id: 'EP-004', name: '真皮电动座椅总成', category: '汽车内饰', standard: 'ISO 14067', sopIds: [], calcCount: 0, lastCalcResult: '', dataCompleteness: 30 },
-          { id: 'EP-005', name: '压铸铝合金前舱盖', category: '车身件', standard: 'ISO 14067', sopIds: [], calcCount: 1, lastCalcResult: '', dataCompleteness: 60 }
-        ]
-        localStorage.setItem('cfp_products', JSON.stringify(this.enterpriseProducts))
-      }
+      this.enterpriseProducts = loadCfpProducts()
+      // 兼容字段补齐：v4 产品无 sopIds（SOP 关联由 cfp_sops 反查），缺省为空
+      this.enterpriseProducts.forEach(p => { if (!p.sopIds) p.sopIds = [] })
       const savedSOPs = localStorage.getItem('cfp_sops')
       if (savedSOPs) {
         this.productSOPs = JSON.parse(savedSOPs)
       }
-      if (!this.productSOPs || this.productSOPs.length === 0) {
-        this.productSOPs = [
-          { id: 'SOP-001', name: '动力电池碳足迹核算模型', productId: 'EP-001', sourceTaskId: 'T-001', publishTime: '2026-06-29', version: 'v1.0', verified: true, standard: 'ISO 14067' },
-          { id: 'SOP-002', name: '直流快充桩碳足迹核算模型', productId: 'EP-003', sourceTaskId: 'T-005', publishTime: '2026-06-26', version: 'v1.0', verified: true, standard: 'ISO 14067' }
-        ]
-        localStorage.setItem('cfp_sops', JSON.stringify(this.productSOPs))
-      }
     } catch (e) { /* ignore */ }
+
+    // 企业产品库增删改后实时刷新（自定义事件广播）
+    this._onProductsChanged = () => {
+      this.enterpriseProducts = loadCfpProducts()
+      this.enterpriseProducts.forEach(p => { if (!p.sopIds) p.sopIds = [] })
+    }
+    window.addEventListener('cfp-products-changed', this._onProductsChanged)
+
+    // 从 cfp_task_list 加载真实核算任务（与任务详情页 agentChatMixin 同源）
+    this.loadCfpTasks()
+    // 任务详情页任务增删改后实时刷新
+    this._onTasksChanged = () => { this.loadCfpTasks() }
+    window.addEventListener('cfp-tasks-changed', this._onTasksChanged)
 
     // 首次访问自动弹出新手引导
     try {
@@ -190,12 +263,115 @@ export default {
     this.pushWelcomeMessage()
   },
   methods: {
+    // ===== 任务列表：读 cfp_task_list 并映射为卡片字段 =====
+    loadCfpTasks() {
+      var raw = []
+      try { raw = JSON.parse(localStorage.getItem('cfp_task_list') || '[]') } catch (e) { raw = [] }
+      if (!Array.isArray(raw)) raw = []
+      // 无快照的自动生成任务一律视为脏数据（旧 bug 每次挂载 unshift 的副本，产品名可能是任意 query 值）
+      var isStaleShell = function(t) {
+        var snap = t.stageSnapshot
+        var hasSnap = snap && ((snap.messages && snap.messages.length) || snap.isModelBuilt)
+        return !hasSnap
+      }
+      var removed = 0
+      // 企业产品库产品名集合：用真实产品新建的任务即使暂无快照也不是脏数据
+      var productNames = {}
+      try {
+        var prods = JSON.parse(localStorage.getItem('cfp_products_v4') || '[]')
+        if (Array.isArray(prods)) prods.forEach(function(p) { if (p && p.name) productNames[p.name] = true })
+      } catch (e) { /* ignore */ }
+      // 同 id 只保留首条
+      var seen = {}
+      var clean = raw.filter(function(t) {
+        if (!t || !t.id) { removed++; return false }
+        if (seen[t.id]) { removed++; return false }
+        seen[t.id] = true
+        // 剔除旧 bug 产生、从未保存过进度且不是示例任务/真实产品的空壳任务
+        if (t.id !== 'task-wind-preset' && t.id !== 'task-ice-a160-preset' && isStaleShell(t) && !productNames[t.productName]) {
+          removed++
+          return false
+        }
+        return true
+      })
+      // 一次性清理：同一产品只保留「有快照且在推进」的最新一条，其余视为历史副本；
+      // 预置示例任务/无重名冲突的任务不参与合并
+      var presetIds = { 'task-wind-preset': true, 'task-ice-a160-preset': true }
+      var nameCount = {}
+      clean.forEach(function(t) { var k = t.productName || ''; nameCount[k] = (nameCount[k] || 0) + 1 })
+      var byProduct = {}
+      var finalList = []
+      clean.forEach(function(t) {
+        var snap = t.stageSnapshot || {}
+        var key = t.productName || ''
+        // 只在同产品名出现多条时才做合并收口，避免把唯一的真实任务误删
+        if (presetIds[t.id] || nameCount[key] < 2) { finalList.push(t); return }
+        var stepIdx = typeof snap.currentStepIndex === 'number' ? snap.currentStepIndex : (t.currentStepIndex || 0)
+        var snapshotMsgCount = (snap.messages && snap.messages.length) || 0
+        var weight = stepIdx * 1000 + Math.min(snapshotMsgCount, 999)
+        var prev = byProduct[key]
+        if (prev == null) {
+          byProduct[key] = { idx: finalList.length, weight: weight }
+          finalList.push(t)
+        } else if (weight > prev.weight) {
+          finalList[prev.idx] = t
+          byProduct[key] = { idx: prev.idx, weight: weight }
+          removed++
+        } else {
+          removed++
+        }
+      })
+      if (removed > 0) {
+        try {
+          localStorage.setItem('cfp_task_list', JSON.stringify(finalList))
+          window.dispatchEvent(new CustomEvent('cfp-tasks-changed'))
+        } catch (e) { /* ignore */ }
+      }
+      this.tasks = finalList.map(t => {
+        var archived = !!(t.stageSnapshot && t.stageSnapshot.isReportArchived)
+        var stepIdx = typeof t.currentStepIndex === 'number' ? t.currentStepIndex : 0
+        return {
+          id: t.id,
+          name: t.productName || '未命名任务',
+          product: t.standard || '',
+          status: archived ? '已归档' : (t.status === 'completed' ? '已完成' : '运行中'),
+          progress: Math.min(100, Math.round(((stepIdx + 1) / 9) * 100)),
+          currentStage: '阶段' + (stepIdx + 1) + '·' + (archived ? '报告已归档' : '进行中'),
+          updateTime: t.updatedAt || t.createdAt || '',
+          taskId: t.id,
+          isReportArchived: archived
+        }
+      })
+    },
+    // ===== 任务删除（三态规则：仅已归档不可删）=====
+    deleteTask(task) {
+      if (task.isReportArchived) {
+        this.$message.warning('报告已归档，任务不可删除')
+        return
+      }
+      var self = this
+      this.$confirm('确定删除任务「' + task.name + '」吗？删除后不可恢复。', '删除任务', {
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(function() {
+        try {
+          var raw = JSON.parse(localStorage.getItem('cfp_task_list') || '[]')
+          if (Array.isArray(raw)) {
+            var next = raw.filter(t => t && t.id !== task.id)
+            localStorage.setItem('cfp_task_list', JSON.stringify(next))
+          }
+        } catch (e) { /* ignore */ }
+        self.loadCfpTasks()
+        self.$message.success('任务已删除')
+      }).catch(function() { /* 取消 */ })
+    },
     onUserSend(text) {
       this.messages.push({ role: 'user', text, time: '刚刚', type: 'text' })
       if (text.includes('新建') || text.includes('创建') || text.includes('开始核算') || text.includes('新建任务')) {
-        this.messages.push({ role: 'agent', text: '正在为您启动九阶段核算流程，即将进入产品碳足迹智能体工作区...', time: '刚刚', type: 'text' })
+        this.messages.push({ role: 'agent', text: '正在为您创建核算任务，即将进入产品碳足迹任务详情页...', time: '刚刚', type: 'text' })
         setTimeout(() => {
-          this.enterTask()
+          this.startCreateTask()
         }, 800)
         return
       }
@@ -209,17 +385,15 @@ export default {
         const expts = this.tasks.filter(t => t.status === '异常')
         return expts.length ? ('发现' + expts.length + '个异常任务：' + expts.map(t => t.name + '（' + t.taskId + '）').join('、') + '。点击右侧该任务进行查看和处理。') : '当前无异常任务，全部任务运行正常。'
       }
-      return '我理解您的问题。输入"新建任务"可直接进入九阶段核算流程，或点击右侧面板切换查看。'
+      return '我理解您的问题。输入「新建任务」可调出创建任务表单，创建后进入任务详情页开始九阶段核算流程，或点击右侧面板切换查看。'
     },
     goToProductLibrary() {
       if (this.$router) this.$router.push('/agent-center/apps/enterprise-product-library')
     },
     onTabSwitch(panel) {
       this.rightPanel = panel
-      if (panel === 'conversations') {
-        this.messages.push({ role: 'agent', text: '已切换至历史对话列表，右侧展示您的对话记录。点击任一对话可查看详情。', time: '刚刚', type: 'text' })
-      } else if (panel === 'tasks') {
-        this.messages.push({ role: 'agent', text: '已切换至近期核算任务列表，右侧展示您的历史核算任务。点击任一任务可进入九阶段流程。', time: '刚刚', type: 'text' })
+      if (panel === 'tasks') {
+        this.messages.push({ role: 'agent', text: '已切换至近期核算任务列表，右侧展示您的历史核算任务。点击任一任务可进入任务详情页继续九阶段流程。', time: '刚刚', type: 'text' })
       } else if (panel === 'products') {
         this.messages.push({ role: 'agent', text: '已切换至企业产品库。绿色标记的产品已有核算模型SOP，可一键继承模型核算；灰色标记的产品需从零构建模型。', time: '刚刚', type: 'text' })
       }
@@ -241,15 +415,33 @@ export default {
         this.$message.warning('请选择核算产品并填写任务名称')
         return
       }
+      // 同步写入 cfp_task_list（与任务详情页 agentChatMixin 同源，卡片可持久化/可删除）
+      var cfpTaskId = 'task-' + Date.now()
+      try {
+        var rawTasks = JSON.parse(localStorage.getItem('cfp_task_list') || '[]')
+        if (!Array.isArray(rawTasks)) rawTasks = []
+        rawTasks.unshift({
+          id: cfpTaskId,
+          productName: this.newTask.name,
+          standard: this.newTask.standard,
+          sopId: this.newTask.sopId || null,
+          currentStepIndex: 0,
+          createdAt: new Date().toLocaleString('zh-CN'),
+          updatedAt: new Date().toLocaleString('zh-CN'),
+          status: 'in-progress'
+        })
+        localStorage.setItem('cfp_task_list', JSON.stringify(rawTasks))
+      } catch (e) { /* ignore */ }
       const task = {
-        id: this.tasks.length + 1,
+        id: cfpTaskId,
         name: this.newTask.name,
-        product: this.newTask.product,
+        product: this.newTask.standard,
         status: '运行中',
-        progress: 5,
+        progress: 11,
         currentStage: '阶段1·目标定义',
         updateTime: '刚刚',
-        taskId: 'T-' + String(this.tasks.length + 1).padStart(3, '0')
+        taskId: cfpTaskId,
+        isReportArchived: false
       }
       this.tasks.unshift(task)
       const lastFormIdx = this.messages.findIndex((m, i) => i >= this.messages.length - 2 && m.type === 'form')
@@ -264,7 +456,7 @@ export default {
         this.rightPanel = 'tasks'
         var self = this
         setTimeout(function() {
-          self.enterTask()
+          self.enterTaskWithCreate(task)
           self.newTask = { name: '', productId: '', product: '', standard: 'ISO 14067', sopId: null }
         }, 800)
       } else {
@@ -280,6 +472,14 @@ export default {
     enterTask(task) {
       var inheritFlag = ''
       var productFlag = ''
+      // 支持从 query 显式恢复指定任务（如详情页返回工作台），不再触发默认创建/兜底新建
+      var queryTaskId = this.$route && this.$route.query && this.$route.query.taskId
+        ? decodeURIComponent(this.$route.query.taskId)
+        : ''
+      if (!task && queryTaskId) {
+        var restoredTask = this.tasks.find(function(t) { return t.taskId === queryTaskId })
+        if (restoredTask) task = restoredTask
+      }
       if (this.newTask.sopId) {
         this.writeSopInheritance()
         inheritFlag = '&inheritSop=1'
@@ -289,7 +489,21 @@ export default {
       } else if (task && task.product) {
         productFlag = '&productName=' + encodeURIComponent(task.product)
       }
+      if (task && task.taskId) {
+        productFlag += (productFlag ? '' : '&') + 'taskId=' + encodeURIComponent(task.taskId)
+      }
       if (this.$router) this.$router.push('/footprint/accounting/agent?direct=true' + inheritFlag + productFlag)
+    },
+    enterTaskWithCreate(task) {
+      var inheritFlag = ''
+      var productFlag = ''
+      if (this.newTask.sopId) {
+        this.writeSopInheritance()
+        inheritFlag = '&inheritSop=1'
+      }
+      if (task && task.name) productFlag += (productFlag ? '' : '&') + 'productName=' + encodeURIComponent(task.name)
+      if (task && task.taskId) productFlag = '&taskId=' + encodeURIComponent(task.taskId)
+      if (this.$router) this.$router.push('/footprint/accounting/agent?direct=true&create=1' + inheritFlag + productFlag)
     },
     onProductSelect(productId) {
       var product = this.enterpriseProducts.find(function(p) { return p.id === productId })
@@ -328,29 +542,49 @@ export default {
       } catch (e) { /* ignore */ }
     },
     quickCalcWithSOP(product) {
+      // 产品卡片「开始核算」无条件创建核算任务；SOP只决定是否继承模型。
       var sopId = product.sopIds && product.sopIds.length > 0 ? product.sopIds[0] : null
       var sop = sopId ? this.productSOPs.find(function(s) { return s.id === sopId }) : null
-      if (!sop) {
-        this.$message.warning('该产品暂无可用SOP')
-        return
-      }
+      var taskName = product.name + '碳足迹核算'
+      var cfpTaskId = 'task-' + Date.now()
       try {
-        var savedTasks = JSON.parse(localStorage.getItem('cfp_task_list') || '[]')
-        var sourceTask = savedTasks.find(function(t) { return t.id === sop.sourceTaskId })
-        localStorage.setItem('cfp_inherit_sop', JSON.stringify({
-          sopId: sop.id,
-          sopName: sop.name,
-          productId: product.id,
-          productName: product.name,
-          standard: product.standard,
-          modelSnapshot: (sourceTask && sourceTask.stageSnapshot) ? sourceTask.stageSnapshot : null,
-          createTime: new Date().toISOString()
-        }))
+        var rawTasks = JSON.parse(localStorage.getItem('cfp_task_list') || '[]')
+        if (!Array.isArray(rawTasks)) rawTasks = []
+        rawTasks.unshift({
+          id: cfpTaskId,
+          productName: taskName,
+          standard: product.standard || 'ISO 14067',
+          sopId: sopId,
+          currentStepIndex: 0,
+          createdAt: new Date().toLocaleString('zh-CN'),
+          updatedAt: new Date().toLocaleString('zh-CN'),
+          status: 'in-progress'
+        })
+        localStorage.setItem('cfp_task_list', JSON.stringify(rawTasks))
       } catch (e) { /* ignore */ }
-      this.messages.push({ role: 'agent', text: '已匹配SOP"' + sop.name + '"，正在继承模型配置并进入九阶段核算...', time: '刚刚', type: 'text' })
+      if (sop) {
+        try {
+          var savedTasks = JSON.parse(localStorage.getItem('cfp_task_list') || '[]')
+          var sourceTask = savedTasks.find(function(t) { return t.id === sop.sourceTaskId })
+          localStorage.setItem('cfp_inherit_sop', JSON.stringify({
+            sopId: sop.id,
+            sopName: sop.name,
+            productId: product.id,
+            productName: taskName,
+            standard: product.standard || 'ISO 14067',
+            modelSnapshot: (sourceTask && sourceTask.stageSnapshot) ? sourceTask.stageSnapshot : null,
+            createTime: new Date().toISOString()
+          }))
+        } catch (e) { /* ignore */ }
+        this.messages.push({ role: 'agent', text: '已匹配SOP"' + sop.name + '"，正在创建核算任务并继承模型配置...', time: '刚刚', type: 'text' })
+      } else {
+        this.messages.push({ role: 'agent', text: '正在创建核算任务"' + taskName + '"，即将进入九阶段核算流程...', time: '刚刚', type: 'text' })
+      }
+      this.loadCfpTasks()
+      var task = { taskId: cfpTaskId, name: taskName, product: product.standard || 'ISO 14067' }
       var self = this
       setTimeout(function() {
-        if (self.$router) self.$router.push('/footprint/accounting/agent?direct=true&inheritSop=1')
+        if (self.$router) self.$router.push('/footprint/accounting/agent?direct=true&create=1&productName=' + encodeURIComponent(taskName) + '&taskId=' + encodeURIComponent(cfpTaskId) + (sop ? '&inheritSop=1' : ''))
       }, 800)
     },
     startOnboarding() {
@@ -403,7 +637,7 @@ export default {
           '共 ' + this.tasks.length + ' 个核算任务：' + running + ' 个运行中 · ' + done + ' 个已完成' +
           (expt > 0 ? ' · <span style="color:#F56C6C;font-weight:600;">' + expt + ' 个异常待处理</span>' : '') +
           '</div>' +
-          '<div style="margin-top:10px;color:#909399;font-size:12px;">直接在下方输入问题，或点击右侧面板查看历史对话、核算任务和企业产品。</div>',
+          '<div style="margin-top:10px;color:#909399;font-size:12px;">查看左侧历史对话栏，或在右侧面板查看核算任务和企业产品。</div>',
         time: '刚刚',
         type: 'text'
       })

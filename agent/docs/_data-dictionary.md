@@ -24,6 +24,7 @@
 | ghg_cycle_config | 组织碳核算 | 核算周期配置 | 配置数据（长期） | GET/POST /org/cycle-config |
 | ghg_conversation_history | 组织碳核算 | 会话历史（切换与恢复上下文） | 会话数据（中期） | GET /conversations |
 | org_onboarding_done / zcf_onboarding_done | 组织碳核算 / 零碳工厂 | 新手引导完成标记（布尔字符串） | 偏好数据（长期） | GET/PUT /user/preferences |
+| carbon-skill-templates | agent-center · Skill 管理 | Skill 配置数组（id/name/phase/enabled/modified/promptTemplate 等完整对象）；加载时以 `DEFAULT_SKILLS` 为 base 增量合并 | 配置数据（长期） | GET/PUT /skills/{id}/template |
 | aiPolish / aiNarratives（AI_POLISH_KEY） | report-submission | 整篇预览 AI 改写待审改动（按任务 id 分片、段落级 mode 标注），接受后才写入正文 | 业务数据（中期） | LLM 改写接口 |
 
 > **隔离约定**：公域权威规则（`carbon-library-*` / `emission_factor_library` / `cfp_formula_library`）与私域企业台账（`org_*` / `enterprise_measured_factors` / `cfp_sops` / `cfp_products`）严格分库，不得互相覆盖；企业因子不得写入公域因子库。
@@ -52,6 +53,8 @@
 | zero-carbon-factory | 核算模型草稿 | object | 指标 → 构成子模块 → 输入项三级模型（含特殊口径：含/不含原料用能、绿电四类来源），确认后版本化冻结 | 阶段② 模型搭建 | POST /zcf/model |
 | zero-carbon-factory | 指标核算结果 | array | 核心指标两级判定（基本要求 / 目标要求）+ 引导指标；逐行验算式与数据来源标注 | 阶段④ 指标核算与评价 | POST /zcf/evaluate |
 | zero-carbon-factory | 材料包 | object | 建设方案（官方大纲六章）+ 证明材料附件与目录 + 内容指纹 | 阶段⑥ 材料编制 | POST /zcf/materials |
+| agent-center | DEFAULT_SKILLS | array | 10 个默认 Skill 配置的唯一来源；含 id/name/phase/icon/color/desc/enabled/modified/knowledgeBase/updatedAt/promptTemplate | `agent-center/data/skillPrompts.js` | GET /skills |
+| agent-center | skill.promptTemplate | string | Prompt 模板全文；`{{\w+}}` 变量由系统运行时填充，编辑时只允许修改描述文字，不允许丢失原变量 | SkillManagement.vue + skillPrompts.js | PUT /skills/{id}/template |
 | org-accounting | org_resources_v2 / ghg_cycle_config / ghg_task_list | 见第一节 | 组织资源台账 / 核算周期配置 / 任务列表 | agentCoreMixin | 见第一节 |
 | pef-accounting / park-accounting / beijing-carbon | *_task_list / cfp_sops / cfp_products | 见第一节 | 任务列表与共用私域台账 | agentChatMixin | 见第一节 |
 | green-factory | 申报项目 | object | 工厂信息、阶段状态、六维度指标与举证材料、差距清单 | agent.vue（演示数据） | GET/POST /gf/projects |

@@ -4,7 +4,7 @@
     <div class="page-header">
       <div class="header-left">
         <h2 class="page-title"><i class="el-icon-files"></i> 平台模板库</h2>
-        <p class="page-desc">平台预置的通用核算模板框架，涵盖边界配置、核算模型、数据模板、报告模板，供全平台企业复用</p>
+        <p class="page-desc">平台预置的通用核算模板，供全平台企业复用</p>
       </div>
     </div>
 
@@ -24,8 +24,6 @@
       </el-select>
       <el-select v-model="filterStatus" placeholder="状态" size="small" clearable style="width: 110px; margin-left: 8px;">
         <el-option label="已发布" value="已发布"></el-option>
-        <el-option label="待审核" value="待审核"></el-option>
-        <el-option label="草稿" value="草稿"></el-option>
         <el-option label="已停用" value="已停用"></el-option>
       </el-select>
       <span v-if="searchText" class="toolbar-hint">搜索已跨全部类型，共匹配 {{ filteredTemplates.length }} 个模板</span>
@@ -35,8 +33,8 @@
     <div class="table-wrapper">
       <div class="table-title-bar">
         <span class="table-title-text">模板列表</span>
-        <!-- 模板内容（章节结构 / 表头字段）由文档解析产出，故不提供手工新增入口，统一走「上传解析 → 核对 → 待审核」 -->
-        <el-button type="primary" size="small" icon="el-icon-upload2" @click="openParseDialog">上传解析模板</el-button>
+        <!-- 模板由政策标准库解析产出并经标准详情页发布，本页仅作浏览、检索与引用管理 -->
+        <span class="table-title-hint">模板来源：政策标准库解析发布</span>
       </div>
       <div class="table-scroll">
         <el-table :data="pagedTemplates" border stripe size="small" style="width: 100%;" :header-cell-style="headerCellStyle">
@@ -102,16 +100,10 @@
           <el-table-column label="更新时间" prop="updateTime" width="110" align="center"></el-table-column>
           <el-table-column label="操作" width="210" align="center" fixed="right">
             <template slot-scope="{ row }">
+              <!-- 本页不承担审核职责：仅提供查看 / 微调 / 删除 -->
               <el-button type="text" size="mini" @click="viewDetail(row)">查看</el-button>
-              <!-- 待审核：仅提供审核动作；其余状态：编辑 / 删除 -->
-              <template v-if="row.status === '待审核'">
-                <el-button type="text" size="mini" @click="approveTemplate(row)">通过</el-button>
-                <el-button type="text" size="mini" class="btn-danger" @click="rejectTemplate(row)">驳回</el-button>
-              </template>
-              <template v-else>
-                <el-button type="text" size="mini" @click="editTemplate(row)">编辑</el-button>
-                <el-button type="text" size="mini" class="btn-danger" @click="deleteTemplate(row)">删除</el-button>
-              </template>
+              <el-button type="text" size="mini" @click="editTemplate(row)">微调</el-button>
+              <el-button type="text" size="mini" class="btn-danger" @click="deleteTemplate(row)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -235,83 +227,8 @@
       </div>
     </el-dialog>
 
-    <!-- 上传解析模板：上传 → 智能解析 → 确认入库（对齐政策标准库范式） -->
-    <el-dialog title="上传解析模板" :visible.sync="showParseDialog" width="640px" append-to-body :close-on-click-modal="false" @close="resetParse">
-      <div class="tpl-steps">
-        <div :class="['tpl-step', { 'step-active': parseStep === 0, 'step-done': parseStep > 0 }]">
-          <div class="tpl-step-dot">1</div><span>上传文件</span>
-        </div>
-        <div class="tpl-step-line"></div>
-        <div :class="['tpl-step', { 'step-active': parseStep === 1, 'step-done': parseStep > 1 }]">
-          <div class="tpl-step-dot">2</div><span>智能解析</span>
-        </div>
-        <div class="tpl-step-line"></div>
-        <div :class="['tpl-step', { 'step-active': parseStep === 2, 'step-done': parseStep > 2 }]">
-          <div class="tpl-step-dot">3</div><span>确认入库</span>
-        </div>
-      </div>
-
-      <!-- 步骤1：上传文件 -->
-      <div v-if="parseStep === 0" class="tpl-upload-zone">
-        <div class="tpl-agent-tip">
-          <i class="el-icon-cpu"></i>
-          <span>请上传模板文件（Word / PDF / Excel），智能助手将解析出章节结构、表头字段与填报要求，并自动预填模板信息。</span>
-        </div>
-        <div class="tpl-drop-zone" :class="{ 'drop-active': isParseDragOver }"
-          @dragover.prevent="isParseDragOver = true"
-          @dragleave.prevent="isParseDragOver = false"
-          @drop.prevent="onParseDrop"
-          @click="$refs.parseFileInput.click()">
-          <i class="el-icon-upload"></i>
-          <div class="tpl-drop-text">将文件拖到此处，或<em>点击上传</em></div>
-          <div class="tpl-drop-hint">支持 .doc / .docx / .pdf / .xlsx，单文件不超过 20MB</div>
-        </div>
-        <input ref="parseFileInput" type="file" accept=".doc,.docx,.pdf,.xlsx" style="display:none;" @change="onParseFileChange">
-        <div v-if="parseFile" class="tpl-file-card">
-          <i class="el-icon-document tpl-file-icon"></i>
-          <div class="tpl-file-info">
-            <div class="tpl-file-name">{{ parseFile.name }}</div>
-            <div class="tpl-file-size">{{ formatFileSize(parseFile.size) }}</div>
-          </div>
-          <i class="el-icon-close tpl-file-remove" @click.stop="parseFile = null"></i>
-        </div>
-      </div>
-
-      <!-- 步骤2：智能解析中 -->
-      <div v-if="parseStep === 1" class="tpl-parsing-zone">
-        <div class="tpl-parse-task" v-for="(task, i) in parseTasks" :key="i"
-          :class="{ 'task-done': task.done, 'task-running': task.running }">
-          <i :class="task.done ? 'el-icon-circle-check' : (task.running ? 'el-icon-loading' : 'el-icon-time')"></i>
-          <span>{{ task.label }}</span>
-          <span v-if="task.done && task.result" class="task-result">{{ task.result }}</span>
-        </div>
-      </div>
-
-      <!-- 步骤3：解析完成（确认在编辑表单中完成，复用同一套字段） -->
-      <div v-if="parseStep === 2" class="tpl-parsed-zone">
-        <div class="tpl-agent-tip success">
-          <i class="el-icon-circle-check"></i>
-          <span>解析完成！已预填模板信息与章节结构，点击「确认并完善」在表单中核对修正后入库。</span>
-        </div>
-        <div v-if="parsedTemplate" class="tpl-parsed-summary">
-          <div class="tpl-parsed-row"><span>模板名称</span><b>{{ parsedTemplate.name }}</b></div>
-          <div class="tpl-parsed-row"><span>模板类型</span><b>{{ parsedTemplate.type }}</b></div>
-          <div class="tpl-parsed-row"><span>章节结构</span><b>{{ parsedTemplate.sections ? parsedTemplate.sections.length : 0 }} 项</b></div>
-          <div class="tpl-parsed-row"><span>识别依据</span><b>{{ parsedTemplate.standard || '未识别到标准引用' }}</b></div>
-          <div class="tpl-parsed-row"><span>口径规则集</span><b>{{ parsedTemplate.caliber ? parsedTemplate.caliber.name : '—' }}</b></div>
-        </div>
-      </div>
-
-      <span slot="footer" class="dialog-footer">
-        <el-button v-if="parseStep === 2" @click="resetParse">重新上传</el-button>
-        <el-button @click="showParseDialog = false">取消</el-button>
-        <el-button v-if="parseStep === 0" type="primary" :disabled="!parseFile" @click="startParseTemplate">开始解析</el-button>
-        <el-button v-if="parseStep === 2" type="primary" @click="confirmParseToForm">确认并完善</el-button>
-      </span>
-    </el-dialog>
-
     <!-- 新增/编辑对话框 -->
-    <el-dialog :title="editMode ? '编辑模板' : '确认模板信息（解析结果）'" :visible.sync="editVisible" width="560px" append-to-body>
+    <el-dialog :title="editMode ? '微调模板' : '模板信息'" :visible.sync="editVisible" width="560px" append-to-body>
       <el-form :model="editForm" label-width="100px" size="small">
         <el-form-item label="模板名称" required>
           <el-input v-model="editForm.name" placeholder="请输入模板名称"></el-input>
@@ -368,12 +285,10 @@
         </el-form-item>
         <el-form-item label="状态">
           <el-radio-group v-model="editForm.status">
-            <el-radio label="草稿">草稿</el-radio>
-            <el-radio label="待审核">待审核</el-radio>
             <el-radio label="已发布">已发布</el-radio>
             <el-radio label="已停用">已停用</el-radio>
           </el-radio-group>
-          <div class="form-hint">草稿→待审核→已发布：仅「已发布」的模板会对引用方（智慧报告智能体等）生效；已停用不再被新任务匹配</div>
+          <div class="form-hint">模板由政策标准库解析发布产出；此处仅可微调与启停，已停用不再被新任务匹配</div>
         </el-form-item>
         <el-form-item label="模板配置项">
           <div class="config-editor">
@@ -433,19 +348,12 @@ export default {
         id: '', name: '', type: '', scope: '', standard: '',
         caliber: null, caliberName: '', caliberFormulaStandard: '', caliberFactorVersion: '',
         docName: '', reportType: '', scopes: [], configItems: [], sectionsJson: '',
-        version: 'v1.0', status: '草稿', description: ''
+        version: 'v1.0', status: '已发布', description: ''
       },
       // 配置项 / 适用范围 的逐条录入草稿
       newConfigKey: '',
       newConfigVal: '',
-      newScopeTag: '',
-      // 上传解析模板：上传 → 智能解析 → 确认入库（对齐政策标准库范式）
-      showParseDialog: false,
-      parseStep: 0,
-      parseFile: null,
-      isParseDragOver: false,
-      parseTasks: [],
-      parsedTemplate: null
+      newScopeTag: ''
     }
   },
   computed: {
@@ -549,42 +457,10 @@ export default {
       const map = { '边界模板': '', '模型模板': 'success', '数据模板': 'warning', '报告模板': 'info', '申报模板': 'danger', '全流程模板': 'danger' }
       return map[type] || ''
     },
-    // 状态标签色：已发布=成功，待审核=警告，其余=中性
+    // 状态标签色：已发布=成功，已停用=中性
     statusTagType(status) {
       if (status === '已发布') return 'success'
-      if (status === '待审核') return 'warning'
       return 'info'
-    },
-    // 审核通过：待审核 → 已发布（此后对引用方生效，如智慧报告智能体的模板匹配）
-    approveTemplate(row) {
-      this.$confirm('确认通过模板「' + row.name + '」的审核？通过后将对该模板的引用方（如智慧报告智能体）生效。', '审核确认', { type: 'warning' }).then(() => {
-        const idx = this.templates.findIndex(t => t.id === row.id)
-        if (idx > -1) {
-          this.$set(this.templates, idx, {
-            ...this.templates[idx], status: '已发布',
-            auditBy: '当前用户', auditTime: new Date().toISOString().slice(0, 10), auditRemark: ''
-          })
-        }
-        this.persist()
-        this.$message.success('模板已通过审核并发布')
-      }).catch(() => {})
-    },
-    // 审核驳回：退回草稿（附驳回原因，反馈提交人修改后重新提交）
-    rejectTemplate(row) {
-      this.$prompt('请填写驳回原因（将反馈给提交人）', '审核驳回', {
-        inputPlaceholder: '如：章节结构缺少表26，请补充后重新提交',
-        inputValidator: v => !!v || '请填写驳回原因'
-      }).then(({ value }) => {
-        const idx = this.templates.findIndex(t => t.id === row.id)
-        if (idx > -1) {
-          this.$set(this.templates, idx, {
-            ...this.templates[idx], status: '草稿',
-            auditBy: '当前用户', auditTime: new Date().toISOString().slice(0, 10), auditRemark: value || ''
-          })
-        }
-        this.persist()
-        this.$message.warning('模板已驳回，退回草稿')
-      }).catch(() => {})
     },
     viewDetail(row) {
       this.currentTemplate = row
@@ -604,196 +480,6 @@ export default {
       this.detailTab = 'sections'
       this.detailVariantKey = v.key
       this.detailVisible = true
-    },
-    // ===== 上传解析模板（上传 → 智能解析 → 确认入库）=====
-    openParseDialog() {
-      this.resetParse()
-      this.showParseDialog = true
-    },
-    resetParse() {
-      this.parseStep = 0
-      this.parseFile = null
-      this.isParseDragOver = false
-      this.parseTasks = []
-      this.parsedTemplate = null
-      if (this.$refs.parseFileInput) this.$refs.parseFileInput.value = ''
-    },
-    onParseFileChange(e) {
-      const file = e.target.files && e.target.files[0]
-      if (file) this.parseFile = file
-    },
-    onParseDrop(e) {
-      this.isParseDragOver = false
-      const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]
-      if (file) this.parseFile = file
-    },
-    formatFileSize(bytes) {
-      if (bytes < 1024) return bytes + ' B'
-      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
-      return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
-    },
-    startParseTemplate() {
-      if (!this.parseFile) return
-      this.parseStep = 1
-      this.parseTasks = [
-        { label: '版式解析（章节标题 / 表格结构 / 落款）', done: false, running: true, result: '' },
-        { label: '章节结构抽取（章节名 + 表头列 + 填报行）', done: false, running: false, result: '' },
-        { label: '字段与填报要求识别（单位 / 数据来源 / 说明）', done: false, running: false, result: '' },
-        { label: '依据标准与口径规则识别（引用标准 / 公式标准 / 因子版本）', done: false, running: false, result: '' },
-        { label: '识别条目信息（模板名称 / 类型 / 适用报告类型）', done: false, running: false, result: '' }
-      ]
-      this.parsedTemplate = this.mockParseTemplateInfo()
-      this.runParseTask(0)
-    },
-    runParseTask(index) {
-      if (index >= this.parseTasks.length) {
-        this.parseStep = 2
-        return
-      }
-      setTimeout(() => {
-        this.$set(this.parseTasks[index], 'done', true)
-        this.$set(this.parseTasks[index], 'running', false)
-        const p = this.parsedTemplate || {}
-        const colCount = (p.sections || []).reduce((n, s) => n + ((s.columns || []).length), 0)
-        const results = [
-          '已解析 ' + Math.round(this.parseFile.size / 1024) + 'KB 文档版式',
-          p.sections ? '抽取 ' + p.sections.length + ' 个章节' : '未识别到章节结构',
-          colCount ? '识别 ' + colCount + ' 个表头字段' : '未识别到表格字段',
-          (p.caliber && p.caliber.formulaStandard) ? '引用标准 ' + p.caliber.formulaStandard : '未识别到标准引用',
-          p.name || ''
-        ]
-        this.$set(this.parseTasks[index], 'result', results[index])
-        if (this.parseTasks[index + 1]) this.$set(this.parseTasks[index + 1], 'running', true)
-        this.runParseTask(index + 1)
-      }, 420)
-    },
-    // 模拟解析（基于文件名与关键词推断；真实实现由后端文档解析服务产出）
-    mockParseTemplateInfo() {
-      const fileName = this.parseFile.name || ''
-      const base = fileName.replace(/\.(docx?|pdf|xlsx)$/i, '')
-      const key = (fileName + base).toLowerCase()
-      const isNybg = /能源利用状况|用能单位|附件2/.test(key)
-      const isPef = /环境足迹|PEF|生命周期评价|LCA/i.test(key)
-      const isCarbon = /碳排放|温室气体|核算报告/.test(key)
-      const isAudit = /能源审计|审计报告/.test(key)
-      const isDisclose = /披露|环境信息/.test(key)
-      if (isNybg) {
-        return {
-          name: '能源利用状况报告模板', docName: '《用能单位能源利用状况报告》（附件2规范）',
-          type: '报告模板', scope: '智慧报告', reportType: '能源利用状况报告',
-          standard: '附件2 用能单位能源利用状况报告格式',
-          caliber: { name: 'GB/T 2589 综合能耗计算通则（当量值折标）', formulaStandard: 'GB/T 2589', factorVersion: '2025年第3号公告版' },
-          scopes: ['重点用能单位', '年度能源利用状况报告'],
-          configItems: [
-            { key: '填报场景', value: '6 类：工业 / 交通运输、仓储和邮政业 / 住宿和餐饮业 / 批发和零售业 / 教育业 / 其他非工业' },
-            { key: '报表数量', value: '随场景路由：工业 11 张（表1~8 + 表26~28）、交通 8 张（表9~13 + 表26~28）、其余各 6 张' },
-            { key: '口径规则集', value: 'GB/T 2589 综合能耗计算通则（当量值折标）' }
-          ],
-          sections: [
-            { no: '表1~8', name: '工业专属表格（8 张）', purpose: '工业基本情况 / 能源消费结构 / 加工转换附表 / 单位产品综合能耗 / 数据中心能效 / 节能目标进度 / 节能改造项目', source: '企业档案 + 基础计量 + 生产统计', columns: ['指标名称', '计量单位', '本期值', '上年值', '同比变化率（%）'], rows: ['表1 工业基本情况表', '表2 工业能源消费结构表', '表3 工业能源消费结构附表', '表4 工业单位产品综合能耗情况表', '表5 其他单位产品综合能耗情况表', '表6 数据中心能源利用效率情况表', '表7 工业节能目标进度完成情况表', '表8 工业节能改造项目情况表'] },
-            { no: '表9~13', name: '交通运输、仓储和邮政业专属表格（5 张）', purpose: '行业基本情况 / 能源消费结构 / 单位运输周转量能耗 / 节能目标进度 / 节能改造项目', source: '企业档案 + 运输台账 + 基础计量', columns: ['指标名称', '计量单位', '本期值', '上年同期值', '同比变化率（%）'], rows: ['表9 行业基本情况表', '表10 行业能源消费结构表', '表11 单位运输周转量（吞吐量）能耗指标情况表', '表12 节能目标进度目标完成情况表', '表13 节能改造项目情况表'] },
-            { no: '表14~16', name: '住宿和餐饮业专属表格（3 张）', purpose: '行业基本情况 / 能源消费结构 / 节能改造项目', source: '企业档案 + 基础计量 + 专项台账', columns: ['指标名称', '计量单位', '本期值', '上年同期值', '同比变化率（%）'], rows: ['表14 行业基本情况表', '表15 行业能源消费结构表', '表16 行业节能改造项目情况表'] },
-            { no: '表17~19', name: '批发和零售业专属表格（3 张）', purpose: '行业基本情况 / 能源消费结构 / 节能改造项目', source: '企业档案 + 基础计量 + 专项台账', columns: ['指标名称', '计量单位', '本期值', '上年同期值', '同比变化率（%）'], rows: ['表17 行业基本情况表', '表18 行业能源消费结构表', '表19 行业节能改造项目情况表'] },
-            { no: '表20~22', name: '教育业专属表格（3 张）', purpose: '行业基本情况 / 能源消费结构 / 节能改造项目', source: '企业档案 + 基础计量 + 专项台账', columns: ['指标名称', '计量单位', '本期值', '上年同期值', '同比变化率（%）'], rows: ['表20 行业基本情况表', '表21 行业能源消费结构表', '表22 行业节能改造项目情况表'] },
-            { no: '表23~25', name: '其他非工业专属表格（3 张）', purpose: '行业基本情况 / 能源消费结构（含用能载体补充资料）/ 节能改造项目（含碳减排效果）', source: '企业档案 + 基础计量 + 专项台账', columns: ['指标名称', '计量单位', '本期值', '上年同期值', '同比变化率（%）'], rows: ['表23 其他非工业基本情况表', '表24 其他非工业能源消费结构表', '表25 其他非工业节能改造项目情况表'] },
-            { no: '表26~28', name: '通用表格（3 张，各场景均含）', purpose: '碳排放情况 / 新能源及可再生能源利用 / 节能工作落实情况自查', source: '能源消费量 × 排放因子 + 专项台账 + 人工自查', columns: ['项目', '数值（吨二氧化碳）'], rows: ['表26 碳排放情况表（能源活动产生）', '表27 新能源及可再生能源利用情况表', '表28 重点用能单位节能工作落实情况自查表（16 条）'] }
-          ]
-        }
-      }
-      if (isPef) {
-        return {
-          name: '产品环境足迹报告模板', docName: '《产品环境足迹（PEF）核算报告》模板',
-          type: '报告模板', scope: '产品环境足迹', reportType: 'PEF 环境足迹声明',
-          standard: 'EU PEF 2021/2279（欧盟产品环境足迹方法论）',
-          caliber: { name: 'EU PEF 2021/2279（16 类中点指标）', formulaStandard: 'EU PEF 2021/2279', factorVersion: 'EF 3.1' },
-          scopes: ['出口欧盟产品', '产品环境足迹声明（EPD）', '多品类产品生命周期评价'],
-          configItems: [
-            { key: '影响类别', value: '16 类中点指标（可勾选，默认 5 类核心）' },
-            { key: '主指标', value: '气候变化（GWP100）' },
-            { key: '功能单位', value: '声明单位 / 功能单位（按产品确定）' },
-            { key: '背景数据集', value: 'EF 3.1（强制）/ Ecoinvent / ELCD' }
-          ],
-          sections: [
-            { name: '一、评估目的与功能单位声明', purpose: '声明评估目的、功能单位/声明单位与产品信息', source: '企业主数据 + 产品台账', columns: ['项目', '内容'] },
-            { name: '二、系统边界与范围界定', purpose: '生命周期范围、量化边界、分配与取舍规则、时间与地理边界', source: '阶段2 边界配置', columns: ['项目', '设定'] },
-            { name: '三、全生命周期清单分析', purpose: '各阶段活动数据与因子引用，形成清单表', source: '活动数据 + 排放因子库', columns: ['阶段', '单元过程', '活动数据', '因子', '影响量'] },
-            { name: '四、多类别环境影响结果矩阵', purpose: '16 类中点指标 × 生命周期阶段的完整结果', source: '核算引擎', columns: ['影响类别', '各阶段', '合计', '单位'] },
-            { name: '五、不确定性评价与数据质量', purpose: 'DQR 评分、蒙特卡洛模拟结果与置信区间', source: '阶段8 不确定性分析', columns: ['指标', '结果'] },
-            { name: '六、结论与改进建议', purpose: '关键热点识别与改进方向', source: '阶段8 敏感性分析', columns: ['热点', '建议'] }
-          ]
-        }
-      }
-      if (isCarbon) {
-        return {
-          name: '碳排放报告模板', docName: '《企业碳排放核算报告》模板',
-          type: '报告模板', scope: '智慧报告', reportType: '碳排放报告',
-          standard: '企业温室气体排放报告管理办法（主管部门报送要求）',
-          caliber: { name: '2025年第3号公告版（生态环境部）', formulaStandard: 'GB/T 32150', factorVersion: '2025年第3号公告版' },
-          scopes: ['工业制造企业', '组织层面碳排放核算'],
-          configItems: [{ key: '报告章节', value: '4 章（范围1/2/3 + 数据来源与说明）' }],
-          sections: [
-            { name: '范围1 直接排放', purpose: '固定燃烧、移动燃烧与逸散排放', source: '能源消费量 × 排放因子', columns: ['排放源', '活动数据', '排放因子', '排放量（tCO₂e）'], rows: ['固定燃烧', '移动燃烧', '逸散排放'] },
-            { name: '范围2 间接排放', purpose: '外购电力、热力产生的间接排放', source: '购电量 × 区域电网因子', columns: ['能源类型', '消耗量', '电网因子', '排放量（tCO₂e）'], rows: ['外购电力', '外购热力'] }
-          ]
-        }
-      }
-      if (isAudit) {
-        return {
-          name: '能源审计报告模板', docName: '《企业能源审计报告》模板',
-          type: '报告模板', scope: '智慧报告', reportType: '能源审计报告',
-          standard: '',
-          caliber: { name: 'GB/T 17166 企业能源审计技术通则', formulaStandard: 'GB/T 17166', factorVersion: '—' },
-          scopes: ['重点用能单位', '年度能源审计'],
-          configItems: [{ key: '报告章节', value: '4 章（管理概况/消费分析/能效对标/措施建议）' }],
-          sections: [
-            { name: '企业能源管理概况', purpose: '用能单位基本情况与能源管理体系', source: '企业档案带出', columns: ['项目', '内容'], rows: ['单位基本情况', '能源管理机构与人员'] },
-            { name: '能源消费分析', purpose: '分品种、分系统能源消费与结构分析', source: '能源统计数据', columns: ['能源品种', '消费量', '折标量（tce）', '占比'], rows: ['电力', '天然气', '柴油'] }
-          ]
-        }
-      }
-      if (isDisclose) {
-        return {
-          name: '合规披露文件模板', docName: '《环境信息合规披露文件》模板',
-          type: '报告模板', scope: '智慧报告', reportType: '合规披露文件',
-          standard: '企业环境信息依法披露管理办法',
-          caliber: { name: '生态环境部环境信息披露规范', formulaStandard: '', factorVersion: '—' },
-          scopes: ['重点排污单位', '环境信息披露'],
-          configItems: [{ key: '报告章节', value: '4 章（主体边界/环境信息/碳排放信息/合规改进）' }],
-          sections: [
-            { name: '披露主体与边界', purpose: '披露主体标识与报告边界', source: '企业档案带出', columns: ['项目', '内容'], rows: ['单位名称', '报告边界', '报告期间'] },
-            { name: '环境信息', purpose: '污染物排放与资源消耗', source: '环境统计台账', columns: ['指标', '单位', '本期值', '上年值'], rows: ['废气排放', '废水排放', '固废产生'] }
-          ]
-        }
-      }
-      // 未识别到已知模板类型：给出通用骨架，由用户在确认步骤补全
-      return {
-        name: base || '新建模板', docName: '', type: '报告模板', scope: '智慧报告', reportType: '',
-        standard: '', caliber: null, scopes: [], configItems: [],
-        sections: [{ name: '章节 1', purpose: '（解析未识别到明确章节，请在此补充）', source: '', columns: [], rows: [], note: '' }]
-      }
-    },
-    // 解析结果预填到编辑表单（确认步骤复用同一套字段，避免两处维护）
-    confirmParseToForm() {
-      const p = this.parsedTemplate || {}
-      this.editMode = false
-      this.editForm = {
-        id: '', name: p.name || '', type: p.type || '报告模板', scope: p.scope || '智慧报告',
-        standard: p.standard || '', caliber: p.caliber || null,
-        caliberName: p.caliber ? p.caliber.name : '',
-        caliberFormulaStandard: p.caliber ? p.caliber.formulaStandard : '',
-        caliberFactorVersion: p.caliber ? p.caliber.factorVersion : '',
-        docName: p.docName || '', reportType: p.reportType || '',
-        scopes: p.scopes ? p.scopes.slice() : [],
-        configItems: p.configItems ? JSON.parse(JSON.stringify(p.configItems)) : [],
-        sectionsJson: p.sections ? JSON.stringify(p.sections, null, 2) : '',
-        version: 'v1.0', status: '待审核',
-        description: '由「' + (this.parseFile ? this.parseFile.name : '上传文件') + '」解析生成，请核对后提交审核'
-      }
-      this.newConfigKey = ''
-      this.newConfigVal = ''
-      this.newScopeTag = ''
-      this.showParseDialog = false
-      this.editVisible = true
     },
     editTemplate(row) {
       this.editMode = true
@@ -1090,6 +776,10 @@ export default {
   font-size: 14px;
   font-weight: 600;
   color: var(--text-primary, #0f172a);
+}
+.table-title-hint {
+  font-size: 12px;
+  color: var(--text-secondary, #909399);
 }
 .table-scroll {
   flex: 1;

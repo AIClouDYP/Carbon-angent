@@ -283,10 +283,11 @@ export default {
       let path = route.path;
       // 首页重定向处理
       if (path === '/') return;
-      // 九阶段工作台复用对应智能体中心的标签页（避免产生重复标签）
+      // 产品碳足迹任务详情复用工作台页签，不额外开页签
       if (path === '/footprint/accounting/agent') {
         path = '/agent-center/apps/carbon-accounting';
       }
+      // 其它场景的九阶段页面仍复用对应智能体中心的标签页（避免产生重复标签）
       if (path === '/pef-accounting/accounting/agent') {
         path = '/agent-center/apps/pef-accounting';
       }
@@ -307,7 +308,9 @@ export default {
       }
       // 检查是否已存在
       const exists = this.openedTabs.find(tab => tab.path === path);
-      if (exists) return;
+      if (exists) {
+        return;
+      }
       // 获取标题：优先 meta.title，兜底 menuItems
       let title = '';
       if (route.meta && route.meta.title) {
@@ -316,14 +319,16 @@ export default {
         const menuItem = this.findMenuItem(path);
         title = menuItem ? menuItem.pageTitle : '未命名页面';
       }
-      this.openedTabs.push({ path, title, fixed: false });
+      const tab = { path, title, fixed: false };
+      this.openedTabs.push(tab);
     },
     isActiveTab(path) {
       let currentPath = this.$route.path;
-      // 九阶段工作台时，对应中心标签页也显示为激活状态
+      // 产品碳足迹任务详情复用工作台页签
       if (currentPath === '/footprint/accounting/agent') {
         currentPath = '/agent-center/apps/carbon-accounting';
       }
+      // 其它场景九阶段页面仍映射回对应中心标签页
       if (currentPath === '/pef-accounting/accounting/agent') {
         currentPath = '/agent-center/apps/pef-accounting';
       }
@@ -341,8 +346,9 @@ export default {
       return currentPath === path;
     },
     switchTab(tab) {
-      if (this.$route.path !== tab.path) {
-        this.$router.push(tab.path).catch(() => {});
+      const target = tab.fullPath || tab.path;
+      if (this.$route.fullPath !== target) {
+        this.$router.push(target).catch(() => {});
       }
     },
     closeTab(index) {
@@ -360,7 +366,7 @@ export default {
         const nextIndex = index < this.openedTabs.length ? index : index - 1;
         const nextTab = this.openedTabs[nextIndex];
         if (nextTab) {
-          this.$router.replace(nextTab.path).catch(() => {});
+          this.$router.replace(nextTab.fullPath || nextTab.path).catch(() => {});
         } else {
           this.$router.replace('/agent-center/apps').catch(() => {});
         }
@@ -368,7 +374,7 @@ export default {
       }
       // 兜底：若关闭的是 fixed 首页且当前路由已不在任何页签内 → 回首页
       const cur = this.$route.path;
-      const stillExists = this.openedTabs.some(t => t.path === cur);
+      const stillExists = this.openedTabs.some(t => t.path === cur || (t.fullPath && t.fullPath.split('?')[0] === cur));
       if (!stillExists) {
         this.$router.replace('/agent-center/apps').catch(() => {});
       }
