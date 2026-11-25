@@ -30,7 +30,7 @@
 
 | 概念 | 说明 |
 |---|---|
-| **Skill** | 一个可复用的解析技能，含：提示词模板（prompt）+ 因子匹配规则（factorPriority）+ 触发阶段（phase）+ 关联知识库（knowledgeBase）+ 绑定标准（standardCode）|
+| **Skill** | 一个可复用的解析技能，含：提示词模板（prompt）+ 因子匹配规则（factorPriority）+ 关联知识库（knowledgeBase）+ 绑定标准（standardCode）；调用时机由程序编排决定，不属于 Skill 配置字段 |
 | **Skill 驱动解析** | 本模块解析标准时，**选择对应 Skill**，由 Skill 的提示词模板与规则驱动大模型完成提取 |
 | **差异化适配** | 不同场景/不同标准类型，加载不同 Skill（如「GB/T 36132 解析技能」「ISO 14067 解析技能」「零碳园区指标解析技能」）|
 
@@ -910,7 +910,6 @@ PUT/DELETE /api/standards/{id}:
 选择文件
   → 前端校验
   → 解析任务动画
-  → 检查 Skill「standard-parsing」是否启用
   → 读取 Prompt 与模板状态
   → runSkillParse() 规则化生成草稿
   → 用户确认编号 / 名称 / 类型 / 场景
@@ -918,7 +917,7 @@ PUT/DELETE /api/standards/{id}:
   → parseStatus = pending
 ```
 
-Skill 禁用时 `runParseTask()` 收到 false 后直接中断，不生成草稿。
+解析入口始终读取「standard-parsing」Skill 的模板，不存在通过停用 Skill 中断流程的路径。
 
 `parseMeta` 记录：
 
@@ -985,14 +984,14 @@ pending（解析草稿）
 
 ### 10.6 与当前 Skill 管理的关系
 
-当前只消费 `standard-parsing`：
+当前消费 `standard-parsing` 与 `boundary-config`：
 
 ```js
-if (!isSkillEnabled('standard-parsing')) return false
 const skillConfig = getSkillConfigById('standard-parsing')
+const boundaryDefaults = getBoundaryDefaults('PCF')
 ```
 
-Prompt 不在列表页硬编码，默认来源和用户修改都由 Skill 管理页维护。业务页只读取模板内容与启用状态，不修改 Skill 配置。
+Prompt 不在列表页硬编码，默认来源和用户修改都由 Skill 管理页维护。业务页只读取模板内容，不修改 Skill 配置。
 
 ### 10.7 上传对话框实现细节
 

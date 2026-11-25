@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Skill 默认配置
  *
  * 说明：
@@ -10,12 +10,11 @@
 export const DEFAULT_SKILLS = [
   {
     id: 'standard-parsing',
+    promptScope: 'global',
     name: '标准解析',
-    phase: '阶段一 · 政策标准解析',
     icon: 'el-icon-reading',
     color: '#0067FE',
     desc: '解析标准文档，产出标准知识（分组条款 + 溯源）、公式参数（公式/参数/规则）、报告模板（模板原文 + 待填字段）；产出为草稿，经标准详情页三页签确认发布后方沉淀至三库',
-    enabled: true,
     modified: false,
     knowledgeBase: '政策标准库',
     updatedAt: '',
@@ -23,25 +22,23 @@ export const DEFAULT_SKILLS = [
   },
   {
     id: 'boundary-config',
+    promptScope: 'scenario',
     name: '边界配置',
-    phase: '阶段二',
     icon: 'el-icon-set-up',
     color: '#0067FE',
-    desc: '引导用户完成核算边界 5 步配置（生命周期/量化单位/分配规则/取舍规则/时间边界）',
-    enabled: true,
+    desc: '按业务场景维护完整边界配置 Prompt；用户可直接编辑场景说明、边界要求与默认值，工作台按当前场景读取',
     modified: false,
     knowledgeBase: '政策标准库',
     updatedAt: '',
-    promptTemplate: '你是一位碳核算边界配置向导。当前处于【阶段二：核算边界】。\n\n请根据用户选择的标准 {{standardCode}}，引导完成 5 步边界配置：\n1. 生命周期范围确认\n2. 量化单位选择\n3. 分配规则确认\n4. 取舍规则确认\n5. 时间边界确认\n\n每步提供 2-3 个推荐选项，用户确认后进入下一步。'
+    promptTemplate: '你是核算边界配置专家。当前处于【阶段二 · 核算边界】。\n\n请根据核算场景 {{scenarioKey}} 与已选标准 {{standardCode}}，只输出该场景的结构化默认边界。\n\n【场景边界模板】\n{{scenarioBoundaryTemplate}}\n\n【优先级】\n1. 已选标准的明确边界条款优先，并对默认边界进行细化或固化\n2. 场景默认边界作为第二优先级\n3. 工作台兜底配置仅用于标准与场景默认值缺失时\n\n【固化规则】\n- 标准明确规定某一边界项时，工作台应锁定为只读\n- 标准只给要求性表述时，保留原文并标注「标准要求」，不得自行编造日期或数值\n- 标准未规定的项可沿用当前场景默认值\n- 不得套用其他业务场景的边界字段或示例\n\n请输出 JSON，不要输出无关说明。'
   },
   {
     id: 'process-modeling',
+    promptScope: 'global',
     name: '工艺建模',
-    phase: '阶段三',
     icon: 'el-icon-s-grid',
     color: '#ED7B2F',
     desc: '根据工艺物料平衡表/BOM 构建单元过程拓扑模型',
-    enabled: true,
     modified: false,
     knowledgeBase: '—',
     updatedAt: '',
@@ -49,12 +46,11 @@ export const DEFAULT_SKILLS = [
   },
   {
     id: 'data-collection',
+    promptScope: 'global',
     name: '数据采集',
-    phase: '阶段四',
     icon: 'el-icon-s-data',
     color: '#722ED1',
     desc: '多源并发采集活动数据，支持 ERP/数据库/文档解析，自动降级',
-    enabled: true,
     modified: false,
     knowledgeBase: '—',
     updatedAt: '',
@@ -62,12 +58,11 @@ export const DEFAULT_SKILLS = [
   },
   {
     id: 'factor-annotation',
+    promptScope: 'global',
     name: '因子标注',
-    phase: '独立能力',
     icon: 'el-icon-magic-stick',
     color: '#00A8A0',
     desc: '为排放因子智能标注活动标识（activityId，精确匹配键）与匹配关键词（tags，模糊命中层）：标识优先复用库内已有保障跨库对齐，关键词按词表命中+同活动复用生成',
-    enabled: true,
     modified: false,
     knowledgeBase: '排放因子库',
     updatedAt: '',
@@ -75,12 +70,11 @@ export const DEFAULT_SKILLS = [
   },
   {
     id: 'factor-matching',
+    promptScope: 'global',
     name: '因子匹配',
-    phase: '阶段五',
     icon: 'el-icon-connection',
     color: '#E6A23C',
     desc: '为活动数据匹配最优排放因子，按优先级排序，计算置信度',
-    enabled: true,
     modified: false,
     knowledgeBase: '排放因子库',
     updatedAt: '',
@@ -88,12 +82,11 @@ export const DEFAULT_SKILLS = [
   },
   {
     id: 'data-validation',
+    promptScope: 'global',
     name: '数据校验',
-    phase: '阶段六',
     icon: 'el-icon-warning-outline',
     color: '#F5222D',
     desc: '五维度评估数据质量（完整性/一致性/准确性/时效性/地理性），生成问题清单',
-    enabled: true,
     modified: false,
     knowledgeBase: '政策标准库',
     updatedAt: '',
@@ -101,12 +94,11 @@ export const DEFAULT_SKILLS = [
   },
   {
     id: 'calculation-orchestration',
+    promptScope: 'global',
     name: '计算编排',
-    phase: '阶段七',
     icon: 'el-icon-cpu',
     color: '#0067FE',
     desc: '遍历生命周期各阶段，调用精确计算工具，汇总排放量',
-    enabled: true,
     modified: false,
     knowledgeBase: '计算公式库',
     updatedAt: '',
@@ -114,12 +106,11 @@ export const DEFAULT_SKILLS = [
   },
   {
     id: 'analysis-orchestration',
+    promptScope: 'global',
     name: '分析编排',
-    phase: '阶段八',
     icon: 'el-icon-data-line',
     color: '#0067FE',
     desc: '贡献度分析、敏感度排序、蒙特卡洛不确定性模拟',
-    enabled: true,
     modified: false,
     knowledgeBase: '—',
     updatedAt: '',
@@ -127,12 +118,11 @@ export const DEFAULT_SKILLS = [
   },
   {
     id: 'report-generation',
+    promptScope: 'global',
     name: '报告生成',
-    phase: '阶段九',
     icon: 'el-icon-document',
     color: '#67C23A',
     desc: '按标准模板生成合规报告（Word/PDF），配套四类可视化图表',
-    enabled: true,
     modified: false,
     knowledgeBase: '—',
     updatedAt: '',
@@ -154,10 +144,8 @@ export function getSkillConfigById(skillId) {
 }
 
 /**
- * 判断 Skill 是否启用
- * @param {string} skillId Skill id
+ * 场景默认边界模板（boundary-config Skill 的结构化产出约定）
+ * - 仅作为「标准条款明确边界」之前的预填基准
+ * - 标准 boundaryTemplate 存在对应值时，标准优先级更高
  */
-export function isSkillEnabled(skillId) {
-  const cfg = getSkillConfigById(skillId)
-  return !cfg || cfg.enabled !== false
-}
+export { BOUNDARY_SCENARIOS, BOUNDARY_FIELD_DEFS, BOUNDARY_DEFAULTS, getEditableBoundaryTemplate } from './boundaryConfig'

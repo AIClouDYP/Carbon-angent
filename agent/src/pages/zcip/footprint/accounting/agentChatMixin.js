@@ -130,6 +130,7 @@ export default {
           suggestions: ['摇篮到坟墓', '摇篮到大门', '大门到大门']
         })
         this.currentStepIndex = 1
+        this.initBoundaryFromSkill()
         this.scrollToBottom()
         this.saveStageSnapshot()
       }, 1000)
@@ -651,6 +652,7 @@ export default {
     jumpToPhase(idx) {
       if (idx === this.currentStepIndex) return
       this.currentStepIndex = idx
+      if (idx === 1) this.initBoundaryFromSkill()
       // 阶段2+需要标记模型已构建
       if (idx >= 2) this.isModelBuilt = true
       // 阶段5（数据校验）：确保 validationStep 在 1-4 范围内，否则右侧面板不显示
@@ -861,7 +863,7 @@ export default {
         this.boundarySubStep = 0
         // 先推送标准确认消息，再弹出因子库选择对话框
         return {
-          content: `**阶段一：政策标准 - 完成**\n已确认适用标准：**${this.selectedStandard} 《${this.getStandardName(this.selectedStandard)}》**。标准解析完毕，政策条款与核算要求已提取。\n\n**【阶段二：核算边界】**\n右侧已进入核算边界配置（步骤 1/5）。\n\n本任务的生命周期模型与功能单位（请确认）：\n* **生命周期阶段**：原材料获取 → 零部件生产 → 大件运输 → 风场建设安装与运营维护（20年）→ 报废回收\n* **功能单位**：度电碳足迹（gCO₂e/kWh）（基于年发电小时数 4200h）\n\n请依次确认：\n* 生命周期范围（摇篮到坟墓 / 摇篮到大门 / 大门到大门）\n* 量化单位（功能单位 / 声明单位）\n* 分配规则（按质量 / 按经济价值 / 按能量）\n* 取舍规则（单项阈值 / 累计阈值）\n* 时间边界（核算周期）\n\n同时选择 **排放因子库**（可多选，按标准推荐）。确认无误后点击底部「确认边界配置，进入核算模型」。`,
+          content: `**阶段一：政策标准 - 完成**\n已确认适用标准：**${this.selectedStandard} 《${this.getStandardName(this.selectedStandard)}》**。标准解析完毕，政策条款与核算要求已提取。\n\n**【阶段二：核算边界】**\n右侧已进入核算边界配置（步骤 1/5）。\n\n本任务的生命周期模型与功能单位（请确认）：\n* **生命周期阶段**：${this.stdStageNames.join(' → ')}\n* **量化单位**：${this.stdUnitTypeLabel}${this.stdUnitDetail ? `（${this.stdUnitDetail}）` : ''}\n\n请依次确认：\n* 生命周期范围（由当前任务确认）\n* 量化单位（由标准与产品确认）\n* 分配规则（标准未规定时可选）\n* 取舍规则（单项阈值 / 累计阈值分别确认）\n* 时间边界（标准要求仅作推荐，必须由用户确认）\n\n同时选择 **可用排放因子库**（默认可用项不需选择）。确认无误后点击底部「确认边界配置，进入核算模型」。`,
           nextStepIndex: 1,
           suggestions: ['确认边界配置']
         }

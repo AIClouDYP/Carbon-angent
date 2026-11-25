@@ -1,6 +1,7 @@
 import PARSED_STANDARDS from '@/data/parsedStandards.json'
+import { getSkillConfigById } from '@/pages/zcip/agent-center/data/skillPrompts'
+import { getEditableBoundaryTemplate, toRuntimeBoundaryTemplate } from '@/pages/zcip/agent-center/data/boundaryConfig'
 /**
-
  * 政策标准库服务（R040201）
  * - 场景枚举与解析模板注册（STORY-004/STORY-012：本期 PCF/ZCF，其余场景注册扩充）
  * - 标准库存取（localStorage: carbon-library-standards，与 StandardsLibrary/StandardsDetail 同 key）
@@ -11,7 +12,7 @@ import PARSED_STANDARDS from '@/data/parsedStandards.json'
 const STORE_KEY = 'carbon-library-standards-v2'
 const SEED_KEY = 'carbon-library-pcf-seed-version'
 // 版本 2：新增智慧报告（REPORT）场景种子，并使已有缓存中的条目补齐 scope / scenarios / 参数化 structured
-const SEED_VERSION = 14  // v14：种子改为 JSON 数据源（src/data/parsedStandards.json），升级时完全重建
+const SEED_VERSION = 16  // v16：生命周期范围交还用户确认；修正乘用车取舍阈值与标准缓存迁移
 
 /** 一级场景枚举（与 R040102:STORY-001 场景路由 7 场景对齐，RULE-007；REPORT 为智慧报告场景扩充） */
 export const SCENARIOS = [
@@ -27,6 +28,28 @@ export const SCENARIOS = [
 
 /** 已注册解析模板的场景（STORY-012 扩充口：新场景在此注册） */
 export const REGISTERED_TEMPLATES = ['PCF', 'ZCF']
+
+/**
+ * 场景默认边界模板（boundary-config Skill 的结构化产出约定）
+ * - 仅作为「标准条款明确边界」之前的预填基准
+ * - 标准 boundaryTemplate 存在对应值时，标准优先级更高
+ * - 业务运行始终读取该 Skill 的场景模板，不依赖启停状态
+ */
+export function getBoundaryDefaults(scenarioKey) {
+  if (!scenarioKey) return null
+  const template = toRuntimeBoundaryTemplate(scenarioKey)
+  if (!template) return null
+  const skill = getSkillConfigById('boundary-config')
+  return {
+    template,
+    sourceMeta: {
+      skillId: 'boundary-config',
+      skillName: (skill && skill.name) || '边界配置',
+      scenarioKey,
+      scenarioLabel: (getEditableBoundaryTemplate(scenarioKey) || {}).scenarioLabel || scenarioKey
+    }
+  }
+}
 
 /**
  * 智慧报告（REPORT）参数键字典（键 → 中文名）
@@ -81,8 +104,30 @@ export function ensureSeed() {
       localStorage.setItem(SEED_KEY, String(SEED_VERSION))
       return rebuilt.length
     }
-    // 版本一致：仅补齐缺失的种子条目（保留用户在详情页的编辑结果）
+    // 旧缓存兼容：生命周期范围不再由标准锁定；累计阈值必须来自标准原文
     const list = loadStandards()
+    let migrated = false
+    list.forEach(std => {
+      const params = std.structured && std.structured.params
+      if (!Array.isArray(params)) return
+      const next = params.filter(p => p && p.key !== 'scopeFixedValue')
+      const car = std.code === '乘用车生命周期碳排放核算技术规范'
+      if (car) {
+        const total = next.find(p => p && p.key === 'cutoffTotalThreshold')
+        if (total && total.value === '1%') {
+          const idx = next.indexOf(total)
+          next.splice(idx, 1)
+        }
+        const summary = next.find(p => p && p.key === 'cutoffThreshold')
+        if (summary) summary.value = '1%'
+      }
+      if (next.length !== params.length || car) {
+        std.structured.params = next
+        migrated = true
+      }
+    })
+    if (migrated) saveStandards(list)
+    // 版本一致：仅补齐缺失的种子条目（保留用户在详情页的编辑结果）
     const codes = new Set(list.map(s => s.code))
     seeds.forEach(seed => {
       if (!codes.has(seed.code)) {
@@ -378,7 +423,7 @@ export function toStandardConfig(std) {
   cfg.excludedSources = p.excludedSources || []
   cfg.materialCategories = p.materialCategories || []
   cfg.stagesFixed = p.stagesFixed === true
-  cfg.scopeFixedValue = p.scopeFixedValue || ''
+  cfg.scopeFixedValue = ''
   cfg.keyComponents = p.keyComponents || []
   cfg.indicatorMapping = p.indicatorMapping || null
   cfg.calcRule = p.calcRule || null

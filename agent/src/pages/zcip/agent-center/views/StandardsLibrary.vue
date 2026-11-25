@@ -317,7 +317,7 @@ import {
   REPORT_SEEDS as EXTRA_STANDARDS
 } from '@/utils/policyStandardService'
 import { getGroupTemplate } from '@/pages/zcip/agent-center/data/skillGroupTemplates'
-import { getSkillConfigById, isSkillEnabled } from '@/pages/zcip/agent-center/data/skillPrompts'
+import { getSkillConfigById } from '@/pages/zcip/agent-center/data/skillPrompts'
 
 export default {
   name: 'StandardsLibrary',
@@ -672,10 +672,6 @@ export default {
     // 前端原型无法接入大模型：以「标准解析 Skill」为规范，用规则化模拟器生成同构草稿。
     // 后续接真实模型时，只需把 runSkillParse 换成服务调用，并保留本映射层。
     runSkillParse() {
-      if (!isSkillEnabled('standard-parsing')) {
-        this.$message.warning('「标准解析」Skill 已禁用，无法执行解析')
-        return false
-      }
       const skillConfig = getSkillConfigById('standard-parsing')
       const mainFile = this.mainFile()
       const fileName = mainFile.name.toLowerCase()

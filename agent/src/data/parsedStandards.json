@@ -18,6 +18,20 @@
     "structured": {
       "kind": "accounting",
       "scenarioKind": "PCF",
+      "params": [
+        { "key": "lifecycleScope", "value": "cradle-to-grave", "clauseRefs": ["第4.1.1条 生命周期视角"] },
+        { "key": "unitType", "value": "functional", "clauseRefs": ["第4.1.2条 功能单位"] },
+        { "key": "unitDetail", "value": "乘用车生命周期碳排放核算功能单位为单位行驶里程（1km）", "clauseRefs": ["第4.1.2条 功能单位", "第4.2.1条"] },
+        { "key": "allocationRule", "value": "economic", "clauseRefs": ["第4.3.2条 数据分配"] },
+        { "key": "cutoffItemThreshold", "value": "1%", "clauseRefs": ["第4.2.2.2条 原材料获取阶段核算范围"] },
+        { "key": "timeBoundary", "value": "应收集最近连续生产3个月到1年的平均水平数据；优先使用最近连续生产1年的平均水平数据", "clauseRefs": ["第4.3.3.1条"] },
+        { "key": "allowedScopes", "value": ["cradle-to-grave"], "clauseRefs": ["第4.1.1条 生命周期视角"] },
+        { "key": "allowedUnitTypes", "value": ["functional"], "clauseRefs": ["第4.1.2条 功能单位"] },
+        { "key": "modelStages", "value": ["原材料获取阶段", "整车生产阶段", "使用阶段"], "clauseRefs": ["第4.1.1条 生命周期视角"] },
+        { "key": "stagesFixed", "value": true, "clauseRefs": ["第4.1.1条 生命周期视角"] },
+        { "key": "factorPriority", "value": ["具体场地数据", "附录缺省值"], "clauseRefs": ["第4.3.1条"] },
+        { "key": "dataQuality", "value": ["时间代表性：最近连续生产3个月到1年", "地理代表性：实际生产地理区域", "技术代表性：实际生产工艺技术"], "clauseRefs": ["第4.3.3.1条", "第4.3.3.2条", "第4.3.3.3条"] }
+      ],
       "dimensions": [
         {
           "key": "principle",

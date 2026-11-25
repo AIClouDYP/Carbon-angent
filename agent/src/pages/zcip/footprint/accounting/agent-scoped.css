@@ -489,6 +489,28 @@
   border-radius: 3px;
 }
 
+/* 阶段二数据来源提示：边界配置 Skill + 已选标准 */
+.boundary-source-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 2px 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  color: #475569;
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.boundary-source-bar i {
+  color: #0067FE;
+  font-size: 12px;
+}
+
 
 /* 分割线 */
 .sidebar-divider {
@@ -1450,7 +1472,61 @@
   text-align: center;
   padding: 0 4px !important;
 }
-
+.boundary-cutoff-static {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  font-size: 12px;
+  color: #303133;
+  font-weight: 600;
+}.boundary-time-row {
+  align-items: flex-start;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+.boundary-time-label {
+  padding-top: 7px;
+}
+.boundary-time-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+.boundary-time-select-row {
+  width: 100%;
+}
+.boundary-time-select-row .boundary-edit-control {
+  width: 340px !important;
+  max-width: 100%;
+}
+.boundary-recommend-hint {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 7px 9px;
+  background: #fffaf0;
+  border: 1px solid #faecd8;
+  border-radius: 5px;
+  color: #7a5b2c;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.boundary-recommend-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #a07b3e;
+}
+.boundary-recommend-head .el-tag {
+  flex-shrink: 0;
+}
+.boundary-recommend-text {
+  color: #606266;
+  padding-left: 1px;
+}
 /* ===== 拓扑待构建空状态 ===== */
 .model-stage-empty {
   padding: 40px 20px;

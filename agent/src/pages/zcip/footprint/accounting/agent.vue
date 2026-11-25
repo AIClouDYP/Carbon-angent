@@ -249,42 +249,42 @@
               <div class="content-header-row">
                 <i class="el-icon-set-up"></i>
                 <span class="content-header-title">核算边界配置</span>
-                <span class="content-header-sub">已由智能体按标准预填，可直接修改</span>
+                <div class="boundary-source-bar">
+                  <i class="el-icon-set-up"></i>
+                  <span>{{ boundarySourceLabel }}</span>
+                </div>
               </div>
             </div>
 
             <!-- 可编辑配置列表 -->
             <div class="boundary-edit-list">
-              <!-- 1. 生命周期范围（按所选标准自适应：标准固定则只读，否则可选） -->
+              <!-- 1. 生命周期范围（只有标准明确给出 scopeFixedValue 时才固定） -->
               <div class="boundary-edit-row">
                 <span class="boundary-edit-label">生命周期范围</span>
-                <!-- 标准明确规定阶段：只读锁定，不可改 -->
-                <template v-if="stdStagesFixed">
+                <template v-if="isBoundaryLocked('lifecycleScope')">
                   <span class="boundary-locked-value">{{ stdScopeLabel }}</span>
-                  <el-tag size="mini" type="info" effect="plain" class="boundary-locked-tag">标准固定</el-tag>
+                  <el-tag size="mini" type="info" effect="plain" class="boundary-locked-tag">标准明确系统边界</el-tag>
                 </template>
-                <!-- 标准未明确规定：用户选择通用口径 -->
                 <el-select v-else v-model="boundaryConfig.lifecycleScope" size="mini" class="boundary-edit-control" @change="onBoundaryEdit('lifecycleScope')">
                   <el-option label="摇篮到坟墓" value="cradle-to-grave"></el-option>
                   <el-option label="摇篮到大门" value="cradle-to-gate"></el-option>
                   <el-option label="大门到大门" value="gate-to-gate"></el-option>
                 </el-select>
               </div>
-              <!-- 标准固定的阶段清单（只读展示） -->
+              <!-- 标准固定的阶段清单（只读展示，不等同于生命周期范围锁定） -->
               <div v-if="stdStagesFixed && stdStageNames.length" class="boundary-edit-row boundary-stages-row">
                 <span class="boundary-edit-label">纳入阶段</span>
                 <span class="boundary-stages-text">{{ stdStageNames.join(' · ') }}</span>
+                <el-tag size="mini" type="info" effect="plain" class="boundary-locked-tag">标准固定</el-tag>
               </div>
               <!-- 2. 量化单位 -->
               <div class="boundary-edit-row">
                 <span class="boundary-edit-label">量化单位</span>
-                <!-- 标准固定：只读 -->
                 <template v-if="isBoundaryLocked('unitType')">
                   <span class="boundary-locked-value">{{ boundaryUnitTypeLabel }}</span>
                   <el-tag size="mini" type="info" effect="plain" class="boundary-locked-tag">标准固定</el-tag>
                   <span class="boundary-locked-detail">{{ boundaryConfig.unitDetail }}</span>
                 </template>
-                <!-- 标准未固定：可选 -->
                 <div v-else class="boundary-edit-group">
                   <el-select v-model="boundaryConfig.unitType" size="mini" class="boundary-edit-type" @change="onBoundaryEdit('unitType')">
                     <el-option label="声明单位" value="declaration"></el-option>
@@ -306,25 +306,45 @@
                   <el-option label="能源分配" value="energy"></el-option>
                 </el-select>
               </div>
-              <!-- 4. 取舍规则 -->
+              <!-- 4. 取舍规则：单项与累计分别判定 -->
               <div class="boundary-edit-row">
-                <span class="boundary-edit-label">取舍规则</span>
-                <template v-if="isBoundaryLocked('cutoffThreshold')">
-                  <span class="boundary-locked-value boundary-locked-long">{{ stdCutoff }}</span>
+                <span class="boundary-edit-label">单项取舍阈值</span>
+                <template v-if="isBoundaryLocked('cutoffItemThreshold')">
+                  <span class="boundary-cutoff-static">≤ {{ stdCutoffItem }}</span>
                   <el-tag size="mini" type="info" effect="plain" class="boundary-locked-tag">标准固定</el-tag>
                 </template>
                 <div v-else class="boundary-edit-group">
-                  <span class="boundary-edit-prefix">单项 &lt;</span>
+                  <span class="boundary-edit-prefix">≤</span>
                   <el-input v-model="boundaryConfig.cutoffItemThreshold" size="mini" class="boundary-edit-cutoff"></el-input>
-                  <span class="boundary-edit-prefix">累计 ≤</span>
-                  <el-input v-model="boundaryConfig.cutoffTotalThreshold" size="mini" class="boundary-edit-cutoff"></el-input>
+                  <el-tag size="mini" type="warning" effect="plain">建议默认</el-tag>
                 </div>
               </div>
-              <!-- 5. 时间边界 -->
               <div class="boundary-edit-row">
-                <span class="boundary-edit-label">时间边界</span>
-                <el-date-picker v-model="boundaryDateRange" type="daterange" size="mini" class="boundary-edit-control" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" value-format="yyyy-MM-dd" @change="onDateRangeChange"></el-date-picker>
+                <span class="boundary-edit-label">累计取舍阈值</span>
+                <template v-if="isBoundaryLocked('cutoffTotalThreshold')">
+                  <span class="boundary-cutoff-static">≤ {{ stdCutoffTotal }}</span>
+                  <el-tag size="mini" type="info" effect="plain" class="boundary-locked-tag">标准固定</el-tag>
+                </template>
+                <div v-else class="boundary-edit-group">
+                  <span class="boundary-edit-prefix">≤</span>
+                  <el-input v-model="boundaryConfig.cutoffTotalThreshold" size="mini" class="boundary-edit-cutoff"></el-input>
+                  <el-tag size="mini" type="warning" effect="plain">建议默认</el-tag>
+                </div>
               </div>
+              <!-- 5. 时间边界：始终由用户选择，标准要求只作为推荐说明 -->
+              <div class="boundary-edit-row boundary-time-row">
+                <span class="boundary-edit-label boundary-time-label">时间边界</span>
+                <div class="boundary-time-stack">
+                  <div class="boundary-time-select-row">
+                    <el-date-picker v-model="boundaryDateRange" type="daterange" size="mini" class="boundary-edit-control" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" value-format="yyyy-MM-dd" @change="onDateRangeChange"></el-date-picker>
+                  </div>
+                  <div v-if="stdTimeBoundary" class="boundary-recommend-hint">
+                    <div class="boundary-recommend-head"><el-tag size="mini" type="warning" effect="plain">标准推荐</el-tag></div>
+                    <div class="boundary-recommend-text">{{ stdTimeBoundary }}</div>
+                  </div>
+                </div>
+              </div>
+
               <!-- 6. 排放因子库（多选，按标准推荐） -->
               <div class="boundary-edit-row boundary-factor-row">
                 <span class="boundary-edit-label">排放因子库</span>
@@ -1343,8 +1363,7 @@
                 </div>
                 </div>
               </template>
-
-              <!-- 阶段3：行内编辑模式 -->
+              <!-- 阶段3：模型清单编辑 -->
               <template v-else-if="currentStepIndex === 2">
                 <div v-for="(group, gi) in modelStages" :key="group.key" class="model-group">
                   <div class="model-group-header">
@@ -1353,59 +1372,62 @@
                     <el-tag size="mini" type="success">{{ group.processes.length }} 个单元过程</el-tag>
                   </div>
                   <div class="process-table editable">
-                    <!-- 列标题 -->
                     <div class="process-row process-header-row">
                       <div class="process-col input-col"><span class="col-header-text">输入流</span></div>
                       <div class="process-col center-col"><span class="col-header-text">单元过程</span></div>
                       <div class="process-col output-col"><span class="col-header-text">输出流</span></div>
                     </div>
-                    <!-- 循环单元过程 -->
-                    <div v-for="(proc, pi) in group.processes" :key="proc.name + '-' + pi" class="process-row editable-row" :class="{ 'proc-highlight': highlightProc && highlightProc.gi === gi && highlightProc.pi === pi }">
-                      <!-- 左列：输入（可编辑，仅名称） -->
+                    <div v-for="(proc, pi) in group.processes" :key="proc.processCode || (proc.name + '-' + pi)" class="process-row editable-row" :class="{ 'proc-highlight': highlightProc && highlightProc.gi === gi && highlightProc.pi === pi }">
                       <div class="process-col input-col">
-                        <div v-for="(inp, ii) in proc.inputs" :key="ii" class="io-item input-item">
-                          <div class="io-bubble editable-bubble">
-                            <el-input v-model="inp.name" size="mini" class="io-edit-name" placeholder="输入流名称"></el-input>
-                            <el-select v-model="inp.listType" size="mini" class="io-edit-listtype" placeholder="类型">
-                              <el-option v-for="opt in inputTypeOptions" :key="opt.value" :label="opt.label" :value="opt.value"></el-option>
-                            </el-select>
-                            <i class="el-icon-close io-del-btn" @click="removeIO(proc, 'inputs', ii)"></i>
+                        <div v-for="(inp, ii) in proc.inputs" :key="inp.flowId || ii" class="io-item input-item">
+                          <div class="io-bubble editable-bubble model-flow-bubble">
+                            <div class="model-flow-row">
+                              <el-select v-model="inp.listType" size="mini" class="io-edit-listtype" @change="onModelFlowTypeChange(inp, 'inputs')">
+                                <el-option v-for="opt in inputTypeOptions" :key="opt.value" :label="opt.label" :value="opt.value"></el-option>
+                              </el-select>
+                              <el-input v-if="inp.linkMode !== 'reference'" v-model="inp.name" size="mini" class="io-edit-name" placeholder="输入内容"></el-input>
+                              <el-select v-else v-model="inp.sourceFlowRef" size="mini" class="io-edit-name" filterable placeholder="选择上游输出流" @change="onModelFlowRefChange(inp)">
+                                <el-option v-for="ref in upstreamOutputFlowOptions(gi, pi)" :key="ref.value" :label="ref.label" :value="ref.value"></el-option>
+                              </el-select>
+                              <el-tooltip content="手工输入 / 引用其他单元过程的输出流" placement="top">
+                                <i :class="['el-icon-connection', 'model-flow-link-toggle', { active: inp.linkMode === 'reference' }]" @click="toggleModelFlowLink(inp, 'inputs')"></i>
+                              </el-tooltip>
+                              <i class="el-icon-setting model-flow-settings" title="流属性" @click="openModelFlowDrawer(gi, pi, 'inputs', ii)"></i>
+                              <i class="el-icon-close io-del-btn" @click="removeIO(proc, 'inputs', ii)"></i>
+                            </div>
+                            <div v-if="inp.linkMode === 'reference'" class="model-flow-ref-hint">
+                              <i class="el-icon-link"></i> {{ referencedFlowLabel(inp) || '请选择上游单元过程的输出流' }}
+                            </div>
                           </div>
                         </div>
                         <div class="io-add-row">
                           <el-button size="mini" type="text" icon="el-icon-plus" @click="addIO(proc, 'inputs')">添加输入</el-button>
                         </div>
                       </div>
-                      <!-- 中列：单元过程（可编辑名称+分配规则+删除） -->
                       <div class="process-col center-col">
                         <div class="proc-card">
                           <div class="proc-card-arrow left">→</div>
                           <div class="proc-card-body" :class="{ 'proc-card-deviated': proc.allocation && proc.allocation !== 'mass' }">
+                            <span class="model-proc-code">{{ proc.processCode || ('P-' + (pi + 1)) }}</span>
                             <el-input v-model="proc.name" size="mini" class="proc-name-edit" placeholder="过程名称"></el-input>
-                            <el-select v-model="proc.allocation" size="mini" class="proc-allocation-select" placeholder="分配规则" @change="onProcAllocationChange(proc)">
-                              <el-option label="质量分配" value="mass"></el-option>
-                              <el-option label="经济分配" value="economic"></el-option>
-                              <el-option label="能源分配" value="energy"></el-option>
-                            </el-select>
-                            <!-- 分配规则非质量分配时，显示备注输入框 -->
-                            <div v-if="proc.allocation && proc.allocation !== 'mass'" class="proc-allocation-remark">
-                              <i class="el-icon-warning-outline"></i>
-                              <el-input v-model="proc.allocationRemark" size="mini" placeholder="说明非质量分配的原因" class="proc-remark-input"></el-input>
-                            </div>
+                            <div v-if="proc.upstreamProcessCode" class="model-proc-upstream">上游 {{ proc.upstreamProcessCode }}</div>
+                            <button type="button" class="model-proc-attr-btn" @click="openModelProcessDrawer(gi, pi)">属性</button>
                           </div>
                           <div class="proc-card-arrow right">→</div>
                         </div>
                         <el-button size="mini" type="text" class="proc-del-btn" icon="el-icon-delete" @click="removeProcess(gi, pi)">删除</el-button>
                       </div>
-                      <!-- 右列：输出（可编辑，仅名称） -->
                       <div class="process-col output-col">
-                        <div v-for="(out, oi) in proc.outputs" :key="oi" class="io-item output-item">
-                          <div class="io-bubble editable-bubble">
-                            <el-input v-model="out.name" size="mini" class="io-edit-name" placeholder="输出流名称"></el-input>
-                            <el-select v-model="out.listType" size="mini" class="io-edit-listtype" placeholder="类型" @change="onOutputTypeChange(out)">
-                              <el-option v-for="opt in outputTypeOptions" :key="opt.value" :label="opt.label" :value="opt.value"></el-option>
-                            </el-select>
-                            <i class="el-icon-close io-del-btn" @click="removeIO(proc, 'outputs', oi)"></i>
+                        <div v-for="(out, oi) in proc.outputs" :key="out.flowId || oi" class="io-item output-item">
+                          <div class="io-bubble editable-bubble model-flow-bubble">
+                            <div class="model-flow-row">
+                              <el-select v-model="out.listType" size="mini" class="io-edit-listtype" @change="onModelFlowTypeChange(out, 'outputs')">
+                                <el-option v-for="opt in outputTypeOptions" :key="opt.value" :label="opt.label" :value="opt.value"></el-option>
+                              </el-select>
+                              <el-input v-model="out.name" size="mini" class="io-edit-name" placeholder="输出内容"></el-input>
+                              <i class="el-icon-setting model-flow-settings" title="流属性" @click="openModelFlowDrawer(gi, pi, 'outputs', oi)"></i>
+                              <i class="el-icon-close io-del-btn" @click="removeIO(proc, 'outputs', oi)"></i>
+                            </div>
                           </div>
                         </div>
                         <div class="io-add-row">
@@ -1413,7 +1435,6 @@
                         </div>
                       </div>
                     </div>
-                    <!-- 新增单元过程按钮 -->
                     <div class="proc-add-row">
                       <el-tooltip :content="`在「${group.title}」下新增一个单元过程`" placement="top" effect="dark">
                         <button type="button" class="proc-add-btn" @click="addProcess(gi)">
@@ -1687,6 +1708,40 @@
         <el-button size="small" @click="tsDetailVisible = false">关闭</el-button>
       </div>
     </el-dialog>
+    <el-drawer title="单元过程属性" :visible.sync="modelProcessDrawerVisible" direction="rtl" size="420px" custom-class="model-attr-drawer">
+      <div v-if="modelProcessDrawerProcess" class="model-attr-form">
+        <div class="model-attr-head"><span class="model-attr-code">{{ modelProcessDrawerProcess.processCode || ('P-' + (modelProcessDrawerProcessIndex + 1)) }}</span><div><strong>{{ modelProcessDrawerProcess.name || '未命名单元过程' }}</strong><span>{{ modelProcessDrawerStage ? modelProcessDrawerStage.title : '' }}</span></div></div>
+        <el-form label-position="top" size="small">
+          <el-form-item label="过程名称"><el-input v-model="modelProcessDrawerProcess.name"></el-input></el-form-item>
+          <el-form-item label="过程类型"><el-select v-model="modelProcessDrawerProcess.processType" style="width:100%;"><el-option v-for="item in processTypeOptions" :key="item.value" :label="item.label" :value="item.value"></el-option></el-select></el-form-item>
+          <el-form-item label="上游单元过程编号（如有）"><el-select v-model="modelProcessDrawerProcess.upstreamProcessCode" clearable filterable placeholder="无上游过程" style="width:100%;"><el-option v-for="item in upstreamProcessOptions(modelProcessDrawerStageIndex, modelProcessDrawerProcessIndex)" :key="item.value" :label="item.label" :value="item.value"></el-option></el-select></el-form-item>
+          <el-form-item label="分配规则"><el-select v-model="modelProcessDrawerProcess.allocation" style="width:100%;" @change="onProcAllocationChange(modelProcessDrawerProcess)"><el-option label="质量分配" value="mass"></el-option><el-option label="经济分配" value="economic"></el-option><el-option label="能源分配" value="energy"></el-option><el-option label="物理分配" value="physical"></el-option><el-option label="不适用" value="none"></el-option></el-select></el-form-item>
+          <el-form-item v-if="modelProcessDrawerProcess.allocation && modelProcessDrawerProcess.allocation !== 'mass'" label="分配说明"><el-input v-model="modelProcessDrawerProcess.allocationRemark" type="textarea" :rows="2"></el-input></el-form-item>
+          <el-form-item label="需采集活动数据"><el-input v-model="modelProcessDrawerProcess.dataRequirement" placeholder="只记录要求，不录入数值"></el-input></el-form-item>
+          <el-form-item label="需匹配因子类别"><el-input v-model="modelProcessDrawerProcess.factorCategory" placeholder="只记录类别，不录入因子值"></el-input></el-form-item>
+          <el-form-item label="备注"><el-input v-model="modelProcessDrawerProcess.note" type="textarea" :rows="3"></el-input></el-form-item>
+        </el-form>
+        <div class="model-attr-tip"><i class="el-icon-info"></i> 修改属性后模型状态变为待重新校核；本阶段不录入活动数据和因子值。</div>
+      </div>
+      <div slot="footer" class="dialog-footer"><el-button size="small" @click="modelProcessDrawerVisible = false">取消</el-button><el-button size="small" type="primary" @click="saveModelProcessDrawer">保存属性</el-button></div>
+    </el-drawer>
+    <el-drawer title="流属性" :visible.sync="modelFlowDrawerVisible" direction="rtl" size="420px" custom-class="model-attr-drawer">
+      <div v-if="modelFlowDrawerFlow" class="model-attr-form">
+        <div class="model-attr-head"><span class="model-attr-code">{{ modelFlowDrawerType === 'inputs' ? '输入流' : '输出流' }}</span><div><strong>{{ modelFlowDrawerFlow.name || '未命名流' }}</strong><span>{{ modelFlowDrawerProcess ? modelFlowDrawerProcess.name : '' }}</span></div></div>
+        <el-form label-position="top" size="small">
+          <el-form-item label="流类型"><el-select v-model="modelFlowDrawerFlow.listType" style="width:100%;" @change="onModelFlowTypeChange(modelFlowDrawerFlow, modelFlowDrawerType)"><el-option v-for="item in (modelFlowDrawerType === 'inputs' ? inputTypeOptions : outputTypeOptions)" :key="item.value" :label="item.label" :value="item.value"></el-option></el-select></el-form-item>
+          <el-form-item label="流名称"><el-input v-model="modelFlowDrawerFlow.name"></el-input></el-form-item>
+          <el-form-item v-if="modelFlowDrawerType === 'inputs'" label="上游来源"><el-select v-model="modelFlowDrawerFlow.sourceFlowRef" clearable filterable placeholder="手工输入时留空" style="width:100%;" @change="onModelFlowRefChange(modelFlowDrawerFlow)"><el-option v-for="item in upstreamOutputFlowOptions(modelFlowDrawerStageIndex, modelFlowDrawerProcessIndex)" :key="item.value" :label="item.label" :value="item.value"></el-option></el-select></el-form-item>
+          <el-form-item v-if="modelFlowDrawerType === 'outputs'" label="下游去向"><el-select v-model="modelFlowDrawerFlow.targetFlowRef" clearable filterable placeholder="可留空，后续阶段关联" style="width:100%;"><el-option v-for="item in downstreamProcessOptions(modelFlowDrawerStageIndex, modelFlowDrawerProcessIndex)" :key="item.value" :label="item.label" :value="item.value"></el-option></el-select></el-form-item>
+          <el-form-item label="计量单位"><el-input v-model="modelFlowDrawerFlow.unit"></el-input></el-form-item>
+          <el-form-item label="后续活动数据项"><el-input v-model="modelFlowDrawerFlow.activityItemName"></el-input></el-form-item>
+          <el-form-item label="后续因子类别"><el-input v-model="modelFlowDrawerFlow.factorCategory"></el-input></el-form-item>
+          <el-form-item label="备注"><el-input v-model="modelFlowDrawerFlow.note" type="textarea" :rows="2"></el-input></el-form-item>
+        </el-form>
+        <div class="model-attr-tip"><i class="el-icon-info"></i> 本阶段只固化流的结构属性；数量与排放因子分别在阶段4、阶段5录入。</div>
+      </div>
+      <div slot="footer" class="dialog-footer"><el-button size="small" @click="modelFlowDrawerVisible = false">取消</el-button><el-button size="small" type="primary" @click="saveModelFlowDrawer">保存属性</el-button></div>
+    </el-drawer>
 
   </div>
 </template>
@@ -2285,11 +2340,18 @@ export default {
     initSelectedFactorLibs() {
       this.selectedFactorLibs = (this.factorDatabases || []).filter(l => l.selected).map(l => l.id)
     },
-    // 当前标准下可用的因子库（数据源：底层 factorDatabases）
+    // 企业因子库权限校验入口：当前默认放行，接入权限服务后在此返回真实可用性
+    isFactorLibraryPermitted(lib) {
+      if (!lib) return false
+      if (lib.id === 'elec-ts' || lib.required) return true
+      if (typeof lib.permitted === 'boolean') return lib.permitted
+      return true
+    },
+    // 当前标准下可用且通过企业权限校验的因子库（数据源：底层 factorDatabases）
     availableFactorLibs() {
       const cfg = this.selectedStandardConfig || {}
       const txt = (cfg.code || '') + ' ' + (cfg.name || '')
-      const all = (this.factorDatabases || []).filter(l => !l.hidden)
+      const all = (this.factorDatabases || []).filter(l => !l.hidden && this.isFactorLibraryPermitted(l))
       const list = all.filter(l => !l.standards || l.standards.some(t => txt.indexOf(t) > -1))
       return list.length ? list : all
     },

@@ -31,7 +31,7 @@
 | W-05 | 任务删除 | CarbonAccountingCenter.vue + CarbonRightPanel.vue | 进行中/已完成未归档可删；`isReportArchived` 为 true 时隐藏删除并拦截 | 已实现 |
 | W-06 | 企业产品库 | CarbonRightPanel.vue | 展示品类、型号、有SOP/待构建及「开始核算」；齿轮按钮去产品库管理 | 已实现 |
 | T-01 | 任务详情对话 | agent.vue + agentChatMixin.js | 左侧对话承接阶段确认、建议和指令 | 已实现 |
-| T-02 | 九阶段核算面板 | agent.vue + agentCoreMixin.js | 右侧按阶段展示标准、边界、模型、数据、因子、校验、计算、分析、报告 | 演示数据 |
+| T-02 | 九阶段核算面板 | agent.vue + agentCoreMixin.js | 右侧按阶段展示标准、边界、模型、数据、因子、校验、计算、分析、报告；阶段2由 `boundary-config` Skill 提供场景默认边界，再由已选标准细化/固化 | 演示数据 |
 | T-03 | 标准解析区 | agent.vue | 阶段1「政策标准」选择标准并展示标准解析内容 | 演示数据 |
 | T-04 | 核算模型与数据 | agent.vue + agentCoreMixin.js | 生命周期模型、活动数据、因子匹配、数据校验 | 演示数据 |
 | T-05 | 计算、分析与报告 | agent.vue + agentCoreMixin.js | 逐单元计算、贡献/不确定性/敏感性分析、报告导出 | 演示数据 |
@@ -47,6 +47,9 @@
 
 - 阶段推进由左侧对话中的确认和右侧面板操作联动，`currentStepIndex` 同步进度条；
 - 阶段1讲「标准怎么要求」，阶段2填「本产品怎么算」；标准解析区应随所选标准动态渲染；
+- 阶段2进入时调用 `getBoundaryDefaults('PCF')` 读取 `boundary-config` Skill 场景默认值；`syncBoundaryFromStandard()` 用标准 `structured.params` 生成的 `boundaryTemplate` 覆盖默认值。优先级为：标准明确条款 > Skill 场景默认 > 工作台兜底；
+- 标准固定生命周期、单位类型、分配规则、取舍阈值时，右侧面板锁定只读；标准时间边界为要求性文本时显示只读文本和「标准要求」标签，不强行造日期；
+- 乘用车种子标准（SEED_VERSION v15）已补齐 `lifecycleScope`、`unitType`、`unitDetail`、`allocationRule`、取舍阈值、时间代表性、生命周期阶段等边界参数，并带条款溯源。
 - 阶段3围绕生命周期边界构建模型；阶段4~6处理活动数据、因子匹配与数据校验；阶段7~9完成计算、分析和报告；
 - 阶段9可发布 SOP；工作台企业产品库据此显示「有SOP」，后续核算可一键继承模型。
 

@@ -48,7 +48,7 @@
 | A-09 | FormulaLibrary.vue（559 行） | /formula-library | 核算公式库 | 已实现 |
 | A-10 | ProcessLibrary.vue（568 行） | /process-library | 单元过程库（工艺流程与单元过程数据） | 已实现 |
 | A-11 | PlatformTemplateLibrary.vue（1141 行） | /platform-template-library | 平台模板库（法定报表表样与 prefill 配置载体） | 已实现 |
-| A-12 | [SkillManagement.vue](skill-management.md) | /skill-management | Skill 管理（Prompt 模板配置、启用禁用、默认模板恢复、详情查看） | 已实现 |
+| A-12 | [SkillManagement.vue](skill-management.md) | /skill-management | Skill 管理（Prompt 模板配置、默认模板恢复、详情查看） | 已实现 |
 | A-13 | AccountingTemplateLibrary.vue（326 行） | /accounting-template-library | 组织模板库（企业侧核算模板） | 已实现 |
 
 ### 3.4 资源库群 · 私域台账库
@@ -92,7 +92,7 @@
 |---|---|
 | **A-08 排放因子库** | 因子智能匹配的数据源；支持自定义因子替换与适用条件维护；分模块存储国内官方因子 / 企业实测因子 / 分时分区电力碳因子 / 国际主流因子，含可信度评分与版本回溯 |
 | **A-07 政策标准库** | 标准条文结构化存储（标准解析 → 结构化配置段）与详情穿透（独立路由）；支撑知识向量库构建；上传解析标准后进入“待人工审核”，审核通过方对智能体生效 |
-| **A-12 Skill 管理** | 默认 Skill 配置唯一来源在 `skillPrompts.js`；管理页只维护 Prompt 与启用状态，保存到 `carbon-skill-templates`；业务页通过 `getSkillConfigById()` / `isSkillEnabled()` 读取配置。当前“标准解析”已接入政策标准库的规则化模拟解析入口 |
+| **A-12 Skill 管理** | 默认 Skill 配置唯一来源在 `skillPrompts.js`；管理页只维护 Prompt 与模板状态，保存到 `carbon-skill-templates`；业务页按固定编排通过 `getSkillConfigById()` 读取配置，不再提供启停。当前“标准解析”已接入政策标准库的规则化模拟解析入口，“边界配置”供产品碳足迹阶段二预填 |
 | **A-11 平台模板库** | 报告模板载体：`reportType / docName / version / prefill / variants / matchFields / periods / sections / body / caliber`；智慧报告按 `reportType` 匹配模板，`caliber.standardCode` 引用政策标准库规则集 |
 | **A-14 组织资源库** | 主体与表计档案台账，是资格核验（法人 / 规模 / 名单）与场景路由（行业 / 领域）的数据来源 |
 | **A-15 企业因子库** | 与 A-08 公因数**分库**：企业实测与历史记忆（P-1 / P0）私域存放，人工纠偏结果回写本库 |

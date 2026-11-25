@@ -1,6 +1,6 @@
 import * as XLSX from 'xlsx'
 import { matchFactor, saveUserFactorOverride, normalizeQuantityAndUnit } from '@/utils/factorMatchingService'
-import { loadPcfStandardsForAgent, ensureSeed } from '@/utils/policyStandardService'
+import { loadPcfStandardsForAgent, ensureSeed, getBoundaryDefaults } from '@/utils/policyStandardService'
 import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
 ﻿export default {
   data() {
@@ -84,6 +84,7 @@ import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
         timeBoundary: '2024-01-01 - 2024-12-31',
         region: '北京'   // 企业所在省市（用于电力因子与区域因子匹配）
       },
+      boundarySourceMeta: null,
       // ===== 多轮澄清 =====
       clarificationState: null,  // 当前澄清状态: null | { topic, step, totalSteps, data }
       clarificationTopics: {
@@ -129,31 +130,47 @@ import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
       ],
       // ===== 标准配置中心 =====
       // R040201 STORY-010（RULE-013）：标准唯一来源为政策标准库（PCF 场景已生效配置），
-      // 库内新增/更新标准后此处自动获取，无需修改代码。形状与原硬编码完全兼容。
-      standards: loadPcfStandardsForAgent(),
       inputTypeOptions: [
         { value: 'raw_material', label: '原材料', color: '#409EFF' },
         { value: 'packaging', label: '包装材料', color: '#13C2C2' },
-        { value: 'transport', label: '运输', color: '#2F54EB' },
         { value: 'energy', label: '能源', color: '#FA8C16' },
         { value: 'resource', label: '资源', color: '#52C41A' },
         { value: 'consumable', label: '辅料', color: '#722ED1' },
-        { value: 'product', label: '产品', color: '#EB2F96' }
+        { value: 'product', label: '中间产品', color: '#EB2F96' },
+        { value: 'transport', label: '运输服务', color: '#2F54EB' }
       ],
       outputTypeOptions: [
         { value: 'main_product', label: '主产品', color: '#EB2F96' },
+        { value: 'product', label: '中间产品', color: '#EB2F96' },
         { value: 'by_product', label: '副产品', color: '#C62828' },
         { value: 'waste_gas', label: '废气', color: '#F5222D' },
         { value: 'solid_waste', label: '固体废物', color: '#8D6E63' },
-        { value: 'wastewater', label: '废水', color: '#1890FF' }
+        { value: 'wastewater', label: '废水', color: '#1890FF' },
+        { value: 'recycled', label: '可回收物', color: '#52C41A' }
       ],
       modelStages: this.createInitialModelStages(),
-      // 阶段3 核算输入清单（单 Excel 多 sheet，上传后解析）
+      // 阶段3 单元过程属性抽屉
+      modelProcessDrawerVisible: false,
+      modelProcessDrawerStageIndex: 0,
+      modelProcessDrawerProcessIndex: 0,
+      modelFlowDrawerVisible: false,
+      modelFlowDrawerStageIndex: 0,
+      modelFlowDrawerProcessIndex: 0,
+      modelFlowDrawerType: 'inputs',
+      modelFlowDrawerIndex: 0,
+      processTypeOptions: [
+        { value: 'material_acquisition', label: '物料获取' },
+        { value: 'production', label: '生产工序' },
+        { value: 'transport', label: '运输' },
+        { value: 'storage', label: '仓储' },
+        { value: 'use', label: '使用' },
+        { value: 'recycling', label: '回收处理' }
+      ],
+      validationStep: 0,
       inputFileName: '',
       bomRows: [],
       energyRows: [],
       paramRows: [],
-      validationStep: 0,
       validationActiveTab: 'validation',
       validationItems: this.createDefaultValidationItems(),
       supplementFiles: []
@@ -227,6 +244,19 @@ import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
       const list = this.standards || []
       return list.find(s => s.code === this.selectedStandard) || list[0] || null
     },
+    /** 标准时间边界是否为要求性文本（日期区间选择器无法回显） */
+    isTextBoundaryTime() {
+      const value = String((this.boundaryConfig && this.boundaryConfig.timeBoundary) || '')
+      return Boolean(value) && !/^\d{4}-\d{2}-\d{2}\s-\s\d{4}-\d{2}-\d{2}$/.test(value.trim())
+    },
+    /** 阶段二数据来源提示：边界配置 Skill + 已选标准；Skill 禁用时仅显示标准来源 */
+    boundarySourceLabel() {
+      const meta = this.boundarySourceMeta || {}
+      const skill = meta.skillName || ''
+      const standard = meta.standardCode || (this.selectedStandardConfig && this.selectedStandardConfig.code)
+      if (standard) return `${skill ? skill + '预填 · ' : ''}${standard}细化/固化`
+      return skill ? `${skill}预填 · 工作台兜底` : '工作台兜底'
+    },
     /** 完整性要求（4.3.3.4） */
     stdCompletenessRule() {
       const cfg = this.selectedStandardConfig || {}
@@ -296,10 +326,20 @@ import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
       const map = { mass: '按质量分配', energy: '按能量分配' }
       return map[t] || t || '—'
     },
-    /** 取舍准则 */
+    /** 取舍准则汇总 */
     stdCutoff() {
       const cfg = this.selectedStandardConfig || {}
       return (cfg.boundaryTemplate && cfg.boundaryTemplate.cutoffThreshold) || ''
+    },
+    /** 标准明确的单项取舍阈值 */
+    stdCutoffItem() {
+      const cfg = this.selectedStandardConfig || {}
+      return (cfg.boundaryTemplate && cfg.boundaryTemplate.cutoffItemThreshold) || ''
+    },
+    /** 标准明确的累计取舍阈值 */
+    stdCutoffTotal() {
+      const cfg = this.selectedStandardConfig || {}
+      return (cfg.boundaryTemplate && cfg.boundaryTemplate.cutoffTotalThreshold) || ''
     },
     /** 时间边界要求 */
     stdTimeBoundary() {
@@ -441,7 +481,11 @@ import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
         return []
       },
       set(val) {
-        // 由 onDateRangeChange 处理
+        if (Array.isArray(val) && val.length === 2 && val[0] && val[1]) {
+          this.boundaryConfig.timeBoundary = val[0] + ' - ' + val[1]
+        } else {
+          this.boundaryConfig.timeBoundary = ''
+        }
       }
     },
     reportStageBars() {
@@ -872,19 +916,42 @@ import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
     /** 边界项是否由标准固定（锁定只读） */
     isBoundaryLocked(field) {
       const cfg = this.selectedStandardConfig || {}
-      // 标准固定阶段 → 生命周期范围锁定
-      if (field === 'lifecycleScope') return cfg.stagesFixed === true
+      // 生命周期范围：只有标准明确给出 scopeFixedValue 时才锁定；纳入阶段固定不等于范围固定
+      if (field === 'lifecycleScope') return Boolean(cfg.scopeFixedValue)
       // 可选值只有一个 → 锁定
       const bt = cfg.boundaryTemplate || {}
       if (field === 'unitType') {
         const allowed = bt.allowedUnitTypes || []
         return allowed.length === 1
       }
-      // 分配规则/取舍规则：标准有明确规定值即锁定（当前展示值来自标准解析）
-      if (field === 'allocationRule' || field === 'cutoffThreshold') {
-        return cfg.stagesFixed === true
-      }
+      // 分配规则：只有标准明确给出分配方式时才锁定
+      if (field === 'allocationRule') return Boolean(bt.allocationRule)
+      // 取舍阈值：单项与累计分别判定，标准未规定时保持可编辑
+      if (field === 'cutoffItemThreshold') return Boolean(bt.cutoffItemThreshold)
+      if (field === 'cutoffTotalThreshold') return Boolean(bt.cutoffTotalThreshold)
       return false
+    },
+    /** 阶段二预填：边界配置 Skill 提供场景默认，随后标准 boundaryTemplate 细化/固化 */
+    initBoundaryFromSkill() {
+      const defaults = getBoundaryDefaults('PCF')
+      if (defaults && defaults.template) {
+        const tpl = defaults.template
+        if (tpl.lifecycleScope) this.$set(this.boundaryConfig, 'lifecycleScope', tpl.lifecycleScope)
+        if (tpl.unitType) this.$set(this.boundaryConfig, 'unitType', tpl.unitType)
+        if (tpl.unitDetail) this.$set(this.boundaryConfig, 'unitDetail', tpl.unitDetail)
+        if (tpl.allocationRule) this.$set(this.boundaryConfig, 'allocationRule', tpl.allocationRule)
+        if (tpl.cutoffItemThreshold) this.$set(this.boundaryConfig, 'cutoffItemThreshold', tpl.cutoffItemThreshold)
+        if (tpl.cutoffTotalThreshold) this.$set(this.boundaryConfig, 'cutoffTotalThreshold', tpl.cutoffTotalThreshold)
+        if (tpl.timeBoundary) this.$set(this.boundaryConfig, 'timeBoundary', tpl.timeBoundary)
+        this.boundaryConfig.cutoffThreshold = [this.boundaryConfig.cutoffItemThreshold, this.boundaryConfig.cutoffTotalThreshold].filter(Boolean).join('/')
+        this.boundarySourceMeta = {
+          ...defaults.sourceMeta,
+          appliedAt: new Date().toLocaleString('zh-CN')
+        }
+      } else {
+        this.boundarySourceMeta = null
+      }
+      this.syncBoundaryFromStandard()
     },
     // ===== C-PSTGT-E 智能因子匹配引擎 (v2.0 全景闭环核心算法) =====
     // 单元换算辅助：支持 MWh<->kWh, t<->kg, Nm3<->m3 等
@@ -1528,16 +1595,36 @@ import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
       if (!/kwh|度/i.test(String(item.unit || ''))) return false
       return true
     },
-    // ===== 阶段3行内编辑方法 =====
-    addProcess(groupIndex) {
-      const group = this.modelStages[groupIndex]
-      if (!group) return
+    createEmptyModelFlow(type) {
+      const isInput = type === 'inputs'
+      return {
+        flowId: 'FLOW-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+        name: isInput ? '新输入' : '新输出',
+        flowType: 'elementary',
+        listType: isInput ? 'raw_material' : 'solid_waste',
+        linkMode: 'manual',
+        sourceFlowRef: '',
+        targetFlowRef: '',
+        unit: '',
+        activityItemName: '',
+        factorCategory: '',
+        note: ''
+      }
+    },
+      const processIndex = group.processes.length
       const newProc = {
+        processCode: 'P-' + String(processIndex + 1).padStart(2, '0'),
         name: '新单元过程',
+        processType: group.key === 'raw_material' ? 'material_acquisition' : 'production',
+        upstreamProcessCode: '',
         allocation: this.boundaryConfig.allocationRule || 'mass',
         allocationRemark: '',
-        inputs: [{ name: '新输入', flowType: 'elementary', listType: 'raw_material' }],
-        outputs: [{ name: '新输出', flowType: 'elementary', listType: 'waste_gas' }]
+        dataRequirement: '',
+        factorCategory: '',
+        note: '',
+        inputs: [this.createEmptyModelFlow('inputs')],
+        outputs: [this.createEmptyModelFlow('outputs')]
+      }
       }
       group.processes.push(newProc)
       // 定位反馈：高亮新增行并滚动至可视区，便于用户立即编辑
@@ -2213,7 +2300,7 @@ import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
       this.modelStages = this.createEmptyModelStages()
       this.validationItems = this.createDefaultValidationItems()
       // 迟一拍同步：确保 selectedStandardConfig 已解析完成
-      this.$nextTick(() => this.syncBoundaryFromStandard())
+      this.$nextTick(() => this.initBoundaryFromSkill())
     },
     /** 将标准规定的边界项同步到 boundaryConfig（锁定项以标准为准） */
     syncBoundaryFromStandard() {
@@ -2224,6 +2311,21 @@ import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
       if (bt.unitType) this.$set(this.boundaryConfig, 'unitType', bt.unitType)
       if (bt.unitDetail) this.$set(this.boundaryConfig, 'unitDetail', bt.unitDetail)
       if (bt.allocationRule) this.$set(this.boundaryConfig, 'allocationRule', bt.allocationRule)
+      if (bt.cutoffItemThreshold) this.$set(this.boundaryConfig, 'cutoffItemThreshold', bt.cutoffItemThreshold)
+      if (bt.cutoffTotalThreshold) this.$set(this.boundaryConfig, 'cutoffTotalThreshold', bt.cutoffTotalThreshold)
+      if (bt.cutoffThreshold) this.$set(this.boundaryConfig, 'cutoffThreshold', bt.cutoffThreshold)
+      if (bt.timeBoundary) this.$set(this.boundaryConfig, 'timeBoundary', bt.timeBoundary)
+      if (bt.lifecycleScope && !cfg.scopeFixedValue) this.$set(this.boundaryConfig, 'lifecycleScope', bt.lifecycleScope)
+      const standard = this.selectedStandardConfig
+      const meta = this.boundarySourceMeta
+      if (standard && meta) {
+        this.boundarySourceMeta = {
+          ...meta,
+          standardCode: standard.code,
+          standardName: standard.name,
+          appliedAt: new Date().toLocaleString('zh-CN')
+        }
+      }
     },
     // 风机五环节 LCA 模型（基于远景《风机碳足迹与低碳发展报告2023》：EN-171/6.5 机型，
     // 度电碳足迹 5.56 gCO2e/kWh；五环节：原材料开采/零部件生产/风场建设安装/运营维护/废弃回收；

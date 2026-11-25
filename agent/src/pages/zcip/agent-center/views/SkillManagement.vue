@@ -15,15 +15,11 @@
       <div class="table-title-bar">
         <span class="table-title-text">Skill 列表</span>
         <div class="filter-bar">
-          <el-select v-model="filterPhase" placeholder="适用阶段" size="small" clearable class="filter-select">
-            <el-option v-for="item in phaseOptions" :key="item" :label="item" :value="item"></el-option>
-          </el-select>
           <el-select v-model="filterKnowledge" placeholder="知识库" size="small" clearable class="filter-select">
             <el-option v-for="item in knowledgeOptions" :key="item" :label="item" :value="item"></el-option>
           </el-select>
-          <el-select v-model="filterStatus" placeholder="状态" size="small" clearable class="filter-status">
-            <el-option label="已启用" value="enabled"></el-option>
-            <el-option label="已禁用" value="disabled"></el-option>
+          <el-select v-model="filterTemplateStatus" placeholder="模板状态" size="small" clearable class="filter-status">
+            <el-option label="默认模板" value="default"></el-option>
             <el-option label="已修改" value="modified"></el-option>
           </el-select>
           <el-input v-model="searchText" placeholder="搜索名称 / 描述 / Prompt" size="small" clearable prefix-icon="el-icon-search" class="filter-input"></el-input>
@@ -41,11 +37,6 @@
         </template>
       </el-table-column>
       <el-table-column label="功能描述" prop="desc" min-width="360" show-overflow-tooltip></el-table-column>
-      <el-table-column label="状态" width="90" align="center">
-        <template slot-scope="{ row }">
-          <el-tag size="mini" :type="row.enabled ? 'success' : 'info'">{{ row.enabled ? '已启用' : '已禁用' }}</el-tag>
-        </template>
-      </el-table-column>
       <el-table-column label="模板状态" width="100" align="center">
         <template slot-scope="{ row }">
           <el-tag v-if="row.modified" size="mini" type="warning" effect="plain">已修改</el-tag>
@@ -57,9 +48,8 @@
           <el-button type="text" size="mini" @click="openDetail(row)">查看</el-button>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="210" align="center" fixed="right">
+      <el-table-column label="操作" width="150" align="center" fixed="right">
         <template slot-scope="{ row }">
-          <el-button type="text" size="mini" @click="toggleEnabled(row)">{{ row.enabled ? '禁用' : '启用' }}</el-button>
           <el-button type="text" size="mini" @click="editPrompt(row)">编辑模板</el-button>
           <el-button v-if="row.modified" type="text" size="mini" @click="resetPrompt(row)">恢复默认</el-button>
         </template>
@@ -125,6 +115,7 @@
       append-to-body
     >
       <div v-if="detailSkill" class="skill-detail">
+        <div v-if="isScenarioPrompt && boundaryTemplate && boundaryTemplate.modified" class="boundary-inline-note"><i class="el-icon-warning-outline"></i> 当前场景已有用户修改；切换场景不会覆盖其他场景的配置。</div>
         <div class="detail-header">
           <div class="detail-icon" :style="{ background: detailSkill.color }"><i :class="detailSkill.icon"></i></div>
           <div class="detail-title">
@@ -141,18 +132,20 @@
           ></el-button>
         </div>
         <div class="detail-chips">
-          <span class="detail-chip phase">{{ detailSkill.phase }}</span>
           <span class="detail-chip knowledge">{{ detailSkill.knowledgeBase }}</span>
-          <span class="detail-chip" :class="detailSkill.enabled ? 'success' : 'muted'">{{ detailSkill.enabled ? '已启用' : '已禁用' }}</span>
           <span class="detail-chip" :class="detailSkill.modified ? 'warning' : 'muted'">{{ detailSkill.modified ? '模板已修改' : '默认模板' }}</span>
         </div>
-        <div class="detail-meta">
-          <div class="meta-item"><span>变量数量</span><strong>{{ detailVariables.length }}</strong></div>
-          <div class="meta-item"><span>最近修改</span><strong>{{ detailSkill.updatedAt || '—' }}</strong></div>
-          <div class="meta-item"><span>Prompt 字数</span><strong>{{ detailSkill.promptTemplate.length }}</strong></div>
-          <div class="meta-item"><span>默认来源</span><strong>内置模板</strong></div>
+        <div v-if="!isScenarioPrompt" class="detail-section">
+          <div class="section-title">
+            <span>Prompt 模板</span>
+            <el-button type="text" size="mini" icon="el-icon-document-copy" @click="copyPrompt">复制</el-button>
+          </div>
+          <div class="prompt-panel">
+            <pre class="detail-prompt">{{ detailSkill.promptTemplate }}</pre>
+            <div class="prompt-footer">共 {{ detailSkill.promptTemplate.length }} 字 · 默认模板可在「恢复默认」时还原</div>
+          </div>
         </div>
-        <div class="detail-section">
+        <div v-if="!isScenarioPrompt" class="detail-section">
           <div class="section-title">
             <span>输入变量</span>
             <small>系统运行时自动填充</small>
@@ -162,14 +155,42 @@
             <span v-if="detailVariables.length === 0" class="empty-variables">该 Skill 无系统变量</span>
           </div>
         </div>
-        <div class="detail-section">
-          <div class="section-title">
-            <span>Prompt 模板</span>
-            <el-button type="text" size="mini" icon="el-icon-document-copy" @click="copyPrompt">复制</el-button>
+             <div v-if="isScenarioPrompt" class="detail-section boundary-scenario-section">
+          <div class="section-title"><span>场景边界模板</span><small>按业务场景维护，运行工作台只读取当前场景</small></div>
+          <div class="boundary-scenario-tabs">
+            <button v-for="sc in boundaryScenarios" :key="sc.key" type="button" class="boundary-scenario-tab" :class="{ active: boundaryActiveScenario === sc.key }" @click="openBoundaryScenario(sc.key)">
+              <span>{{ sc.label }}</span><small>{{ sc.key }}</small>
+              <em v-if="scenarioOverrideKeys.indexOf(sc.key) > -1" class="boundary-modified-dot">已修改</em>
+            </button>
           </div>
-          <div class="prompt-panel">
-            <pre class="detail-prompt">{{ detailSkill.promptTemplate }}</pre>
-            <div class="prompt-footer">共 {{ detailSkill.promptTemplate.length }} 字 · 默认模板可在「恢复默认」时还原</div>
+          <div v-if="boundaryTemplate" class="boundary-editor">
+            <div class="boundary-editor-head">
+              <div>
+                <strong>{{ boundaryTemplate.scenarioLabel }}</strong>
+                <span>此页签内容会作为该场景的边界配置 Prompt</span>
+              </div>
+              <el-tag size="mini" :type="boundaryTemplate.modified ? 'warning' : 'info'" effect="plain">{{ boundaryTemplate.modified ? '已修改' : '默认模板' }}</el-tag>
+            </div>
+            <el-input
+              v-model="boundaryTemplate.promptTemplate"
+              type="textarea"
+              :rows="22"
+              class="boundary-prompt-textarea"
+              placeholder="请输入当前场景的边界配置 Prompt"
+              @input="onBoundaryPromptInput"
+            ></el-input>
+            <div class="boundary-editor-hint">
+              可直接修改场景说明、边界要求、JSON 默认值和固化规则。{{standardCode}} 由运行时填充。
+            </div>
+            <div class="boundary-editor-actions">
+              <el-button size="small" @click="resetBoundaryScenario">恢复本场景默认</el-button>
+              <el-button size="small" type="primary" @click="saveBoundaryScenario">保存本场景</el-button>
+            </div>
+
+            <details class="boundary-json-details">
+              <summary>查看从 Prompt 中读取的结构化默认边界</summary>
+              <pre>{{ boundaryJsonPreview }}</pre>
+            </details>
           </div>
         </div>
       </div>
@@ -180,6 +201,7 @@
 
 <script>
 import { DEFAULT_SKILLS } from '../data/skillPrompts'
+import { BOUNDARY_SCENARIOS, getEditableBoundaryTemplate, getDefaultBoundaryTemplate, saveBoundaryOverride, resetBoundaryOverride, loadBoundaryOverrides } from '../data/boundaryConfig'
 
 export default {
   name: 'SkillManagement',
@@ -190,37 +212,40 @@ export default {
       showDetailDrawer: false,
       detailSkill: null,
       searchText: '',
-      filterPhase: '',
       filterKnowledge: '',
-      filterStatus: '',
+      filterTemplateStatus: '',
       editingSkill: null,
       originalTemplate: '',
       previewContent: '',
+      boundaryScenarios: BOUNDARY_SCENARIOS,
+      boundaryActiveScenario: 'PCF',
+      boundaryTemplate: null,
+      boundaryJsonPreview: '',
+      scenarioOverrideKeys: [],
       currentPage: 1,
       pageSize: 10,
       skills: DEFAULT_SKILLS.map(s => JSON.parse(JSON.stringify(s)))
     }
   },
   computed: {
-    phaseOptions() {
-      return Array.from(new Set(this.skills.map(s => s.phase).filter(Boolean)))
-    },
     knowledgeOptions() {
       return Array.from(new Set(this.skills.map(s => s.knowledgeBase).filter(v => v && v !== '—')))
     },
     filteredSkills() {
       const keyword = this.searchText.trim().toLowerCase()
       return this.skills.filter(skill => {
-        const phaseMatched = !this.filterPhase || skill.phase === this.filterPhase
         const knowledgeMatched = !this.filterKnowledge || skill.knowledgeBase === this.filterKnowledge
-        const statusMatched = !this.filterStatus || (this.filterStatus === 'enabled' ? skill.enabled : this.filterStatus === 'disabled' ? !skill.enabled : skill.modified)
-        const keywordMatched = !keyword || [skill.name, skill.desc, skill.phase, skill.knowledgeBase, skill.promptTemplate].some(value => String(value || '').toLowerCase().includes(keyword))
-        return phaseMatched && knowledgeMatched && statusMatched && keywordMatched
+        const statusMatched = !this.filterTemplateStatus || (this.filterTemplateStatus === 'modified' ? skill.modified : !skill.modified)
+        const keywordMatched = !keyword || [skill.name, skill.desc, skill.knowledgeBase, skill.promptTemplate].some(value => String(value || '').toLowerCase().includes(keyword))
+        return knowledgeMatched && statusMatched && keywordMatched
       })
     },
     pagedSkills() {
       const start = (this.currentPage - 1) * this.pageSize
       return this.filteredSkills.slice(start, start + this.pageSize)
+    },
+    isScenarioPrompt() {
+      return Boolean(this.detailSkill && this.detailSkill.promptScope === 'scenario')
     },
     detailVariables() {
       return this.detailSkill ? this.extractVariables(this.detailSkill.promptTemplate) : []
@@ -228,25 +253,68 @@ export default {
   },
   watch: {
     searchText() { this.currentPage = 1 },
-    filterPhase() { this.currentPage = 1 },
     filterKnowledge() { this.currentPage = 1 },
-    filterStatus() { this.currentPage = 1 }
+    filterTemplateStatus() { this.currentPage = 1 }
   },
   methods: {
     handleSizeChange(val) { this.pageSize = val; this.currentPage = 1 },
     handlePageChange(val) { this.currentPage = val },
     resetFilters() {
       this.searchText = ''
-      this.filterPhase = ''
       this.filterKnowledge = ''
-      this.filterStatus = ''
+      this.filterTemplateStatus = ''
     },
     openDetail(row) {
       this.detailSkill = row
       this.showDetailDrawer = true
+      if (this.isScenarioPrompt) {
+        this.scenarioOverrideKeys = Object.keys(loadBoundaryOverrides())
+        this.boundaryActiveScenario = 'PCF'
+        this.openBoundaryScenario('PCF')
+      }
+    },
+    openBoundaryScenario(key) {
+      this.boundaryActiveScenario = key
+      this.boundaryTemplate = getEditableBoundaryTemplate(key)
+      this.refreshBoundaryJsonPreview()
+    },
+    refreshBoundaryJsonPreview() {
+      if (!this.boundaryTemplate) { this.boundaryJsonPreview = ''; return }
+      this.boundaryJsonPreview = JSON.stringify(this.boundaryTemplate.defaults || {}, null, 2)
+    },
+    onBoundaryPromptInput() {
+      if (!this.boundaryTemplate) return
+      this.boundaryTemplate.modified = true
+      this.refreshBoundaryJsonPreview()
     },
     closeDetail() {
+      this.boundaryTemplate = null
       this.showDetailDrawer = false
+    },
+    saveBoundaryScenario() {
+      this.refreshBoundaryJsonPreview()
+      if (!this.boundaryTemplate) return
+      const row = this.skills.find(s => s.id === 'boundary-config')
+      if (row) {
+        row.modified = true
+        row.updatedAt = new Date().toLocaleString('zh-CN', { hour12: false })
+        this.persistSkills()
+      }
+      const ok2 = saveBoundaryOverride(this.boundaryActiveScenario, this.boundaryTemplate)
+      if (!ok2) { this.$message.error('保存失败，请检查浏览器存储权限'); return }
+      this.boundaryTemplate = getEditableBoundaryTemplate(this.boundaryActiveScenario)
+      this.scenarioOverrideKeys = Object.keys(loadBoundaryOverrides())
+      this.$message.success('已保存「' + this.boundaryTemplate.scenarioLabel + '」场景 Prompt')
+    },
+    resetBoundaryScenario() {
+      this.$confirm('确定恢复当前场景的默认边界模板吗？', '恢复默认', { type: 'warning' })
+        .then(() => {
+          resetBoundaryOverride(this.boundaryActiveScenario)
+          this.boundaryTemplate = getDefaultBoundaryTemplate(this.boundaryActiveScenario)
+          this.scenarioOverrideKeys = Object.keys(loadBoundaryOverrides())
+          this.refreshBoundaryJsonPreview()
+          this.$message.success('已恢复默认')
+        }).catch(() => {})
     },
     copyPrompt() {
       if (!this.detailSkill) return
@@ -261,13 +329,15 @@ export default {
         this.$message.warning('当前浏览器不支持自动复制，请手动选择复制')
       }
     },
-    toggleEnabled(row) {
-      row.enabled = !row.enabled
-      row.updatedAt = new Date().toLocaleString('zh-CN', { hour12: false })
-      this.persistSkills()
-      this.$message.success(row.enabled ? `已启用「${row.name}」` : `已禁用「${row.name}」`)
-    },
     editPrompt(row) {
+      if (row.promptScope === 'scenario') {
+        this.openDetail(row)
+        this.$nextTick(() => {
+          const body = this.$el.querySelector('.skill-detail-drawer .el-drawer__body')
+          if (body) body.scrollTop = body.scrollHeight
+        })
+        return
+      }
       this.editingSkill = JSON.parse(JSON.stringify(row))
       this.originalTemplate = row.promptTemplate
       this.showEditDialog = true
@@ -332,8 +402,7 @@ export default {
         activityData: '[{ name: "钢材", value: 620, unit: "kg" }]',
         factorPriority: '["cpcd", "ecoinvent"]',
         emissionResult: '{ total: 72.35, unit: "kgCO2e" }',
-        productName: '燃油汽车 ICE-A160',
-        phaseName: '政策分析'
+        productName: '燃油汽车 ICE-A160'
       }
       Object.keys(sampleData).forEach(key => {
         preview = preview.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), `<span class="var-highlight">${escapeHtml(sampleData[key])}</span>`)
@@ -352,7 +421,13 @@ export default {
         const savedSkills = saved ? JSON.parse(saved) : []
         this.skills = DEFAULT_SKILLS.map(defaultSkill => {
           const savedSkill = savedSkills.find(item => item.id === defaultSkill.id)
-          return savedSkill ? { ...JSON.parse(JSON.stringify(defaultSkill)), ...savedSkill } : JSON.parse(JSON.stringify(defaultSkill))
+          const skill = savedSkill
+            ? { ...JSON.parse(JSON.stringify(defaultSkill)), ...savedSkill }
+            : JSON.parse(JSON.stringify(defaultSkill))
+          skill.promptScope = defaultSkill.promptScope
+          delete skill.phase
+          delete skill.enabled
+          return skill
         })
       } catch (e) {
         this.skills = DEFAULT_SKILLS.map(skill => JSON.parse(JSON.stringify(skill)))
@@ -519,45 +594,13 @@ export default {
   background: #f1f5f9;
   color: #64748b;
 }
-.detail-chip.phase {
-  background: rgba(0,103,254,0.1);
-  color: #0067FE;
-}
 .detail-chip.knowledge {
   background: rgba(0,168,160,0.1);
   color: #00A8A0;
 }
-.detail-chip.success {
-  background: rgba(103,194,58,0.12);
-  color: #67C23A;
-}
 .detail-chip.warning {
   background: rgba(230,162,60,0.14);
   color: #e6a23c;
-}
-.detail-meta {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  margin-top: 14px;
-  padding: 12px;
-  background: #f8fafc;
-  border: 1px solid var(--border-color, #ebeef5);
-  border-radius: 10px;
-}
-.meta-item {
-  min-width: 0;
-}
-.meta-item span {
-  display: block;
-  margin-bottom: 4px;
-  font-size: 11px;
-  color: #909399;
-}
-.meta-item strong {
-  font-size: 13px;
-  color: #303133;
-  font-weight: 600;
 }
 .detail-section {
   margin-top: 22px;
@@ -639,4 +682,27 @@ export default {
 .empty-state i { font-size: 48px; margin-bottom: 12px; color: var(--text-placeholder); }
 .empty-state p { font-size: 14px; margin: 0 0 4px; }
 .empty-state span { font-size: 12px; }
+.boundary-scenario-section { margin-top: 18px; }
+.boundary-scenario-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.boundary-scenario-tab { border: 1px solid #dcdfe6; background: #fff; border-radius: 6px; padding: 6px 10px; cursor: pointer; color: #606266; display: flex; align-items: center; gap: 6px; font-size: 12px; }
+.boundary-scenario-tab small { color: #a8abb2; font-size: 10px; }
+.boundary-editor-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; margin-bottom: 10px; }
+.boundary-editor-head > div { display: flex; flex-direction: column; gap: 4px; }
+.boundary-editor-head strong { color: #303133; font-size: 13px; }
+.boundary-editor-head span { color: #909399; font-size: 11px; }
+.boundary-prompt-textarea >>> .el-textarea__inner { font-family: 'Consolas', 'Monaco', monospace; font-size: 12px; line-height: 1.65; }
+.boundary-editor-hint { margin-top: 6px; color: #909399; font-size: 11px; }
+.boundary-scenario-summary { display: flex; flex-direction: column; gap: 4px; padding: 9px 11px; margin-bottom: 12px; background: #f8fafc; border-left: 3px solid #0067FE; border-radius: 4px; font-size: 12px; color: #606266; }
+.boundary-scenario-summary strong { color: #303133; font-size: 13px; }
+.boundary-modified-dot { margin-left: 2px; padding: 1px 5px; border-radius: 999px; background: #fff4e5; color: #d48806; font-size: 10px; font-style: normal; }
+.boundary-scenario-tab.active { border-color: #0067FE; color: #0067FE; background: rgba(0,103,254,.06); }
+.boundary-purpose-row { display: grid; grid-template-columns: 72px 1fr; gap: 10px; align-items: start; margin-bottom: 10px; }
+.boundary-purpose-label { font-size: 12px; color: #606266; padding-top: 6px; }
+.boundary-field-row { display: grid; grid-template-columns: 108px 1fr; gap: 10px; align-items: start; margin-bottom: 9px; }
+.boundary-field-row label { font-size: 12px; color: #606266; padding-top: 6px; line-height: 1.5; }
+.boundary-editor-actions { display: flex; justify-content: flex-end; gap: 8px; margin: 14px 0; }
+.boundary-json-details { margin-top: 10px; font-size: 12px; color: #606266; }
+.boundary-json-details summary { cursor: pointer; color: #0067FE; }
+.boundary-json-details pre { max-height: 220px; overflow: auto; padding: 10px; background: #f5f7fa; border-radius: 6px; font-size: 11px; }
+.boundary-inline-note { margin-top: 12px; padding: 8px 10px; border-radius: 6px; background: #fff8e6; color: #b88230; font-size: 12px; }
 </style>
