@@ -1,5 +1,5 @@
 /**
- * 绿色工厂辅助申报智能体 - 核心 Mixin
+ * 绿色工厂自评价智能体 - 核心 Mixin
  *
  * 负责：5阶段数据、任务管理、localStorage持久化、阶段切换
  */
@@ -267,7 +267,7 @@ export default {
         { name: 'YU7', unit: '辆', metered: false, auto: true },
         { name: 'YU8', unit: '辆', metered: false, auto: true }
       ],
-      qualificationExpanded: false, // 申报资格默认收缩
+      qualificationExpanded: false, // 自评资格默认收缩
       collectExpanded: {},         // 阶段2 指标分组展开状态
       categoryExpanded: {},       // 一级指标分组展开状态
       currentCollectIndicator: -1, // 当前聚焦指标
@@ -276,7 +276,7 @@ export default {
       collectFocusIdx: 0,          // 下一项定位游标
       // ===== 阶段4 核算明细区（整体收缩，默认收起——核心看点是指标结果与评价） =====
       accDetailExpanded: false,
-      // ===== 阶段6 证据链明细（整体收缩，默认收起——总览统计已并入标题） =====
+      // ===== 阶段4 证据链明细（整体收缩，默认收起——总览统计已并入标题） =====
       evidenceChainExpanded: false,
 
       // ===== 页面模式 =====
@@ -318,8 +318,8 @@ export default {
       onboardingSteps: [
         {
           icon: 'el-icon-s-home',
-          title: '欢迎使用绿色工厂辅助申报智能体',
-          text: '这里是绿色工厂辅助申报工作空间。基于绿色工厂评价标准，为您提供4阶段智能申报辅助服务，涵盖标准适配、数据收集、核算评价、数据溯源与归档全流程。',
+          title: '欢迎使用绿色工厂自评价智能体',
+          text: '这里是绿色工厂自评价工作空间。基于绿色工厂评价标准，为您提供4阶段智能自评辅助服务，涵盖标准适配、数据收集、核算评价、数据溯源与归档全流程。',
           features: [
             { icon: 'el-icon-reading', title: '4阶段流程', desc: '标准适配→数据收集→核算评价→溯源归档', color: '#0067FE' },
             { icon: 'el-icon-s-data', title: '五化指标', desc: '能源低碳化·资源高效化·生产洁净化·产品绿色化·用地集约化', color: '#0067FE' },
@@ -331,13 +331,13 @@ export default {
         {
           icon: 'el-icon-chat-dot-round',
           title: '智能对话区',
-          text: '页面中间为对话区，直接向小易提问或下达指令。输入企业名称即可开始申报，小易会引导您完成4阶段流程。',
+          text: '页面中间为对话区，直接向小易提问或下达指令。输入企业名称即可开始自评，小易会引导您完成4阶段流程。',
           features: [
-            { icon: 'el-icon-video-play', title: '快速开始', desc: '输入企业名称即可创建申报项目', color: '#0067FE' },
+            { icon: 'el-icon-video-play', title: '快速开始', desc: '输入企业名称即可创建自评项目', color: '#0067FE' },
             { icon: 'el-icon-magic-stick', title: '智能问答', desc: '「指标分类」「基础库」「溯源链」即问即答', color: '#0067FE' },
             { icon: 'el-icon-s-opportunity', title: '快捷指令', desc: '点击灯泡图标呼出常用指令面板', color: '#ED7B2F' }
           ],
-          tip: '试试输入"小米汽车"开始一个申报项目。',
+          tip: '试试输入"小米汽车"开始一个自评项目。',
           iconStyle: {}
         },
         {
@@ -354,20 +354,20 @@ export default {
         },
         {
           icon: 'el-icon-folder-opened',
-          title: '申报项目列表',
-          text: '页面右侧为申报项目列表，展示所有已创建的绿色工厂申报项目。点击项目卡片即可进入6阶段申报辅助流程。',
+          title: '自评项目列表',
+          text: '页面右侧为自评项目列表，展示所有已创建的绿色工厂自评项目。点击项目卡片即可进入4阶段自评辅助流程。',
           features: [
             { icon: 'el-icon-aim', title: '进度跟踪', desc: '实时显示每个项目的当前阶段和进度', color: '#0067FE' },
-            { icon: 'el-icon-right', title: '一键进入', desc: '点击卡片即可继续推进申报流程', color: '#0067FE' },
-            { icon: 'el-icon-delete', title: '项目管理', desc: '支持删除已完成的申报项目', color: '#F56C6C' }
+            { icon: 'el-icon-right', title: '一键进入', desc: '点击卡片即可继续推进自评流程', color: '#0067FE' },
+            { icon: 'el-icon-delete', title: '项目管理', desc: '支持删除已完成的自评项目', color: '#F56C6C' }
           ],
-          tip: '进入项目后，右侧将切换为6阶段任务进度面板。',
+          tip: '进入项目后，右侧将切换为4阶段任务进度面板。',
           iconStyle: {}
         },
         {
           icon: 'el-icon-set-up',
-          title: '6阶段任务进度',
-          text: '进入具体申报项目后，右侧展示6阶段任务进度面板。每个阶段显示当前状态（进行中/已完成）、进度条和关联基础库。输入"下一步"即可推进流程。',
+          title: '4阶段任务进度',
+          text: '进入具体自评项目后，右侧展示4阶段任务进度面板。每个阶段显示当前状态（进行中/已完成）、进度条和关联基础库。输入"下一步"即可推进流程。',
           features: [
             { icon: 'el-icon-reading', title: '阶段1·标准适配', desc: '加载标准·信息带出·资格核验·材料匹配', color: '#0067FE' },
             { icon: 'el-icon-s-data', title: '阶段2·数据收集', desc: '活动数据收集·因子匹配·质量校验', color: '#0067FE' },
@@ -386,12 +386,12 @@ export default {
         { name: '统一数据底座', stages: [2], icon: 'el-icon-s-data', desc: '自动采集活动数据（外部模块提供，不在本平台建设范围）' },
         { name: '排放因子库', stages: [2], icon: 'el-icon-connection', desc: '因子匹配' },
         { name: '核算公式库', stages: [3], icon: 'el-icon-cpu', desc: '参数管理·公式管理' },
-        { name: '申报模板库', stages: [5], icon: 'el-icon-document', desc: '绿色工厂评价指标自评表模板·证明材料目录模板' },
+        { name: '评价模板库', stages: [5], icon: 'el-icon-document', desc: '绿色工厂评价指标自评表模板·证明材料目录模板' },
         { name: '佐证材料库', stages: [0, 2, 5], icon: 'el-icon-folder-opened', desc: '原始支撑材料·资格证明/凭证/检测报告/证书' },
         { name: '报告与档案中心', stages: [5], icon: 'el-icon-tickets', desc: '评价报告定稿归档（评价报告+证明材料目录），供查阅/导出/专家评审' }
       ],
 
-      // ===== 申报场景模式（改善中 / 已达标巩固提升，方案附件2填写说明三 + ZCF8） =====
+      // ===== 评价场景模式（改善中 / 已达标巩固提升，方案附件2填写说明三 + ZCF8） =====
       scenarioMode: 'improve', // 'improve' | 'consolidate'
       // 改善中场景的初始快照（首次切换到巩固提升前保存，便于恢复）
       improveScenario: null,
@@ -457,16 +457,16 @@ export default {
         diagnosis: '核心指标已全部达到目标要求，按巩固提升要求持续改善建设成效（政策填写说明三）'
       },
 
-      // ===== 申报主体类型（方案支持制造型企业 + 零碳算力设施两类，创建任务时确定） =====
+      // ===== 评价主体类型（方案支持制造型企业 + 零碳算力设施两类，创建任务时确定） =====
       applicantType: 'manufacturing', // 'manufacturing' | 'computing'
       // 评价年度（R040201 衍生设计：被评价的核算年度，创建任务时确定，默认当前年-1）
       baselineYear: new Date().getFullYear() - 1,
-      // 新建任务对话框状态（评价年度由申报依据带出，不可选）
+      // 新建任务对话框状态（评价年度由评价依据带出，不可选）
       showNewTaskDialog: false,
       newTaskForm: { factoryName: '', planId: 'plan-2025', scene: 'manufacturing', baselineYear: '' },
       currentPlanLabel: '《绿色工厂评价通则》（GB/T 36132-2025）',
       currentPlanId: 'plan-2025',
-      // 申报依据版本（来源：政策标准库；依据更新后入库新版本，新建任务时可选新版，评价年度/标准/资格条件整体切换）
+      // 评价依据版本（来源：政策标准库；依据更新后入库新版本，新建任务时可选新版，评价年度/标准/资格条件整体切换）
       planVersions: [
         {
           id: 'plan-2025',
@@ -505,7 +505,7 @@ export default {
               { label: '单位性质', value: '国有', source: '自动带出', type: 'select', options: ['国有', '集体', '民营', '中外合资', '港澳台', '外商独资'] },
               { label: '统一社会信用代码', value: '91520100MA0YYYYYYY', source: '自动带出' },
               { label: '法定代表人', value: '王强', source: '自动带出' },
-              { label: '申报工作联系部门', value: '基础设施运维部', placeholder: '如：能源管理部', source: '当前用户带入' },
+              { label: '评价工作联系部门', value: '基础设施运维部', placeholder: '如：能源管理部', source: '当前用户带入' },
               { label: '联系人', value: '李工', placeholder: '如：李工', source: '当前用户带入' },
               { label: '联系电话', value: '0851-8888-6666', placeholder: '手机/座机', source: '当前用户带入' },
               { label: '电子邮箱', value: 'li.gong@greencompute.cn', placeholder: 'name@company.com', source: '当前用户带入' }
@@ -724,7 +724,7 @@ export default {
             { name: '碳排放信息披露透明度与质量', value: '可测量·可报告·可核查', basic: '—', target: '—', status: 'ongoing' }
           ],
           accountingDetails: {
-            note: '各项数值与计算过程可在阶段6溯源报告中逐项复核',
+            note: '各项数值与计算过程可在阶段4溯源报告中逐项复核',
             indicators: [
               {
                 name: '单位能耗碳排放',
@@ -846,7 +846,7 @@ export default {
             { name: '零碳供应链管理措施补齐', direction: '管理提升', reason: '对照零碳供应链管理措施清单补齐缺项，支撑符合项数达标', targetIndicator: '零碳供应链管理措施符合项数', contribValue: 2, contribText: '+2 项' },
             { name: '能碳管理中心功能补齐', direction: '管理提升', reason: '补齐能碳管理中心功能项，支撑功能符合项数达标', targetIndicator: '能碳管理中心功能符合项数', contribValue: 2, contribText: '+2 项' }
           ],
-          diagnosis: '核心指标暂未全部达到目标要求，按改善路径建设后可满足申报条件'
+          diagnosis: '核心指标暂未全部达到目标要求，按改善路径建设后可满足评价条件'
         },
         5: {
           evidence: { total: 118, autoCollected: 92, manualProvided: 26 },
@@ -896,7 +896,7 @@ export default {
             ],
             // 指标适用性规则（政策豁免与限定，阶段一仅展示规则；实际判定在阶段2建模/阶段3采数后进行）
             applicability: [
-              { name: '非化石能源电力消费物理认定量占比', rule: '仅适用于年电力消费量 ≥500万千瓦时的申报单位' },
+              { name: '非化石能源电力消费物理认定量占比', rule: '仅适用于年电力消费量 ≥500万千瓦时的评价单位' },
               { name: '单位工业增加值能耗', rule: '不适用于算力设施' },
               { name: '碳清除率', rule: '仅适用于存在直接排放的单位' }
             ]
@@ -910,13 +910,13 @@ export default {
               { label: '单位性质', value: '民营', source: '自动带出', type: 'select', options: ['国有', '集体', '民营', '中外合资', '港澳台', '外商独资'] },
               { label: '统一社会信用代码', value: '91110308MA0XXXXXXX', source: '自动带出' },
               { label: '法定代表人', value: '雷军', source: '自动带出' },
-              { label: '申报工作联系部门', value: '能源管理部', placeholder: '如：能源管理部', source: '当前用户带入' },
+              { label: '评价工作联系部门', value: '能源管理部', placeholder: '如：能源管理部', source: '当前用户带入' },
               { label: '联系人', value: '张工', placeholder: '如：张工', source: '当前用户带入' },
               { label: '联系电话', value: '010-6061-8866', placeholder: '手机/座机', source: '当前用户带入' },
               { label: '电子邮箱', value: 'zhang@xiaomiev.com', placeholder: 'name@company.com', source: '当前用户带入' }
             ],
             // 前置资质类资格条件（基本信息表未列出，系统自动核验；要求-现状-材料-判断四列，现状可调整，状态自动判定；证明材料经 proofId 引用材料池，支持共用与更换）
-            // blocking=true 静态硬资格（不通过则终止申报）；false 量化门槛（暂不满足不拦截，核算后给出差距与改善路径）
+            // blocking=true 静态硬资格（不通过则终止自评）；false 量化门槛（暂不满足不拦截，核算后给出差距与改善路径）
             autoChecks: [
               { condition: '独立法人资格（境内注册工业企业）', blocking: true, current: '是', type: 'yesno', options: ['是', '否'], passValue: '是', source: '营业执照' },
               { condition: '规模以上工业企业（年主营业务收入 ≥ 2000 万元）', blocking: true, current: 3650000, unit: '万元', type: 'number', threshold: 2000, source: '财务报表 / 统计年报' },
@@ -1523,7 +1523,7 @@ export default {
         }
       },
 
-      // ===== 阶段6材料编制Skill配置（输出内容由Skill配置驱动，可扩展；章节按填充方式分级标识） =====
+      // ===== 阶段4材料编制Skill配置（输出内容由Skill配置驱动，可扩展；章节按填充方式分级标识） =====
       materialSkillConfig: {
         skillName: '零碳申报材料编制Skill',
         template: '平台模板库 · 绿色工厂评价指标自评表模板（GB/T 36132-2025）',
@@ -1583,7 +1583,7 @@ export default {
                     { key: 'value', label: '内容' }
                   ]
                 },
-                { type: 'paragraph', refs: ['阶段4 · 指标核算结果'], text: '绿色工厂建设亮点（300字以内）：\n【AI草稿】围绕新五化建设路径——能源低碳化：单位产品综合能耗 0.086 tce/件、可再生能源使用率 28%、已通过 ISO 50001 认证；资源高效化：一般固废综合利用率 92%、工业用水重复利用率 88%、资源产出率 1.85 万元/吨标煤；生产洁净化：单位产品污染物产生量 0.82 kg/件、已通过清洁生产审核；产品绿色化：绿色设计产品占比 45%、绿色物料使用率 68%、产品可回收利用率 72%；用地集约化：容积率 1.35、单位用地面积产值 520 万元/亩。' },
+                { type: 'paragraph', refs: ['阶段3 · 指标核算结果'], text: '绿色工厂建设亮点（300字以内）：\n【AI草稿】围绕新五化建设路径——能源低碳化：单位产品综合能耗 0.086 tce/件、可再生能源使用率 28%、已通过 ISO 50001 认证；资源高效化：一般固废综合利用率 92%、工业用水重复利用率 88%、资源产出率 1.85 万元/吨标煤；生产洁净化：单位产品污染物产生量 0.82 kg/件、已通过清洁生产审核；产品绿色化：绿色设计产品占比 45%、绿色物料使用率 68%、产品可回收利用率 72%；用地集约化：容积率 1.35、单位用地面积产值 520 万元/亩。' },
                 { type: 'paragraph', text: '单位承诺：\n近三年不存在下列情况：发生较大及以上级别的安全（含网络安全、数据安全、生产安全等）、质量、环境污染等事故；从事《中华人民共和国反垄断法》规定的垄断行为；在国务院及有关部门相关督查工作中被发现存在严重问题；被列入工业节能监察整改名单且未按要求完成整改；被列入电信业务经营不良名单和失信名单；受到有关行政主管部门比较重大以上行政处罚；被列为失信被执行人；因专利权、商标权、著作权、所有权、使用权等权属纠纷被生效法律文书认定应承担法律责任。\n\n绿色工厂建设在不影响电力安全供应和系统稳定运行的前提下进行。所提交的所有材料均真实、有效，愿接受并积极配合主管部门的监督抽查和核验。如有违反，愿承担由此产生的相应责任。\n\n法定代表人签字：____________　　　　（单位公章）：____________\n　　　　　　　　年　　月　　日' }
               ]
             },
@@ -1618,28 +1618,28 @@ export default {
               ]
             },
             {
-              title: '一、企业概况（单位情况/主要产品/生产工艺）', source: '阶段1资源库 + 阶段3近三年数据；近三年数据自动，工艺等行业自述内容由企业提供、AI整理成稿', status: '草稿待补充', fillType: 'draft',
+              title: '一、企业概况（单位情况/主要产品/生产工艺）', source: '阶段1资源库 + 阶段2近三年数据；近三年数据自动，工艺等行业自述内容由企业提供、AI整理成稿', status: '草稿待补充', fillType: 'draft',
               blocks: [
-                { type: 'paragraph', refs: ['阶段1 · 基本信息', '阶段3 · 数据采集', '阶段4 · 指标核算结果'], text: '（一）单位情况\n绿算智算中心位于贵州省贵安新区算力大道 88 号，是一家面向云计算与智算服务的算力设施运营单位，拥有独立供配电和制冷系统，标准机架 4,500 个，已入选国家绿色算力设施名单。\n\n（二）设施与用能情况\n算力设施以电力消费为主，2025 年总用电量 12,000 万千瓦时，其中其他电网电力 8,000 万千瓦时、光伏自发自用 500 万千瓦时、绿电直连 3,500 万千瓦时（物理消纳凭证 #GR-2025-0512）；备用柴油发电 100 吨。电能利用效率 PUE 1.25，达 GB 40879 2级。\n\n（三）能源利用情况\n2025 年综合能源消费量 34,418 吨标准煤（等价值，无原料用能）。\n\n（四）碳排放情况\n2025 年边界内二氧化碳排放总量约 43,238 吨，其中购入电力排放 42,928 吨、备用柴油发电排放 310 吨。单位能耗碳排放 1.26 tCO₂/tce，非化石能源消费占比 33.2%，非化石能源电力消费物理认定量占比 33.3%。' }
+                { type: 'paragraph', refs: ['阶段1 · 基本信息', '阶段2 · 数据采集', '阶段3 · 指标核算结果'], text: '（一）单位情况\n绿算智算中心位于贵州省贵安新区算力大道 88 号，是一家面向云计算与智算服务的算力设施运营单位，拥有独立供配电和制冷系统，标准机架 4,500 个，已入选国家绿色算力设施名单。\n\n（二）设施与用能情况\n算力设施以电力消费为主，2025 年总用电量 12,000 万千瓦时，其中其他电网电力 8,000 万千瓦时、光伏自发自用 500 万千瓦时、绿电直连 3,500 万千瓦时（物理消纳凭证 #GR-2025-0512）；备用柴油发电 100 吨。电能利用效率 PUE 1.25，达 GB 40879 2级。\n\n（三）能源利用情况\n2025 年综合能源消费量 34,418 吨标准煤（等价值，无原料用能）。\n\n（四）碳排放情况\n2025 年边界内二氧化碳排放总量约 43,238 吨，其中购入电力排放 42,928 吨、备用柴油发电排放 310 吨。单位能耗碳排放 1.26 tCO₂/tce，非化石能源消费占比 33.2%，非化石能源电力消费物理认定量占比 33.3%。' }
               ]
             },
             {
-              title: '一、评价指标核算（五化 14 项）', source: '阶段4指标核算结果 + 佐证材料库；指标情况自动，已开展工作事实由企业提供、AI生成草稿', status: '草稿待补充', fillType: 'draft',
+              title: '一、评价指标核算（五化 14 项）', source: '阶段3指标核算结果 + 佐证材料库；指标情况自动，已开展工作事实由企业提供、AI生成草稿', status: '草稿待补充', fillType: 'draft',
               blocks: [
-                { type: 'paragraph', refs: ['阶段4 · 指标核算结果'], text: '（一）科学算碳\n已建立覆盖全部算力设备的能碳计量体系，按可测量、可报告、可核查原则开展碳排放计量统计；118 项参数全程留痕，数据来源、统计口径、计算过程可追溯。【待企业补充：核算体系运行具体情况】\n\n（二）源头减碳\n绿电直连 3,500 万千瓦时（物理消纳认定）+ 分布式光伏自发自用 500 万千瓦时，非化石能源消费占比 33.2%。\n\n（三）过程脱碳\n节能装备应用占比 82%，PUE 1.25 达 GB 40879 2级（≤1.3）。\n\n（四）协同降碳\n算力设施不适用产品碳足迹类指标（2.1/2.3/3.1 不适用），零碳供应链管理措施符合 3 项。\n\n（五）智能控碳\n能碳管理中心能源数据自动采集率 96%，功能符合项数 11/13 项。\n\n（六）碳抵销和信息披露\n碳排放信息披露透明度与质量符合可测量、可报告、可核查原则。【待企业补充：各路径已开展的具体工作与建设亮点】\n\n对照《国家级绿色工厂建设评估指标体系》，3 项核心指标均满足基本要求（目标要求在建设期内达成）；其余指标中 2 项不适用，其余不设量化要求，验收时按较申报时持续改善核查（指标明细详见第三章）。' }
+                { type: 'paragraph', refs: ['阶段3 · 指标核算结果'], text: '（一）科学算碳\n已建立覆盖全部算力设备的能碳计量体系，按可测量、可报告、可核查原则开展碳排放计量统计；118 项参数全程留痕，数据来源、统计口径、计算过程可追溯。【待企业补充：核算体系运行具体情况】\n\n（二）源头减碳\n绿电直连 3,500 万千瓦时（物理消纳认定）+ 分布式光伏自发自用 500 万千瓦时，非化石能源消费占比 33.2%。\n\n（三）过程脱碳\n节能装备应用占比 82%，PUE 1.25 达 GB 40879 2级（≤1.3）。\n\n（四）协同降碳\n算力设施不适用产品碳足迹类指标（2.1/2.3/3.1 不适用），零碳供应链管理措施符合 3 项。\n\n（五）智能控碳\n能碳管理中心能源数据自动采集率 96%，功能符合项数 11/13 项。\n\n（六）碳抵销和信息披露\n碳排放信息披露透明度与质量符合可测量、可报告、可核查原则。【待企业补充：各路径已开展的具体工作与建设亮点】\n\n对照《国家级绿色工厂建设评估指标体系》，3 项核心指标均满足基本要求（目标要求在建设期内达成）；其余指标中 2 项不适用，其余不设量化要求，验收时按较申报时持续改善核查（指标明细详见第三章）。' }
               ]
             },
             {
-              title: '三、评价结论（综合得分与等级）', source: '阶段4达标判定 + 阶段5差距分析；可达性分析AI草稿，建设目标由企业确认的表1目标生成', status: '草稿待决策', fillType: 'draft',
+              title: '三、评价结论（综合得分与等级）', source: '阶段3达标判定 + 阶段4差距分析；可达性分析AI草稿，建设目标由企业确认的表1目标生成', status: '草稿待决策', fillType: 'draft',
               blocks: [
-                { type: 'paragraph', refs: ['阶段4 · 指标核算结果', '阶段5 · 建设目标'], text: '（一）能源消费、碳排放趋势及目标可达性分析\n以近三年能源消费和碳排放现状数据为基础，结合绿电直连扩容、光伏扩容与液冷改造、高效 UPS 替换等举措，建设期内绿电消费比例持续提升、碳排放强度逐年下降：单位能耗碳排放由 1.26 降至 0.20 tCO₂/tce、非化石能源消费占比由 33.2% 提升至 95%、非化石能源电力消费物理认定量占比由 33.3% 提升至 38%。经测算，核心指标目标要求可达，实现路径与阶段安排如下（详见（二）建设目标）。' },
+                { type: 'paragraph', refs: ['阶段3 · 指标核算结果', '阶段4 · 建设目标'], text: '（一）能源消费、碳排放趋势及目标可达性分析\n以近三年能源消费和碳排放现状数据为基础，结合绿电直连扩容、光伏扩容与液冷改造、高效 UPS 替换等举措，建设期内绿电消费比例持续提升、碳排放强度逐年下降：单位能耗碳排放由 1.26 降至 0.20 tCO₂/tce、非化石能源消费占比由 33.2% 提升至 95%、非化石能源电力消费物理认定量占比由 33.3% 提升至 38%。经测算，核心指标目标要求可达，实现路径与阶段安排如下（详见（二）建设目标）。' },
                 
                 
                 {
                   type: 'table',
                   caption: '表1 国家级绿色工厂建设期评估指标年度目标表',
                   dynamic: 'targetTable',
-                  refs: ['阶段4 · 指标核算结果', '阶段5 · 建设目标'],
+                  refs: ['阶段3 · 指标核算结果', '阶段4 · 建设目标'],
                   columns: [
                     { key: 'category', label: '类别', width: 110 },
                     { key: 'indicator', label: '指标', width: 210 },
@@ -1656,7 +1656,7 @@ export default {
                 {
                   type: 'table',
                   caption: '主要证明材料目录',
-                  refs: ['阶段6 · 数据溯源'],
+                  refs: ['阶段4 · 数据溯源'],
                   columns: [
                     { key: 'no', label: '编号', width: 70 },
                     { key: 'name', label: '证明材料名称', width: 260 },
@@ -1688,7 +1688,7 @@ export default {
         dataTab: 'validation'
       },
 
-      // ===== 阶段6整篇编制（通读 + 就地编辑一体弹窗） =====
+      // ===== 阶段4整篇编制（通读 + 就地编辑一体弹窗） =====
       fullPreviewVisible: false,
       isPolishing: false,
       isReportArchived: false,
@@ -1712,7 +1712,7 @@ export default {
         { type: 'direct', name: '填报指标', source: '无计算公式，需逐项核查', calcMethod: '用户填报结果值（说明来源/上传材料）', example: '零碳供应链管理措施符合项数、能碳管理中心功能符合项数、碳排放信息披露透明度与质量' }
       ],
 
-      // ===== 申报场景 =====
+      // ===== 评价场景 =====
       scenarios: [
         { code: 'ZC', name: '绿色工厂', starMax: 5, standard: 'GB/T 36132 绿色工厂评价通则' }
       ]
@@ -1743,7 +1743,7 @@ export default {
         }
       },
       // 评价年度可选范围（保留兼容）
-      // 申报资格状态（标题提醒）
+      // 自评资格状态（标题提醒）
       qualificationStatus() {
         const q = this.phaseDetails[0] && this.phaseDetails[0].qualification
         if (!q) return { text: '', type: 'info', total: 0, pass: 0 }
@@ -2011,7 +2011,7 @@ export default {
       const name = bi.find(x => x.label === '单位名称')
       return name ? name.value : ''
     },
-    // 阶段5：建设目标按核心/自主目标分组（目标设定、年度分解、差距分析三表共用）
+    // 阶段4：建设目标按核心/自主目标分组（目标设定、年度分解、差距分析三表共用）
     phase5GoalGroups() {
       const rows = (this.phaseDetails[3] && this.phaseDetails[3].goals ? this.phaseDetails[3].goals.rows : []) || []
       return { core: rows.filter(r => r.core), self: rows.filter(r => !r.core) }
@@ -2025,7 +2025,7 @@ export default {
         self: gaps.filter(x => !goalOf(x.name).core)
       }
     },
-    // 阶段5：整数型指标（项数类，integer=true）目标值失焦取整——项数不允许出现小数
+    // 阶段4：整数型指标（项数类，integer=true）目标值失焦取整——项数不允许出现小数
     roundGoal(g, field, mi) {
       if (!g || !g.integer) return
       const raw = field === 'mids' ? g.mids[mi] : g[field]
@@ -2036,14 +2036,14 @@ export default {
         else g[field] = v
       }
     },
-    // 阶段5：建设期年度目标年份列表（起始年起至期满年前一年；单年建设期为空）
+    // 阶段4：建设期年度目标年份列表（起始年起至期满年前一年；单年建设期为空）
     goalMidYears() {
       const g = this.phaseDetails[3].goals
       const arr = []
       for (let y = g.startYear; y < g.endYear; y++) arr.push(y)
       return arr
     },
-    // 阶段5：建设期结束年份选择器可选范围（不早于起始年 · 不晚于 2030 政策上限）
+    // 阶段4：建设期结束年份选择器可选范围（不早于起始年 · 不晚于 2030 政策上限）
     goalEndYearPickerOptions() {
       const g = this.phaseDetails[3].goals
       return {
@@ -2053,7 +2053,7 @@ export default {
         }
       }
     },
-    // 新建任务：当前所选申报依据（决定评价年度/标准/资格条件）
+    // 新建任务：当前所选评价依据（决定评价年度/标准/资格条件）
     newTaskPlan() {
       return this.planVersions.find(v => v.id === this.newTaskForm.planId) || this.planVersions[0]
     },
@@ -2067,7 +2067,7 @@ export default {
         disabledDate: d => d < min || d >= max
       }
     },
-    // 阶段6：数据溯源报告参数明细（从阶段3采集清单真实聚合——每行=指标/子模块/参数/活动数据/数据来源/因子/因子来源）
+    // 阶段4：数据溯源报告参数明细（从阶段3采集清单真实聚合——每行=指标/子模块/参数/活动数据/数据来源/因子/因子来源）
     evidenceParamRows() {
       const rows = []
       const cm = (this.phaseDetails[1] && this.phaseDetails[1].collectModel) || []
@@ -2088,7 +2088,7 @@ export default {
       })
       return rows
     },
-    // 阶段5：建设期结束年份（v-model 受控：get 读 goals，set 进 changeGoalPeriod 联动重算）
+    // 阶段4：建设期结束年份（v-model 受控：get 读 goals，set 进 changeGoalPeriod 联动重算）
     goalEndYearModel: {
       get() {
         return String(this.phaseDetails[3].goals.endYear)
@@ -2144,8 +2144,8 @@ export default {
           hint: '材料已生成，可归档下载',
           type: 'success',
           action: () => {
-            this.recordConfirm('confirm4', '材料审核', '确认申报材料与证据链完整')
-            this.$message.success('申报材料已确认，可归档下载')
+            this.recordConfirm('confirm4', '材料审核', '确认自评材料与证据链完整')
+            this.$message.success('自评材料已确认，可归档下载')
           }
         }
       }
@@ -2153,7 +2153,7 @@ export default {
         return {
           label: '确认并进入数据收集与校验',
           icon: 'el-icon-right',
-          hint: '完成右侧企业信息与申报资格条件确认后推进',
+          hint: '完成右侧企业信息与自评资格条件确认后推进',
           type: 'primary',
           action: () => {
             const c = this.qualiConclusion()
@@ -2205,7 +2205,7 @@ export default {
         }
       }
       if (i === 5) {
-        // 阶段6为最终阶段：无「推进」动作，底部操作（存档/导出/专家复核）由右侧内容区操作面板承载
+        // 阶段4为最终阶段：无「推进」动作，底部操作（存档/导出/专家复核）由右侧内容区操作面板承载
         return null
       }
       return null
@@ -2473,7 +2473,7 @@ export default {
 
     // 生成阶段引导消息（新建任务进入/重置共用）
     makePhaseIntroMsg(prefix) {
-      const title = prefix ? (prefix + this.currentFactoryName) : ('已进入申报项目：' + this.currentFactoryName)
+      const title = prefix ? (prefix + this.currentFactoryName) : ('已进入自评项目：' + this.currentFactoryName)
       // 三段式精简：阶段结论 → 需要关注项 → 下一步动作（数据明细归右侧面板，判定依据按需展开）
       const q = this.phaseDetails[0].qualification
       const allChecks = [...q.autoChecks, ...q.manualChecks]
@@ -2498,10 +2498,10 @@ export default {
           '评价标准：<b>《绿色工厂评价通则》（GB/T 36132-2025）</b> · 制造型企业 · 评价年度 ' + this.baselineYear + ' 年<br/>' +
           '企业信息 <b>11 项</b>已由组织资源库带出，资格核验 <b style="color:#52c41a;">' + passCount + ' / ' + allChecks.length + ' 项</b>通过，证明材料自动匹配 6 份。<br/>' +
           '静态硬资格（法人 / 规上企业 / 产业政策 / 污染物达标 / 无淘汰装备）不满足时建议先整改，也可继续试算。<br/>' +
-          '→ 核对右侧「企业信息」与「申报资格条件」后，点击底部「确认并进入核算模型搭建」' +
+          '→ 核对右侧「企业信息」与「自评资格条件」后，点击底部「确认并进入核算模型搭建」' +
           '</div>',
         timestamp: '刚刚',
-        suggestions: ['下载材料清单', '上传申报材料']
+        suggestions: ['下载材料清单', '上传自评材料']
       }
     },
 
@@ -2510,7 +2510,7 @@ export default {
       const q = this.phaseDetails[0].qualification
       const checks = [...q.autoChecks, ...q.manualChecks]
       const seen = {}
-      const lines = ['绿色工厂申报 - 资格证明材料清单', '申报主体：' + this.currentFactoryName, '申报依据：' + this.currentPlanLabel, '', '序号\t材料名称\t关联资格条件\t状态']
+      const lines = ['绿色工厂自评价 - 资格证明材料清单', '评价主体：' + this.currentFactoryName, '评价依据：' + this.currentPlanLabel, '', '序号\t材料名称\t关联资格条件\t状态']
       let idx = 0
       checks.forEach(c => {
         const pid = c.proofId
@@ -2520,11 +2520,11 @@ export default {
         const status = c.proofStatus === 'matched' ? '已匹配' : '待上传'
         lines.push(idx + '\t' + q.proofPool[pid].name + '\t' + c.condition + '\t' + status)
       })
-      lines.push('', '说明：待上传材料可对话输入「上传 + 材料名」或点击「上传申报材料」完成识别与自动匹配。')
+      lines.push('', '说明：待上传材料可对话输入「上传 + 材料名」或点击「上传自评材料」完成识别与自动匹配。')
       const blob = new Blob(['\ufeff' + lines.join('\n')], { type: 'text/plain;charset=utf-8' })
       const a = document.createElement('a')
       a.href = URL.createObjectURL(blob)
-      a.download = '绿色工厂申报-材料清单.txt'
+      a.download = '绿色工厂自评价-材料清单.txt'
       a.click()
       URL.revokeObjectURL(a.href)
     },
@@ -2540,7 +2540,7 @@ export default {
       this.currentFactoryName = task.factoryName
       this.currentStepIndex = task.currentStepIndex
       this.maxStepIndex = task.currentStepIndex
-      // 恢复到阶段5时：按阶段4核算结果自动判定申报场景
+      // 恢复到阶段4时：按阶段4核算结果自动判定评价场景
       if (this.currentStepIndex === 3) {
         this.applyAutoScenario()
       }
@@ -2552,7 +2552,7 @@ export default {
       this.phaseOps.adoptedMeasures = []
       this.phaseOps.dataTab = 'validation'
       this.invalidatedStages = []
-      // 恢复到阶段5：改善措施默认全部已采纳（用户可逐项取消）
+      // 恢复到阶段4：改善措施默认全部已采纳（用户可逐项取消）
       if (this.currentStepIndex === 3) this.initAdoptedMeasures()
       this.isReportArchived = false
       this.confirmRecords = []
@@ -2566,7 +2566,7 @@ export default {
     },
 
     // ===== 阶段交互操作方法 =====
-    // 申报资格条件自动判定：null=待判定 / true=满足 / false=不满足；数值型按阈值比较，是非型按下拉值判定，文本型按关键词规则（演示级）
+    // 自评资格条件自动判定：null=待判定 / true=满足 / false=不满足；数值型按阈值比较，是非型按下拉值判定，文本型按关键词规则（演示级）
     judgeQualiPass(check) {
       if (check.type === 'number') {
         const v = Number(check.current)
@@ -2606,14 +2606,14 @@ export default {
       const name = this.currentFactoryName || this.autoFactoryName || '（企业名称）'
       const clauses = this.phaseDetails[0].qualification.manualChecks
         .map((c, i) => `<p style="margin:8px 0;text-indent:2em;">${i + 1}. 本单位承诺：${c.condition}。</p>`).join('')
-      const html = `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><title>绿色工厂申报承诺书</title>
+      const html = `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><title>绿色工厂评价承诺书</title>
 <style>body{font-family:'SimSun','宋体',serif;max-width:760px;margin:40px auto;padding:0 32px;color:#1f2d3d;line-height:1.9;}
 h1{text-align:center;font-size:22px;margin-bottom:8px;} .sub{text-align:center;color:#67c23a;font-size:12px;margin-bottom:24px;}
 .meta{margin:16px 0;font-size:14px;} .meta p{margin:4px 0;} h3{font-size:15px;margin:20px 0 8px;}
 .clause p{font-size:14px;} .sign{margin-top:56px;text-align:right;font-size:14px;line-height:2.4;}
 .hint{color:#909399;font-size:12px;border-top:1px dashed #dcdfe6;padding-top:12px;margin-top:40px;}</style></head><body>
-<h1>绿色工厂申报承诺书</h1>
-<div class="sub">（法定代表人承诺 · 覆盖申报负面清单全部事项）</div>
+<h1>绿色工厂评价承诺书</h1>
+<div class="sub">（法定代表人承诺 · 覆盖自评负面清单全部事项）</div>
 <div class="meta">
 <p>致：工业和信息化部（绿色工厂建设评估组织方）</p>
 <p>单位名称：${name}</p>
@@ -2628,12 +2628,12 @@ h1{text-align:center;font-size:22px;margin-bottom:8px;} .sub{text-align:center;c
 <p>单位（公章）：<br/><br/></p>
 <p>日期：＿＿＿＿年＿＿月＿＿日</p>
 </div>
-<div class="hint">使用说明：本承诺书由系统按企业信息与申报负面清单自动生成，打印后由法定代表人签字并加盖公章，扫描回传至「佐证材料库」完成关联。</div>
+<div class="hint">使用说明：本承诺书由系统按企业信息与自评负面清单自动生成，打印后由法定代表人签字并加盖公章，扫描回传至「佐证材料库」完成关联。</div>
 </body></html>`
       const blob = new Blob(['\ufeff' + html], { type: 'text/html;charset=utf-8' })
       const a = document.createElement('a')
       a.href = URL.createObjectURL(blob)
-      a.download = `绿色工厂申报承诺书-${name}.html`
+      a.download = `绿色工厂评价承诺书-${name}.html`
       a.click()
       URL.revokeObjectURL(a.href)
       this.$message.success('承诺书模板已下载（企业信息已预填），打印签字盖章后扫描回传佐证材料库')
@@ -2751,7 +2751,7 @@ h1{text-align:center;font-size:22px;margin-bottom:8px;} .sub{text-align:center;c
       if (softFail > 0) {
         return { text: '静态资格满足；' + softFail + ' 项量化条件暂不满足，核算后将给出差距与改善路径', ok: true }
       }
-      return { text: '满足国家级绿色工厂申报条件', ok: true }
+      return { text: '满足国家级绿色工厂评价条件', ok: true }
     },
     typeLabel(t) {
       return { calc: '自动核算', param: '参数填报', direct: '直接填报' }[t] || t
@@ -3039,23 +3039,23 @@ h1{text-align:center;font-size:22px;margin-bottom:8px;} .sub{text-align:center;c
         '其余 ' + ongoingCnt + ' 项不设量化要求' + (naCnt ? '（不适用 ' + naCnt + ' 项）' : '') + '，验收时按较申报时持续改善核查（附件1注1）。<br/>' +
         '→ 核对无误后点击底部「确认核算结果」，进入阶段 4 数据溯源与材料归档'
     },
-    // 阶段5引导语·确认前（目标设定任务：预填说明 → 调整要点 → 确认动作）
+    // 阶段4引导语·确认前（目标设定任务：预填说明 → 调整要点 → 确认动作）
     buildOptGuideHtml() {
       const g = this.phaseDetails[3].goals
       const coreCnt = g.rows.filter(r => r.core).length
       const selfCnt = g.rows.length - coreCnt
-      return '<strong style="color:#0067FE;">【阶段5 · 建设目标与优化建议】</strong> ⏳ 待确认<br/>' +
+      return '<strong style="color:#0067FE;">【阶段4 · 建设目标与优化建议】</strong> ⏳ 待确认<br/>' +
         '建设期 <b>' + g.startYear + '—' + g.endYear + '</b> 年（可调整至 2030，不晚于政策上限），' + g.rows.length + ' 项适用指标目标已预填：核心 ' + coreCnt + ' 项锚定官方目标要求、其余 ' + selfCnt + ' 项为企业自主目标（AI 推荐参考值）。<br/>' +
         '→ 在右侧调整建设期与各指标期末目标值（核心指标不得低于官方要求）后，点击底部「确认建设目标」'
     },
-    // 阶段5引导语·确认后（结果审阅任务：锁定说明 → 已生成内容 → 调整/推进路径）
+    // 阶段4引导语·确认后（结果审阅任务：锁定说明 → 已生成内容 → 调整/推进路径）
     buildGoalConfirmedGuideHtml() {
       const g = this.phaseDetails[3].goals
       const coreCnt = g.rows.filter(r => r.core).length
       const selfCnt = g.rows.length - coreCnt
-      return '<strong style="color:#0067FE;">【阶段5 · 建设目标与优化建议】</strong> ✅ 已确认<br/>' +
+      return '<strong style="color:#0067FE;">【阶段4 · 建设目标与优化建议】</strong> ✅ 已确认<br/>' +
         '建设期 <b>' + g.startYear + '—' + g.endYear + '</b> 年，' + g.rows.length + ' 项适用指标（核心 ' + coreCnt + ' · 企业自主 ' + selfCnt + '）的目标值已锁定，年度轨迹分解完成。<br/>' +
-        '右侧已生成：差距分析（对照建设目标）· 改善措施推荐（默认全部已采纳，可逐项取消）· 申报诊断。<br/>' +
+        '右侧已生成：差距分析（对照建设目标）· 改善措施推荐（默认全部已采纳，可逐项取消）· 评价诊断。<br/>' +
         '→ 浏览差距与措施，确认无误后点击底部「生成改善计划并进入材料编制」；需重设目标，点击①标题区「调整目标」'
     },
     // 阶段4 引导语（三段式：生成结论 → 数据溯源 → 后续动作）
@@ -3090,7 +3090,7 @@ h1{text-align:center;font-size:22px;margin-bottom:8px;} .sub{text-align:center;c
     downloadValChecklist() {
       const items = this.phaseDetails[1].validationItems
       const pend = items.filter(v => v.status !== 'resolved')
-      const lines = ['绿色工厂申报 — 待补充 / 待确认清单', '生成时间：' + new Date().toLocaleString('zh-CN'), '']
+      const lines = ['绿色工厂自评价 — 待补充 / 待确认清单', '生成时间：' + new Date().toLocaleString('zh-CN'), '']
       pend.forEach((v, i) => {
         lines.push((i + 1) + '. [' + (v.status === 'missing' ? '缺失' : '待确认') + '] ' + v.name + '（' + v.stage + '）')
         lines.push('    说明：' + v.label)
@@ -3125,7 +3125,7 @@ h1{text-align:center;font-size:22px;margin-bottom:8px;} .sub{text-align:center;c
       item.proofName = name
       this.$message.success((type === 'upload' ? '新材料已上传并关联：' : '已关联佐证材料库材料：') + name)
     },
-    // 阶段6「建设目标」段落文本动态生成（随建设期/评价年度联动，data 初始化阶段不可用故在 created 及建设期变更时刷新）
+    // 阶段4「建设目标」段落文本动态生成（随建设期/评价年度联动，data 初始化阶段不可用故在 created 及建设期变更时刷新）
     syncTargetParagraph() {
       const g = this.phaseDetails[3] && this.phaseDetails[3].goals
       if (!g) return
@@ -3136,7 +3136,7 @@ h1{text-align:center;font-size:22px;margin-bottom:8px;} .sub{text-align:center;c
         if (block) block.text = text
       }
     },
-    // 阶段5：切换建设期（期满年）→ 重新分解中间年度目标（演示：线性插值示意，实际按措施贡献分年分解）
+    // 阶段4：切换建设期（期满年）→ 重新分解中间年度目标（演示：线性插值示意，实际按措施贡献分年分解）
     changeGoalPeriod(endYear) {
       const g = this.phaseDetails[3].goals
       if (!endYear || endYear < g.startYear) {
@@ -3161,10 +3161,10 @@ h1{text-align:center;font-size:22px;margin-bottom:8px;} .sub{text-align:center;c
         r.mids = arr
       })
       this.$message.info('已按建设期 ' + g.startYear + '–' + endYear + ' 重新分解年度目标（演示为线性示意），可逐项调整')
-      // 建设期变更 → 阶段6「建设目标」段落文本同步刷新
+      // 建设期变更 → 阶段4「建设目标」段落文本同步刷新
       this.syncTargetParagraph()
     },
-    // 阶段5：建设目标确认（目标确认后展开差距分析与措施推荐）
+    // 阶段4：建设目标确认（目标确认后展开差距分析与措施推荐）
     toggleGoalConfirm(silent) {
       // R040201 衍生校验：评价年度须早于建设期起始年（评价现状在建设期之前）
       const by = Number(this.baselineYear)
@@ -3190,7 +3190,7 @@ h1{text-align:center;font-size:22px;margin-bottom:8px;} .sub{text-align:center;c
       }
       this.$nextTick(this.scrollToBottom)
     },
-    // ===== 阶段5：降碳措施减排量测算（统一四方向：新能源建设 / 设备升级改造 / 余能利用 / 碳抵消）=====
+    // ===== 阶段4：降碳措施减排量测算（统一四方向：新能源建设 / 设备升级改造 / 余能利用 / 碳抵消）=====
     // 年减排量 = 措施参数 × 典型减排系数（内置口径），参数可调、结果实时联动
     measureReduction(m) {
       // 余能利用：多回收项（余热 / 余压 / 可燃废气 / 余冷可同时存在）→ 逐项测算后累加
@@ -3205,7 +3205,7 @@ h1{text-align:center;font-size:22px;margin-bottom:8px;} .sub{text-align:center;c
       if (m.calcType === 'offset') return Math.round(v.amount || 0)
       return 0
     },
-    // ===== 阶段6：方案章节中「随改善措施自动生成」的段落（改参数/加减措施即自动更新）=====
+    // ===== 阶段4：方案章节中「随改善措施自动生成」的段落（改参数/加减措施即自动更新）=====
     wanTons(v) {
       return (Math.round((Number(v) || 0) / 1000) / 10).toFixed(1)
     },
@@ -3306,10 +3306,10 @@ h1{text-align:center;font-size:22px;margin-bottom:8px;} .sub{text-align:center;c
     generatePlan() {
       this.phaseOps.planGenerated = true
       this.$message.success('改善计划已生成（建设方案第四部分编制素材），进入数据溯源与材料归档')
-      // 计划生成即完成阶段5全部动作，直接推进阶段6（不再单设纯导航确认）
+      // 计划生成即完成阶段4全部动作，直接推进阶段4（不再单设纯导航确认）
       this.nextPhase()
     },
-    // 阶段6：报告存档（归档至报告与档案中心，同时标记任务完成）——关键确认④材料审核
+    // 阶段4：报告存档（归档至报告与档案中心，同时标记任务完成）——关键确认④材料审核
     handleArchiveReport() {
       this.isReportArchived = true
       const task = this.taskList.find(t => t.id === this.currentTaskId)
@@ -3327,7 +3327,7 @@ h1{text-align:center;font-size:22px;margin-bottom:8px;} .sub{text-align:center;c
         key,
         name,
         what,
-        operator: '张工（企业申报负责人）',
+        operator: '张工（企业自评负责人）',
         time: new Date().toLocaleString('zh-CN')
       }
       if (idx > -1) {
@@ -3336,7 +3336,7 @@ h1{text-align:center;font-size:22px;margin-bottom:8px;} .sub{text-align:center;c
         this.confirmRecords.push(record)
       }
     },
-    // 阶段6：方案导出（下拉：PDF / Word）
+    // 阶段4：方案导出（下拉：PDF / Word）
     handleExportReport(format) {
       const formatMap = {
         pdf: 'PDF 审计版',
@@ -3344,12 +3344,12 @@ h1{text-align:center;font-size:22px;margin-bottom:8px;} .sub{text-align:center;c
       }
       this.$message.success(`正在导出 ${formatMap[format] || format} 格式建设方案，请稍候...`)
     },
-    // 阶段6：专家复核（提交第三方认证机构）
+    // 阶段4：专家复核（提交第三方认证机构）
     handleShareReport() {
       this.$message.success('建设方案已提交至第三方专家复核，请等待复核意见')
     },
-    // 阶段6：打开章节预览/编辑器
-    // 阶段6：数据溯源完整报告下载（与预览一致：参数总览 + 阶段3真实聚合的核算参数明细 + 核心指标证据链）
+    // 阶段4：打开章节预览/编辑器
+    // 阶段4：数据溯源完整报告下载（与预览一致：参数总览 + 阶段3真实聚合的核算参数明细 + 核心指标证据链）
     downloadEvidenceReport() {
       const ev = this.phaseDetails[3].evidence
       const name = this.currentFactoryName || '企业'
@@ -3372,7 +3372,7 @@ h2{font-size:15px;margin:20px 0 10px;} h3{font-size:14px;margin:18px 0 8px;} .tb
 .tbl th,.tbl td{border:1px solid #dcdfe6;padding:5px 7px;text-align:left;vertical-align:top;} .tbl th{background:#f5f7fa;font-weight:600;}
 .hint{color:#909399;font-size:12px;border-top:1px dashed #dcdfe6;padding-top:12px;margin-top:40px;}</style></head><body>
 <h1>数据溯源报告</h1>
-<div class="sub">（绿色工厂申报 · 证据链 SHA-256 签名防篡改）</div>
+<div class="sub">（绿色工厂自评价 · 证据链 SHA-256 签名防篡改）</div>
 <div class="meta">
 <p>企业名称：${name}</p>
 <p>参数总数：${ev.total} 项（自动采集 ${ev.autoCollected} 项 · 统一数据底座；手动提供 ${ev.manualProvided} 项 · 来源凭证已归档）</p>
@@ -3394,7 +3394,7 @@ ${chainRows}
       URL.revokeObjectURL(a.href)
       this.$message.success('数据溯源报告已下载（与预览内容一致：参数明细 ' + rows.length + ' 项 + 核心指标证据链）')
     },
-    // 阶段6：整篇编制弹窗（通读 + 就地编辑一体）
+    // 阶段4：整篇编制弹窗（通读 + 就地编辑一体）
     openFullPreview() {
       this.fullPreviewVisible = true
     },
@@ -3408,7 +3408,7 @@ ${chainRows}
       const esc = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       return esc(text || '').replace(/【(待企业补充：[^】]*)】/g, '<span class="fp-placeholder">【$1】</span>').replace(/\n/g, '<br/>')
     },
-    // 阶段6：解析表格块的行数据（dynamic 标记时从上游权威源动态生成，保证单一数据入口、改动自动同步）
+    // 阶段4：解析表格块的行数据（dynamic 标记时从上游权威源动态生成，保证单一数据入口、改动自动同步）
     // ===== 标准驱动：库访问 =====
     // 按指标名查公式
     formulaOf(indicatorName) {
@@ -3469,11 +3469,11 @@ ${chainRows}
           { field: '主要产品（服务）', value: find('主要产品') },
           { field: '单位性质', value: '内资（☑' + find('单位性质') + '）' },
           { field: '统一社会信用代码 / 法定代表人', value: find('统一社会信用代码') + ' / ' + find('法定代表人') },
-          { field: '申报工作联系部门 / 联系人', value: find('申报工作联系部门') + ' / ' + find('联系人') },
+          { field: '评价工作联系部门 / 联系人', value: find('评价工作联系部门') + ' / ' + find('联系人') },
           { field: '联系电话 / 电子邮箱', value: find('联系电话') + ' / ' + find('电子邮箱') }
         ]
       }
-      // 表1：从阶段4 indicators（11项实际值/目标要求）+ 阶段5 goals（核心指标年度目标、建设期）动态生成
+      // 表1：从阶段4 indicators（11项实际值/目标要求）+ 阶段4 goals（核心指标年度目标、建设期）动态生成
       if (block.dynamic === 'targetTable') {
         const goals = this.phaseDetails[3] && this.phaseDetails[3].goals
         if (!goals) return []
@@ -3535,7 +3535,7 @@ ${chainRows}
       }
       return block.rows || []
     },
-    // 阶段6：解析表格块的列定义（targetTable 的年份列随建设期长度动态生成，保证单一数据源；单年建设期无中间年列）
+    // 阶段4：解析表格块的列定义（targetTable 的年份列随建设期长度动态生成，保证单一数据源；单年建设期无中间年列）
     getTableColumns(block) {
       if (block.dynamic === 'targetTable') {
         const g = this.phaseDetails[3] && this.phaseDetails[3].goals
@@ -3555,7 +3555,7 @@ ${chainRows}
       }
       return block.columns || []
     },
-    // 阶段6：保存章节编辑（draft 章节保存后状态更新：「草稿待补充」→「已补充」、「草稿待确认」→「已确认」；整篇弹窗内就地保存）
+    // 阶段4：保存章节编辑（draft 章节保存后状态更新：「草稿待补充」→「已补充」、「草稿待确认」→「已确认」；整篇弹窗内就地保存）
     saveSectionEdit(idx) {
       const sec = this.materialSkillConfig.coreOutput.sections[idx]
       if (sec && sec.fillType !== 'auto' && sec.status !== '草稿待决策') {
@@ -3563,7 +3563,7 @@ ${chainRows}
       }
       this.$message.success('「' + (sec ? sec.title : '') + '」内容已保存')
     },
-    // 阶段6：AI 润色（将【待企业补充/决策】占位符替换为 AI 建议内容，标注待企业确认）
+    // 阶段4：AI 润色（将【待企业补充/决策】占位符替换为 AI 建议内容，标注待企业确认）
     polishSection(idx) {
       const sec = this.materialSkillConfig.coreOutput.sections[idx]
       if (!sec) return
@@ -3618,7 +3618,7 @@ ${chainRows}
         messages: [
           {
             id: 'demo-m1', role: 'user', timestamp: '08/18 09:30',
-            content: '小米汽车工厂 开始申报'
+            content: '小米汽车工厂 开始自评'
           },
           {
             id: 'demo-m2', role: 'assistant', timestamp: '08/18 09:30',
@@ -3627,7 +3627,7 @@ ${chainRows}
               '<div style="' + boxStyle + '">' +
               '加载标准《绿色工厂评价通则》（GB/T 36132-2025） · 带出基本信息 11 项 · 核验资格条件 14 项（全部通过）· 自动匹配证明材料 6 份。<br/>' +
               '核算边界：北京亦庄单厂区（不含武汉、上海基地，随单位地址确定）· 统计期 ' + this.baselineYear + ' 年度。<br/>' +
-              '<strong style="color:#37c876;">校验结论：满足国家级绿色工厂申报条件</strong><br/>' +
+              '<strong style="color:#37c876;">校验结论：满足国家级绿色工厂评价条件</strong><br/>' +
               '→ 确认右侧信息无误后，点击底部按钮进入核算模型搭建' +
               '</div>'
           },
@@ -3705,7 +3705,7 @@ ${chainRows}
       this.taskList.unshift(demoTask)
       this.saveTasks()
     },
-    // 算力设施演示任务（绿算智算中心，caseType=computing，展示两类申报主体差异化）
+    // 算力设施演示任务（绿算智算中心，caseType=computing，展示两类评价主体差异化）
     seedComputingDemoTask() {
       const boxStyle = 'padding:12px 14px;background:rgba(0,103,254,0.04);border-radius:8px;border-left:3px solid #0067FE;margin:8px 0;'
       const computingTask = {
@@ -3726,10 +3726,10 @@ ${chainRows}
             id: 'cmp-m1',
             role: 'assistant',
             timestamp: '2026/08/25 14:00:00',
-            content: '<strong>✅ 已进入申报项目：绿算智算中心（算力设施）</strong><br/><br/>' +
+            content: '<strong>✅ 已进入自评项目：绿算智算中心（算力设施）</strong><br/><br/>' +
               '<div style="' + boxStyle + '">' +
               '<strong style="color:#0067FE;">【阶段1 · 标准适配】</strong><br/>' +
-              '本案例为<b>零碳算力设施</b>申报主体（通知二（二）），与制造型企业申报条件存在差异：<br/>' +
+              '本案例为<b>零碳算力设施</b>评价主体（通知二（二）），与制造型企业评价条件存在差异：<br/>' +
               '· 资格条件：产权清晰、物理边界明确、独立供配电制冷系统、规模≥3000机架、PUE达GB40879 2级、入选国家绿色算力设施名单<br/>' +
               '· 指标适用性：2.1 单位工业增加值能耗不适用、1.3 物理认定量占比不设定基本要求<br/>' +
               '右侧内容区已切换为本案例内容，按提示完成确认后推进。' +
@@ -3778,13 +3778,13 @@ ${chainRows}
       }
     },
     // 打开新建任务对话框（依据 → 主体类型默认首个 → 企业名称/评价年度带出；评价年度支持调整试算）
-    // 切换申报依据：同步标准名称、评价年度与主体类型默认值
+    // 切换评价依据：同步标准名称、评价年度与主体类型默认值
     onPlanVersionChange(planId) {
       const plan = this.planVersions.find(p => p.id === planId)
       if (!plan) return
       this.currentPlanLabel = plan.label
       this.baselineYear = plan.baselineYear
-      this.$message.success('已切换申报依据：' + plan.standard)
+      this.$message.success('已切换评价依据：' + plan.standard)
     },
     openNewTaskDialog() {
       this.newTaskForm.planId = this.planVersions[0].id
@@ -3792,19 +3792,19 @@ ${chainRows}
       this.newTaskForm.baselineYear = String(this.planVersions[0].baselineYear)
       this.showNewTaskDialog = true
     },
-    // 评价年度调整确认：默认按政策文件带出，修改后提示申报材料不合规风险，确认后用于试算
+    // 评价年度调整确认：默认按政策文件带出，修改后提示自评材料不合规风险，确认后用于试算
     onBaselineYearChange(val) {
       if (!val || String(val) === String(this.newTaskPlan.baselineYear)) return
       const stdYear = this.newTaskPlan.baselineYear
       this.$confirm(
-        `当前申报依据《${this.newTaskPlan.standard.replace(/[《》]/g, '')}》要求评价年度为 ${stdYear} 年，修改后与政策文件要求不一致，可能导致申报材料不被受理。若仅为内部试算用途，可点击「继续使用」，正式申报时请恢复为 ${stdYear} 年。`,
+        `当前评价依据《${this.newTaskPlan.standard.replace(/[《》]/g, '')}》要求评价年度为 ${stdYear} 年，修改后与政策文件要求不一致，可能导致自评材料不被受理。若仅为内部试算用途，可点击「继续使用」，正式申报时请恢复为 ${stdYear} 年。`,
         '评价年度与政策要求不一致',
         { confirmButtonText: '继续使用（试算）', cancelButtonText: `恢复为 ${stdYear} 年`, type: 'warning', distinguishCancelAndClose: true }
       ).then(() => {}).catch(() => {
         this.newTaskForm.baselineYear = String(stdYear)
       })
     },
-    // 确认新建任务（申报依据/主体类型/评价年度由用户确定，企业名称自动带出）
+    // 确认新建任务（评价依据/主体类型/评价年度由用户确定，企业名称自动带出）
     confirmNewTask() {
       const name = this.autoFactoryName
       const plan = this.newTaskPlan
@@ -3812,7 +3812,7 @@ ${chainRows}
       // 同主体 + 同评价年度：提示复用既有任务（年度复评语义），防重复
       const sameYear = this.taskList.find(t => t.factoryName === name && String(t.baselineYear) === baseYear)
       if (sameYear) {
-        this.$confirm(`「${name}」已存在评价年度 ${baseYear} 的申报任务，是否直接进入该任务？`, '任务已存在', {
+        this.$confirm(`「${name}」已存在评价年度 ${baseYear} 的自评任务，是否直接进入该任务？`, '任务已存在', {
           confirmButtonText: '进入已有任务',
           cancelButtonText: '取消',
           type: 'info'
@@ -3822,7 +3822,7 @@ ${chainRows}
         }).catch(() => {})
         return
       }
-      // 适用场景分组下仅申报主体类型一个维度，单选；一任务一场景，多场景需分别创建任务
+      // 适用场景分组下仅评价主体类型一个维度，单选；一任务一场景，多场景需分别创建任务
       const caseType = this.newTaskForm.scene || 'manufacturing'
       const task = this.createTask(name, 'GF', caseType, plan)
       // 评价年度以用户最终确认值为准（支持试算调整，不强制等于政策要求年）
@@ -3833,9 +3833,9 @@ ${chainRows}
       })
       const warnSuffix = baseYear !== String(plan.baselineYear) ? '（试算评价年度，与政策要求 ' + plan.baselineYear + ' 年不一致）' : ''
       const sceneLabel = (plan.sceneOptions.find(s => s.key === caseType) || {}).label || caseType
-      this.$message.success('已创建「' + name + '」申报项目（' + sceneLabel + ' · 评价年度 ' + baseYear + ' 年）' + warnSuffix)
+      this.$message.success('已创建「' + name + '」自评项目（' + sceneLabel + ' · 评价年度 ' + baseYear + ' 年）' + warnSuffix)
     },
-    // 申报场景自动判定（不暴露切换UI）：阶段4核心指标全部满足目标要求→巩固提升，否则→改善中
+    // 评价场景自动判定（不暴露切换UI）：阶段4核心指标全部满足目标要求→巩固提升，否则→改善中
     applyAutoScenario() {
       const inds = this.phaseDetails[2].indicators || []
       const allTarget = inds.length > 0 && inds.every(i => i.status === 'target')
@@ -3844,7 +3844,7 @@ ${chainRows}
         this.switchScenario(mode)
       }
     },
-    // 切换申报场景（改善中 / 已达标巩固提升），同步替换阶段5的目标/差距/措施/诊断
+    // 切换评价场景（改善中 / 已达标巩固提升），同步替换阶段4的目标/差距/措施/诊断
     switchScenario(mode) {
       if (mode === this.scenarioMode) return
       const p4 = this.phaseDetails[3]
@@ -3882,7 +3882,7 @@ ${chainRows}
       }
       this.scenarioMode = mode
     },
-    // 阶段5：改善措施默认全部「已采纳」（AI 推荐 = 默认纳入建设方案，用户可逐项取消采纳）
+    // 阶段4：改善措施默认全部「已采纳」（AI 推荐 = 默认纳入建设方案，用户可逐项取消采纳）
     initAdoptedMeasures() {
       this.phaseOps.adoptedMeasures = (this.phaseDetails[3].measures || []).map(m => m.name)
     },
@@ -3942,7 +3942,7 @@ ${chainRows}
         const phase = this.phases[this.currentStepIndex]
         // 重新确认通过：清除该阶段的失效标记
         this.clearInvalidated(confirmIdx)
-        // 进入阶段5：按阶段4核算结果自动判定申报场景（核心指标全部达标→巩固提升，否则→改善中）
+        // 进入阶段4：按阶段4核算结果自动判定评价场景（核心指标全部达标→巩固提升，否则→改善中）
         if (phase.key === 'OPTIMIZATION') {
           this.applyAutoScenario()
           // 改善措施默认全部「已采纳」（AI 推荐 = 默认纳入建设方案，用户可逐项取消）
@@ -4158,7 +4158,7 @@ ${chainRows}
       this.messages.push({
         id: Date.now(),
         role: 'assistant',
-        content: '<strong>您好，我是绿色工厂辅助申报智能体！</strong><br/><br/>基于绿色工厂评价标准，为您提供 <strong>4 阶段智能申报辅助</strong> 服务。<br/><br/>在下方输入企业名称即可开始申报辅助流程。',
+        content: '<strong>您好，我是绿色工厂自评价智能体！</strong><br/><br/>基于绿色工厂评价标准，为您提供 <strong>4 阶段智能自评辅助</strong> 服务。<br/><br/>在下方输入企业名称即可开始自评辅助流程。',
         timestamp: '刚刚'
       })
       this.$nextTick(this.scrollToBottom)
@@ -4173,7 +4173,7 @@ ${chainRows}
     // 保存阶段数据初始快照（非响应式），供重置时恢复
     this._initialPhaseDetails = JSON.parse(JSON.stringify(this.phaseDetails))
     this._initialComputingPhaseDetails = JSON.parse(JSON.stringify(this.computingPhaseDetails))
-    // 阶段6「建设目标」段落：data 初始化时 phaseDetails 不可用，至此再按当前建设期生成
+    // 阶段4「建设目标」段落：data 初始化时 phaseDetails 不可用，至此再按当前建设期生成
     this.syncTargetParagraph()
   },
 

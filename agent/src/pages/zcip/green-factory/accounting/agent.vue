@@ -75,7 +75,7 @@
                             <el-tag size="mini" :type="getTaskStatusType(task.status)" effect="dark">{{ getTaskStatusLabel(task.status) }}</el-tag>
                             <span class="tl-hc-standard">
                               <span :style="{ color: task.caseType === 'computing' ? '#8B5CF6' : '#0067FE', fontWeight: 600 }">{{ task.caseType === 'computing' ? '算力设施' : '制造型' }}</span>
-                              · {{ task.baselineYear || '2025' }}年度申报
+                              · {{ task.baselineYear || '2025' }}年度自评
                             </span>
                           </div>
                         </div>
@@ -87,7 +87,7 @@
                       </div>
                       <div class="tl-hc-bottom">
                         <span class="tl-hc-phase">阶段：{{ getPhaseName(task.currentStepIndex) }}</span>
-                        <el-progress :percentage="Math.round(task.currentStepIndex / 5 * 100)" :stroke-width="4" :show-text="false" :color="task.status === 'completed' ? '#52c41a' : '#0067FE'" style="flex:1;margin-left:6px;"></el-progress>
+                        <el-progress :percentage="Math.round(task.currentStepIndex / 3 * 100)" :stroke-width="4" :show-text="false" :color="task.status === 'completed' ? '#52c41a' : '#0067FE'" style="flex:1;margin-left:6px;"></el-progress>
                         <span class="tl-hc-time">{{ task.updatedAt }}</span>
                       </div>
                     </div>
@@ -110,9 +110,9 @@
           </div>
           <div class="cmd-panel-body">
             <div class="cmd-group">
-              <div class="cmd-group-title">申报操作</div>
+              <div class="cmd-group-title">自评操作</div>
               <div class="cmd-list">
-                <span class="cmd-item" @click="useTlCmd('开始申报')"><i class="el-icon-video-play"></i> 开始申报</span>
+                <span class="cmd-item" @click="useTlCmd('开始自评')"><i class="el-icon-video-play"></i> 开始自评</span>
                 <span class="cmd-item" @click="useTlCmd('历史记录')"><i class="el-icon-folder-opened"></i> 历史记录</span>
               </div>
             </div>
@@ -129,7 +129,7 @@
         <!-- 输入框 -->
         <div class="chat-input-area">
           <div class="input-box">
-            <textarea class="input-textarea" v-model="tlInputText" placeholder="输入「开始申报」启动绿色工厂申报流程，或输入问题…" rows="1"
+            <textarea class="input-textarea" v-model="tlInputText" placeholder="输入「开始自评」启动绿色工厂自评流程，或输入问题…" rows="1"
               @keydown.enter.exact="handleTlSendKey" @input="autoResizeTlTextarea" ref="tlInputTextareaRef"></textarea>
             <div class="input-box-footer">
               <div class="input-toolbar">
@@ -146,11 +146,11 @@
         </div>
       </div>
 
-      <!-- 右栏：历史申报项目列表（固定窄栏） -->
+      <!-- 右栏：历史自评项目列表（固定窄栏） -->
       <aside class="cd-sidebar cd-sidebar-list">
         <div class="cd-tabs-header">
           <div class="cd-tab active">
-            <i class="el-icon-folder-opened"></i><span>历史申报</span>
+            <i class="el-icon-folder-opened"></i><span>历史自评</span>
           </div>
         </div>
         <div class="cd-tab-content">
@@ -166,7 +166,7 @@
                   <el-tag size="mini" :type="getTaskStatusType(task.status)" effect="dark">{{ getTaskStatusLabel(task.status) }}</el-tag>
                   <span class="cd-tc-standard">
                     <span :style="{ color: task.caseType === 'computing' ? '#8B5CF6' : '#0067FE', fontWeight: 600 }">{{ task.caseType === 'computing' ? '算力设施' : '制造型' }}</span>
-                    · {{ task.baselineYear || '2025' }}年度申报
+                    · {{ task.baselineYear || '2025' }}年度自评
                   </span>
                 </div>
               </div>
@@ -178,7 +178,7 @@
             </div>
             <div class="cd-tc-bottom">
               <span class="cd-tc-phase">{{ getPhaseName(task.currentStepIndex) }}</span>
-              <el-progress :percentage="Math.round(task.currentStepIndex / 5 * 100)" :stroke-width="4" :show-text="false" :color="task.status === 'completed' ? '#52c41a' : '#0067FE'" style="flex:1;margin-left:6px;"></el-progress>
+              <el-progress :percentage="Math.round(task.currentStepIndex / 3 * 100)" :stroke-width="4" :show-text="false" :color="task.status === 'completed' ? '#52c41a' : '#0067FE'" style="flex:1;margin-left:6px;"></el-progress>
             </div>
             <div class="cd-tc-time">{{ task.updatedAt }}</div>
           </div>
@@ -369,7 +369,7 @@
               </div>
               <div class="pd-section">
                 <div class="pd-title" style="cursor:pointer;user-select:none;" @click="qualificationExpanded = !qualificationExpanded">
-                  <i class="el-icon-finished"></i> 申报资格
+                  <i class="el-icon-finished"></i> 自评资格
                   <el-tag size="mini" :type="qualificationStatus.type" effect="plain" style="margin-left:4px;">{{ qualificationStatus.text }}</el-tag>
                   <i :class="qualificationExpanded ? 'el-icon-arrow-up' : 'el-icon-arrow-down'" style="margin-left:auto;color:#909399;"></i>
                 </div>
@@ -820,7 +820,7 @@
               </div>
             </div>
 
-            <!-- 阶段4：指标核算与评价 -->
+            <!-- 阶段3：指标核算与评价 -->
             <div v-else-if="currentStepIndex === 2" class="phase-detail pd-eval">
               <!-- 评价结果 -->
               <div class="pd-section">
@@ -939,7 +939,7 @@
               
             </div>
 
-            <!-- 阶段6：材料编制与数据溯源 -->
+            <!-- 阶段4：材料编制与数据溯源 -->
             <div v-else-if="currentStepIndex === 3" class="phase-detail">
               <div class="pd-section">
                 <div class="pd-title"><i class="el-icon-document"></i> {{ materialSkillConfig.coreOutput.name }}</div>
@@ -1012,7 +1012,7 @@
                 </template>
               </div>
               <div class="pd-section">
-                <div class="pd-title"><i class="el-icon-time"></i> 关键留痕 <span class="pd-title-progress">四道关键确认 · 申报责任链条</span></div>
+                <div class="pd-title"><i class="el-icon-time"></i> 关键留痕 <span class="pd-title-progress">四道关键确认 · 自评责任链条</span></div>
                 <div class="pd-card">
                   <el-timeline v-if="confirmRecords.length">
                     <el-timeline-item
@@ -1072,9 +1072,9 @@
       </div>
     </div>
 
-    <!-- 新建申报任务对话框（主体类型在创建时确定） -->
+    <!-- 新建自评任务对话框（主体类型在创建时确定） -->
     <el-dialog
-      title="新建绿色工厂申报任务"
+      title="新建绿色工厂自评任务"
       :visible.sync="showNewTaskDialog"
       width="520px"
       append-to-body
@@ -1082,7 +1082,7 @@
     >
       <div class="new-task-form">
         <div class="ntf-row">
-          <span class="ntf-label">申报依据</span>
+          <span class="ntf-label">评价依据</span>
           <el-select v-model="newTaskForm.planId" size="mini" style="flex:1;" popper-class="plan-select-popper">
             <el-option v-for="v in planVersions" :key="v.id" :label="v.label" :value="v.id"></el-option>
           </el-select>
@@ -1101,13 +1101,13 @@
             style="flex:1;"
             :clearable="false"
             :picker-options="baselineYearPickerOptions"
-            placeholder="由申报依据带出"
+            placeholder="由评价依据带出"
             @change="onBaselineYearChange"
           ></el-date-picker>
         </div>
         <div class="ntf-row">
-          <span class="ntf-label">申报主体类型</span>
-          <el-select v-model="newTaskForm.scene" size="mini" style="flex:1;" placeholder="由申报依据带出">
+          <span class="ntf-label">评价主体类型</span>
+          <el-select v-model="newTaskForm.scene" size="mini" style="flex:1;" placeholder="由评价依据带出">
             <el-option v-for="s in (newTaskPlan.sceneOptions || [])" :key="s.key" :label="s.label" :value="s.key"></el-option>
           </el-select>
         </div>
@@ -1118,7 +1118,7 @@
       </span>
     </el-dialog>
 
-    <!-- 阶段6：整篇方案编制（通读 + 就地编辑一体） -->
+    <!-- 阶段4：整篇方案编制（通读 + 就地编辑一体） -->
     <el-dialog
       v-if="fullPreviewVisible"
       title="《绿色工厂评价指标自评表》"
@@ -1222,8 +1222,8 @@ export default {
       this.tlMessages.push({
         role: 'agent',
         text:
-          '<strong>您好，我是绿色工厂辅助申报智能体！</strong><br/><br/>' +
-          '基于绿色工厂评价标准，为您提供 <strong>4 阶段智能申报辅助</strong> 服务。<br/><br/>' +
+          '<strong>您好，我是绿色工厂自评价智能体！</strong><br/><br/>' +
+          '基于绿色工厂评价标准，为您提供 <strong>4 阶段智能自评辅助</strong> 服务。<br/><br/>' +
           '<div style="margin:8px 0;padding:12px 14px;background:rgba(0,103,254,0.04);border-radius:8px;border-left:3px solid #0067FE;">' +
           '<strong style="color:#0067FE;">4 阶段流程</strong><br/>' +
           '1. 标准规则适配 — 加载标准·信息带出·资格核验·材料匹配<br/>' +
@@ -1231,8 +1231,8 @@ export default {
           '3. 指标核算与评价 — 核算·核心指标评价<br/>' +
           '4. 材料编制与数据溯源 — 方案生成·数据溯源·归档下载' +
           '</div>' +
-          '<div style="margin-top:8px;color:#909399;font-size:12px;">点击下方按钮或输入「开始申报」启动流程。</div>',
-        suggestions: ['开始申报'],
+          '<div style="margin-top:8px;color:#909399;font-size:12px;">点击下方按钮或输入「开始自评」启动流程。</div>',
+        suggestions: ['开始自评'],
         time: '刚刚'
       })
       this.$message.success('已开启新对话')
@@ -1245,8 +1245,8 @@ export default {
       this.tlMessages.push({
         role: 'agent',
         text:
-          '<strong>您好，我是绿色工厂辅助申报智能体！</strong><br/><br/>' +
-          '基于绿色工厂评价标准，为您提供 <strong>4 阶段智能申报辅助</strong> 服务。<br/><br/>' +
+          '<strong>您好，我是绿色工厂自评价智能体！</strong><br/><br/>' +
+          '基于绿色工厂评价标准，为您提供 <strong>4 阶段智能自评辅助</strong> 服务。<br/><br/>' +
           '<div style="margin:8px 0;padding:12px 14px;background:rgba(0,103,254,0.04);border-radius:8px;border-left:3px solid #0067FE;">' +
           '<strong style="color:#0067FE;">4 阶段流程</strong><br/>' +
           '1. 标准规则适配 — 加载标准·信息带出·资格核验·材料匹配<br/>' +
@@ -1254,8 +1254,8 @@ export default {
           '3. 指标核算与评价 — 核算·核心指标评价<br/>' +
           '4. 材料编制与数据溯源 — 方案生成·数据溯源·归档下载' +
           '</div>' +
-          '<div style="margin-top:8px;color:#909399;font-size:12px;">点击下方按钮或输入「开始申报」启动流程，企业名称与主体类型由系统引导确认。</div>',
-        suggestions: ['开始申报'],
+          '<div style="margin-top:8px;color:#909399;font-size:12px;">点击下方按钮或输入「开始自评」启动流程，企业名称与主体类型由系统引导确认。</div>',
+        suggestions: ['开始自评'],
         time: '刚刚'
       })
     }
@@ -1266,7 +1266,7 @@ export default {
 <style src="../../footprint/accounting/agent-global.css"></style>
 
 <style>
-/* 新建任务弹窗：申报依据下拉面板（append到body，必须全局作用域） */
+/* 新建任务弹窗：评价依据下拉面板（append到body，必须全局作用域） */
 .plan-select-popper { min-width: 480px !important; max-width: 560px; }
 .plan-select-popper .el-select-dropdown__item {
   height: auto;

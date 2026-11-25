@@ -61,7 +61,7 @@ docs/
 | park-accounting | [园区碳核算工作台](park-accounting/park-accounting.md) | /#/park-accounting/accounting/agent | 已实现 |
 | beijing-carbon | [北京碳市场工作台](beijing-carbon/beijing-carbon.md) | /#/beijing-carbon/accounting/agent | 已实现 |
 | zero-carbon-factory | 零碳工厂申报工作台 | /#/agent-center/apps/zero-carbon-factory | 已实现 |
-| green-factory | 绿色工厂申报辅助 | /#/agent-center/apps/green-factory | 演示数据 |
+| green-factory | [绿色工厂自评价](green-factory/green-factory.md) | /#/green-factory/agent | 演示数据 |
 | agent-center | 智能体中心 + 资源库群（多视图模块，按模块汇总记录；各视图清单见该文档第 3 节） | /#/agent-center/* | 已实现 |
 | agent-center | [Skill 管理](agent-center/skill-management.md) | /#/agent-center/apps/skill-management | 已实现 |
 | report-submission | [报送任务编排详情](report-submission/Orchestration.md) | （工作台任务模式内） | 已实现 |

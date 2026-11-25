@@ -1,5 +1,5 @@
 /**
- * 绿色工厂辅助申报智能体 - 局部样式
+ * 绿色工厂自评价智能体 - 局部样式
  *
  * 注意：输入框样式（.input-box/.input-textarea/.send-btn 等）使用全局样式
  *       参见 footprint/accounting/agent-global.css
@@ -725,7 +725,7 @@
   flex-direction: column;
   overflow: hidden;
 }
-/* 初始页-申报项目列表：固定窄栏 */
+/* 初始页-自评项目列表：固定窄栏 */
 .cd-sidebar-list {
   flex: 0 0 340px;
   max-width: 340px;
@@ -945,7 +945,7 @@
   padding: 12px 14px;
   margin-bottom: 8px;
 }
-/* 阶段1 申报资格条件卡片：灰底容器 + 居中分组横条（用类名替代 :has()，规避旧浏览器兼容风险） */
+/* 阶段1 自评资格条件卡片：灰底容器 + 居中分组横条（用类名替代 :has()，规避旧浏览器兼容风险） */
 .pd-card-quali {
   display: flex;
   flex-direction: column;
@@ -988,7 +988,7 @@
 .pd-cat-name { font-size: 12px; font-weight: 600; color: #0067FE; flex-shrink: 0; }
 .pd-cat-count { font-size: 10px; color: #94a3b8; flex-shrink: 0; }
 .pd-cat-ind { font-size: 10px; color: #64748b; }
-/* 阶段1 申报资格条件：渐变表头块 + 白底数据行（表头字号与对比度提升） */
+/* 阶段1 自评资格条件：渐变表头块 + 白底数据行（表头字号与对比度提升） */
 .pd-check-head {
   display: flex;
   align-items: stretch;
@@ -1664,7 +1664,7 @@
   padding: 6px 0;
 }
 .pd-bd-label { font-weight: 600; color: #64748b; flex-shrink: 0; }
-/* 阶段1标准适配：申报依据独占一行（超长省略+tooltip），主体类型/基准年并排占满行宽 */
+/* 阶段1标准适配：评价依据独占一行（超长省略+tooltip），主体类型/基准年并排占满行宽 */
 .sa-meta-card { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px; }
 .sa-meta-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .sa-span2 { grid-column: 1 / -1; }
@@ -1910,7 +1910,7 @@
   color: #303133;
   font-weight: 600;
 }
-/* 申报依据下拉面板样式见 agent.vue 非scoped style块（面板append到body，scoped选择器作用不到） */
+/* 评价依据下拉面板样式见 agent.vue 非scoped style块（面板append到body，scoped选择器作用不到） */
 .ntf-auto-name {
   display: inline-flex;
   align-items: center;
@@ -2227,7 +2227,7 @@
   border-radius: 8px;
 }
 
-/* 任务卡片（右栏-历史申报项目） */
+/* 任务卡片（右栏-历史自评项目） */
 .cd-task-card {
   background: rgba(255,255,255,0.6);
   border: 1px solid rgba(0,103,254,0.1);
