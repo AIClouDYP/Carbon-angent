@@ -67,7 +67,7 @@
           <el-table-column type="index" label="序号" width="60" align="center"></el-table-column>
           <el-table-column label="模板编号" prop="id" width="110" align="center">
             <template slot-scope="{ row }">
-              <span style="font-family: monospace; font-size: 12px; color: #909399;">{{ row.id }}</span>
+              <span style="font-family: monospace; font-size: 13px; color: #909399;">{{ row.id }}</span>
             </template>
           </el-table-column>
           <el-table-column label="模板名称" prop="name" min-width="200" show-overflow-tooltip></el-table-column>
@@ -593,22 +593,22 @@ export default {
 .type-tab { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 8px; border: 1px solid #e4e7ed; background: #fff; cursor: pointer; font-size: 13px; color: #606266; transition: all .15s; user-select: none; }
 .type-tab:hover { border-color: #0067FE; color: #0067FE; }
 .type-tab.active { background: #0067FE; border-color: #0067FE; color: #fff; font-weight: 600; }
-.type-tab-count { font-size: 11px; padding: 0 6px; border-radius: 8px; background: rgba(0, 0, 0, 0.06); }
+.type-tab-count { font-size: 13px; padding: 0 6px; border-radius: 8px; background: rgba(0, 0, 0, 0.06); }
 .type-tab.active .type-tab-count { background: rgba(255, 255, 255, 0.25); }
-.toolbar-hint { font-size: 12px; color: #909399; margin-left: 10px; }
+.toolbar-hint { font-size: 13px; color: #909399; margin-left: 10px; }
 
 /* 编辑表单：字段说明 */
-.form-hint { font-size: 11px; color: #909399; line-height: 1.5; margin-top: 2px; }
+.form-hint { font-size: 13px; color: #909399; line-height: 1.5; margin-top: 2px; }
 /* 上传解析模板：步骤条 / 上传区 / 解析任务 / 解析结果摘要 */
 .tpl-steps { display: flex; align-items: center; padding: 4px 0 18px; }
 .tpl-step { display: flex; flex-direction: column; align-items: center; gap: 5px; }
 .tpl-step-dot { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #dcdfe6; background: #fff; color: #909399; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; }
-.tpl-step span { font-size: 12px; color: #909399; }
+.tpl-step span { font-size: 13px; color: #909399; }
 .tpl-step.step-active .tpl-step-dot { border-color: #0067FE; background: #0067FE; color: #fff; }
 .tpl-step.step-active span { color: #0067FE; font-weight: 600; }
 .tpl-step.step-done .tpl-step-dot { border-color: #0067FE; color: #0067FE; }
 .tpl-step-line { flex: 1; height: 2px; background: #ebeef5; margin: 0 10px 20px; }
-.tpl-agent-tip { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: #606266; background: #ecf5ff; border-radius: 8px; padding: 10px 12px; line-height: 1.6; margin-bottom: 14px; }
+.tpl-agent-tip { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #606266; background: #ecf5ff; border-radius: 8px; padding: 10px 12px; line-height: 1.6; margin-bottom: 14px; }
 .tpl-agent-tip i { color: #0067FE; margin-top: 2px; }
 .tpl-agent-tip.success { background: #f0f9eb; color: #529b2e; }
 .tpl-agent-tip.success i { color: #67C23A; }
@@ -617,43 +617,43 @@ export default {
 .tpl-drop-zone i { font-size: 34px; color: #c0c4cc; }
 .tpl-drop-text { font-size: 13px; color: #606266; margin-top: 8px; }
 .tpl-drop-text em { color: #0067FE; font-style: normal; }
-.tpl-drop-hint { font-size: 11px; color: #909399; margin-top: 6px; }
+.tpl-drop-hint { font-size: 13px; color: #909399; margin-top: 6px; }
 .tpl-file-card { display: flex; align-items: center; gap: 10px; border: 1px solid #ebeef5; border-radius: 8px; padding: 10px 12px; margin-top: 12px; }
 .tpl-file-icon { font-size: 22px; color: #0067FE; }
 .tpl-file-info { flex: 1; min-width: 0; }
-.tpl-file-name { font-size: 12px; color: #303133; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tpl-file-size { font-size: 11px; color: #909399; }
+.tpl-file-name { font-size: 13px; color: #303133; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tpl-file-size { font-size: 13px; color: #909399; }
 .tpl-file-remove { cursor: pointer; color: #909399; }
 .tpl-file-remove:hover { color: #F56C6C; }
 .tpl-parsing-zone { display: flex; flex-direction: column; gap: 10px; padding: 6px 0; }
-.tpl-parse-task { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #909399; }
+.tpl-parse-task { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #909399; }
 .tpl-parse-task.task-running { color: #0067FE; }
 .tpl-parse-task.task-done { color: #303133; }
 .tpl-parse-task.task-done i { color: #67C23A; }
-.tpl-parse-task .task-result { margin-left: auto; font-size: 11px; color: #909399; }
+.tpl-parse-task .task-result { margin-left: auto; font-size: 13px; color: #909399; }
 .tpl-parsed-summary { border: 1px solid #ebeef5; border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
-.tpl-parsed-row { display: flex; gap: 10px; font-size: 12px; }
+.tpl-parsed-row { display: flex; gap: 10px; font-size: 13px; }
 .tpl-parsed-row span { flex-shrink: 0; width: 80px; color: #909399; }
 .tpl-parsed-row b { color: #303133; font-weight: 600; }
 
 /* 口径规则集编辑器（引用声明） */
 .caliber-editor { display: flex; flex-direction: column; gap: 6px; }
 .caliber-row { display: flex; align-items: center; gap: 8px; }
-.caliber-label { flex-shrink: 0; font-size: 12px; color: #909399; }
+.caliber-label { flex-shrink: 0; font-size: 13px; color: #909399; }
 /* 业务适用范围标签编辑器 */
 .tag-editor { display: flex; flex-wrap: wrap; align-items: center; }
 /* 列表展开行：填报场景 / 配置项（一二级联动） */
 .var-panel { padding: 8px 16px 12px 48px; background: #fafbfc; }
-.var-panel-title { font-size: 12px; font-weight: 600; color: #303133; margin-bottom: 8px; }
-.var-panel-empty { color: #909399; font-size: 12px; }
-.var-row { display: grid; grid-template-columns: 140px 1fr 80px 220px 90px; gap: 8px; align-items: center; font-size: 12px; color: #606266; padding: 5px 0; border-bottom: 1px dashed #ebeef5; }
+.var-panel-title { font-size: 13px; font-weight: 600; color: #303133; margin-bottom: 8px; }
+.var-panel-empty { color: #909399; font-size: 13px; }
+.var-row { display: grid; grid-template-columns: 140px 1fr 80px 220px 90px; gap: 8px; align-items: center; font-size: 13px; color: #606266; padding: 5px 0; border-bottom: 1px dashed #ebeef5; }
 .var-row:last-child { border-bottom: none; }
-.var-row-head { color: #909399; font-size: 11px; font-weight: 600; }
+.var-row-head { color: #909399; font-size: 13px; font-weight: 600; }
 .var-label { font-weight: 600; color: #303133; }
 .var-suite { color: #606266; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .var-count { color: #909399; }
 .var-cond { color: #E6A23C; }
-.cfg-row { display: flex; gap: 10px; font-size: 12px; padding: 4px 0; }
+.cfg-row { display: flex; gap: 10px; font-size: 13px; padding: 4px 0; }
 .cfg-key { flex-shrink: 0; width: 120px; color: #909399; }
 .cfg-val { color: #303133; }
 /* 详情：配置明细（非报告类模板） */
@@ -662,14 +662,14 @@ export default {
 .cfg-detail-key { flex-shrink: 0; width: 130px; color: #909399; }
 .cfg-detail-val { flex: 1; min-width: 0; color: #303133; }
 .cfg-detail-empty { text-align: center; color: #909399; font-size: 13px; padding: 40px 0; }
-.detail-hint { font-size: 11px; color: #909399; margin-left: 4px; }
+.detail-hint { font-size: 13px; color: #909399; margin-left: 4px; }
 /* 模板详情弹窗：填报场景概览（Tab1）+ 按场景分块展示章节（Tab2） */
 .tpl-scene-table { margin-top: 8px; }
-.tpl-cond { display: inline-block; font-size: 11px; color: #606266; background: #f5f7fa; border-radius: 4px; padding: 1px 6px; margin: 0 6px 2px 0; }
-.tpl-scene-hint { font-size: 11.5px; color: #909399; line-height: 1.6; margin-bottom: 10px; }
+.tpl-cond { display: inline-block; font-size: 13px; color: #606266; background: #f5f7fa; border-radius: 4px; padding: 1px 6px; margin: 0 6px 2px 0; }
+.tpl-scene-hint { font-size: 13px; color: #909399; line-height: 1.6; margin-bottom: 10px; }
 .tpl-scene-collapse { border-top: none; }
 .tpl-scene-name { flex-shrink: 0; font-size: 13px; font-weight: 600; color: #303133; margin-right: 12px; }
-.tpl-scene-suite { font-size: 11px; color: #909399; margin-right: 10px; max-width: 420px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tpl-scene-suite { font-size: 13px; color: #909399; margin-right: 10px; max-width: 420px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* 模板配置项编辑器 */
 .config-editor { display: flex; flex-direction: column; gap: 6px; }
 .config-edit-row { display: flex; align-items: center; gap: 8px; }
@@ -699,7 +699,7 @@ export default {
 }
 .page-title i { color: var(--primary); }
 .page-desc {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   margin: 4px 0 0;
 }
@@ -739,7 +739,7 @@ export default {
   line-height: 1.2;
 }
 .stat-label {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   margin-top: 2px;
 }
@@ -778,7 +778,7 @@ export default {
   color: var(--text-primary, #0f172a);
 }
 .table-title-hint {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-secondary, #909399);
 }
 .table-scroll {
@@ -805,7 +805,7 @@ export default {
 }
 .empty-state i { font-size: 48px; margin-bottom: 12px; color: var(--text-placeholder); }
 .empty-state p { font-size: 14px; margin: 0 0 4px; }
-.empty-state span { font-size: 12px; }
+.empty-state span { font-size: 13px; }
 .detail-content {
   padding: 0 20px 20px;
 }
@@ -831,7 +831,7 @@ export default {
 .config-row {
   display: flex;
   gap: 8px;
-  font-size: 12px;
+  font-size: 13px;
   padding: 6px 10px;
   background: var(--bg-hover, #f5f7fa);
   border-radius: 4px;

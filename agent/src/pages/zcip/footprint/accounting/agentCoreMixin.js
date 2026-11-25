@@ -1,6 +1,6 @@
 import * as XLSX from 'xlsx'
 import { matchFactor, saveUserFactorOverride, normalizeQuantityAndUnit } from '@/utils/factorMatchingService'
-import { loadPcfStandardsForAgent, ensureSeed, getBoundaryDefaults } from '@/utils/policyStandardService'
+import { loadPcfStandardsForAgent, ensureSeed, getBoundaryDefaults, toStandardConfig, loadStandards } from '@/utils/policyStandardService'
 import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
 ﻿export default {
   data() {
@@ -148,6 +148,8 @@ import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
         { value: 'wastewater', label: '废水', color: '#1890FF' },
         { value: 'recycled', label: '可回收物', color: '#52C41A' }
       ],
+      // 政策标准库必须随页面初始化加载，不能只在重置/任务画像时才赋值
+      standards: loadPcfStandardsForAgent(),
       modelStages: this.createInitialModelStages(),
       // 阶段3 单元过程属性抽屉
       modelProcessDrawerVisible: false,
@@ -209,7 +211,7 @@ import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
     },
     stageConfirmConfig() {
       const configs = {
-        1: { label: '确认边界配置，进入核算模型', icon: 'el-icon-check', hint: '确认5项边界配置无误后进入核算模型阶段', action: () => this.sendSuggestion('确认边界配置') },
+        1: this.boundaryConfirmConfig(),
         2: { label: '确认模型，启动数据收集', icon: 'el-icon-check', hint: '确认工艺拓扑模型无误后，系统将自动完成活动数据采集与因子匹配', action: () => this.sendSuggestion('确认模型，启动数据收集') },
         5: this.validationActiveTab === 'activity'
           ? { label: '确认调整，重新校核', icon: 'el-icon-refresh-right', hint: '数据调整完成后重新进入「数据采集→因子匹配→数据校验」循环', action: () => this.confirmActivityData() }
@@ -233,6 +235,25 @@ import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
       })
       return total
     },
+    modelProcessDrawerStage() {
+      return (this.modelStages || [])[this.modelProcessDrawerStageIndex] || null
+    },
+    modelProcessDrawerProcess() {
+      const stage = this.modelProcessDrawerStage
+      return stage && (stage.processes || [])[this.modelProcessDrawerProcessIndex]
+    },
+    modelFlowDrawerStage() {
+      return (this.modelStages || [])[this.modelFlowDrawerStageIndex] || null
+    },
+    modelFlowDrawerProcess() {
+      const stage = this.modelFlowDrawerStage
+      return stage && (stage.processes || [])[this.modelFlowDrawerProcessIndex]
+    },
+    modelFlowDrawerFlow() {
+      const proc = this.modelFlowDrawerProcess
+      const list = proc && proc[this.modelFlowDrawerType]
+      return list && list[this.modelFlowDrawerIndex]
+    },
     formattedTokens() {
       const t = this.estimatedTokens
       if (t >= 10000) return (t / 10000).toFixed(1) + '万 tokens'
@@ -241,8 +262,15 @@ import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
     },
     // 当前选中标准的完整配置
     selectedStandardConfig() {
-      const list = this.standards || []
-      return list.find(s => s.code === this.selectedStandard) || list[0] || null
+      const selected = this.selectedStandard
+      if (!selected) return (this.standards || [])[0] || null
+      try {
+        ensureSeed()
+        const raw = (loadStandards() || []).find(s => s && s.code === selected)
+        if (raw) return toStandardConfig(raw)
+      } catch (e) { /* 标准库异常时回退当前内存对象 */ }
+      const list = Array.isArray(this.standards) ? this.standards : []
+      return list.find(s => s.code === selected) || list[0] || null
     },
     /** 标准时间边界是否为要求性文本（日期区间选择器无法回显） */
     isTextBoundaryTime() {
@@ -429,7 +457,7 @@ import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
     },
     standardsWithSelection() {
       // 按任务类型初筛：风机任务剔除汽车行业专属标准 QC/T 1248-2025（通用核算标准保留）
-      let list = this.standards
+      let list = Array.isArray(this.standards) ? this.standards : []
       if (this.isWindTask()) {
         list = list.filter(std => std.code !== 'QC/T 1248-2025')
       }
@@ -896,6 +924,45 @@ import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
     }
   },
   methods: {
+    /** 阶段2确认栏：日期未填或顺序错误时直接提示并禁用 */
+    boundaryConfirmConfig() {
+      const error = this.validateBoundaryBeforeNextStage()
+      return {
+        label: '确认边界配置，进入核算模型',
+        icon: 'el-icon-check',
+        hint: error || '确认5项边界配置无误后进入核算模型阶段',
+        disabled: Boolean(error),
+        action: () => {
+          const currentError = this.validateBoundaryBeforeNextStage()
+          if (currentError) {
+            this.$message.warning(currentError)
+            return
+          }
+          this.sendSuggestion('确认边界配置')
+        }
+      }
+    },
+
+    /**
+     * 阶段2 → 阶段3 前置校验：时间边界必填且起止顺序有效。
+     * 返回 null 表示通过，否则返回给用户展示的错误信息。
+     */
+    validateBoundaryBeforeNextStage() {
+      const range = String((this.boundaryConfig && this.boundaryConfig.timeBoundary) || '').trim()
+      if (!range) return '时间边界为必填项，请先选择完整的开始日期和结束日期。'
+      // 仅以「空格 - 空格」分隔起止日期，避免把日期自身的连字符当成分隔符
+      const parts = range.split(/\s+-\s+/)
+      if (parts.length !== 2 || !parts[0] || !parts[1]) {
+        return '时间边界格式不完整，请重新选择开始日期和结束日期。'
+      }
+      const start = Date.parse(parts[0] + 'T00:00:00')
+      const end = Date.parse(parts[1] + 'T00:00:00')
+      if (!Number.isFinite(start) || !Number.isFinite(end)) {
+        return '时间边界包含无法识别的日期，请重新选择。'
+      }
+      if (start > end) return '时间边界的开始日期不能晚于结束日期，请调整后再继续。'
+      return null
+    },
 
     /** flowType 中文标签 */
     ioTypeLabel(t) {
@@ -1595,10 +1662,13 @@ import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
       if (!/kwh|度/i.test(String(item.unit || ''))) return false
       return true
     },
-    createEmptyModelFlow(type) {
+    createEmptyModelFlow(type, processCode, index) {
       const isInput = type === 'inputs'
+      const seq = Number(index) || 1
+      const procCode = processCode || 'S0-P001'
       return {
         flowId: 'FLOW-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+        flowCode: procCode + (isInput ? '-I' : '-O') + String(seq).padStart(2, '0'),
         name: isInput ? '新输入' : '新输出',
         flowType: 'elementary',
         listType: isInput ? 'raw_material' : 'solid_waste',
@@ -1606,14 +1676,15 @@ import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
         sourceFlowRef: '',
         targetFlowRef: '',
         unit: '',
-        activityItemName: '',
-        factorCategory: '',
         note: ''
       }
     },
-      const processIndex = group.processes.length
+    addProcess(groupIndex) {
+      const group = this.modelStages[groupIndex]
+      if (!group) return
+      const processCode = this.nextProcessCode(groupIndex)
       const newProc = {
-        processCode: 'P-' + String(processIndex + 1).padStart(2, '0'),
+        processCode: processCode,
         name: '新单元过程',
         processType: group.key === 'raw_material' ? 'material_acquisition' : 'production',
         upstreamProcessCode: '',
@@ -1622,12 +1693,10 @@ import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
         dataRequirement: '',
         factorCategory: '',
         note: '',
-        inputs: [this.createEmptyModelFlow('inputs')],
-        outputs: [this.createEmptyModelFlow('outputs')]
-      }
+        inputs: [this.createEmptyModelFlow('inputs', processCode, 1)],
+        outputs: [this.createEmptyModelFlow('outputs', processCode, 1)]
       }
       group.processes.push(newProc)
-      // 定位反馈：高亮新增行并滚动至可视区，便于用户立即编辑
       const pi = group.processes.length - 1
       this.highlightProc = { gi: groupIndex, pi: pi }
       this.$message.success('已新增单元过程，请编辑名称与输入/输出流')
@@ -1636,6 +1705,30 @@ import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
         if (el && el.scrollIntoView) el.scrollIntoView({ block: 'center', behavior: 'smooth' })
       })
       setTimeout(() => { this.highlightProc = null }, 1800)
+    },
+    /** 按「阶段号-P+三位过程序号」生成唯一编号，如 S1-P001 */
+    nextProcessCode(groupIndex) {
+      const stageNo = Number(groupIndex) + 1
+      const stagePrefix = 'S' + stageNo + '-P'
+      const codes = ((this.modelStages[groupIndex] || {}).processes || [])
+        .map(proc => String((proc && proc.processCode) || ''))
+        .filter(code => code.startsWith(stagePrefix))
+      let max = 0
+      codes.forEach(code => {
+        const seq = Number(code.slice(stagePrefix.length))
+        if (Number.isFinite(seq) && seq > max) max = seq
+      })
+      return stagePrefix + String(max + 1).padStart(3, '0')
+    },
+    /** 兼容旧模型：无编号的过程按阶段显示稳定编号 */
+    processDisplayCode(stageIndex, processIndex, proc) {
+      return (proc && proc.processCode) || ('S' + (Number(stageIndex) + 1) + '-P' + String(Number(processIndex) + 1).padStart(3, '0'))
+    },
+    /** 气泡内只展示流的短编号，完整编号在抽屉中展示 */
+    modelFlowShortCode(flow, type, index) {
+      const isInput = type === 'inputs'
+      const seq = Number(index) + 1
+      return (isInput ? 'I' : 'O') + String(seq).padStart(3, '0')
     },
     removeProcess(groupIndex, procIndex) {
       const group = this.modelStages[groupIndex]
@@ -1654,11 +1747,9 @@ import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
       }).catch(() => {})
     },
     addIO(proc, type) {
-      if (!proc[type]) {
-        this.$set(proc, type, [])
-      }
-      const isInput = type === 'inputs'
-      proc[type].push({ name: isInput ? '新输入' : '新输出', flowType: 'elementary', listType: isInput ? 'raw_material' : 'waste_gas' })
+      if (!proc[type]) this.$set(proc, type, [])
+      proc[type].push(this.createEmptyModelFlow(type, proc.processCode, proc[type].length + 1))
+      this.invalidateModelValidation()
     },
     onOutputTypeChange(out) {
       if (out.listType === 'main_product') {
@@ -1677,6 +1768,124 @@ import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
       proc[type].splice(index, 1)
     },
     /** 空模型骨架：按所选标准的阶段清单生成（保证阶段2/3 阶段一致） */
+    onModelFlowTypeChange(flow, type) {
+      if (!flow) return
+      if (type === 'outputs') this.onOutputTypeChange(flow)
+      else { flow.flowType = 'elementary'; flow.productSubType = null }
+      this.invalidateModelValidation()
+    },
+    toggleModelFlowLink(flow, type) {
+      if (!flow || type !== 'inputs') return
+      flow.linkMode = flow.linkMode === 'reference' ? 'manual' : 'reference'
+      if (flow.linkMode === 'manual') flow.sourceFlowRef = ''
+      if (flow.linkMode === 'reference') {
+        flow.listType = 'product'
+        flow.flowType = 'elementary'
+        flow.productSubType = null
+        flow.name = ''
+      }
+    },
+    onModelFlowRefChange(flow) {
+      if (!flow || !flow.sourceFlowRef) return
+      const target = this.findModelFlowByRef(flow.sourceFlowRef)
+      if (target) {
+        flow.name = target.flow.name
+        flow.listType = ['main_product', 'by_product'].indexOf(target.flow.listType) > -1 ? 'product' : target.flow.listType
+        flow.unit = target.flow.unit || flow.unit
+      }
+      this.invalidateModelValidation()
+    },
+    referencedFlowLabel(flow) {
+      return flow && flow.sourceFlowRef ? this.flowRefLabel(flow.sourceFlowRef) : ''
+    },
+    flowRefLabel(ref) {
+      const target = this.findModelFlowByRef(ref)
+      if (!target) return ''
+      return (target.stageTitle ? target.stageTitle + ' · ' : '') + (target.processCode ? target.processCode + ' · ' : '') + (target.flowCode ? target.flowCode + ' · ' : '') + (target.flow ? target.flow.name : '')
+    },
+    findModelFlowByRef(ref) {
+      if (!ref) return null
+      let found = null
+      ;(this.modelStages || []).some(stage => {
+        return (stage.processes || []).some(proc => {
+          return (proc.outputs || []).some(flow => {
+            if (flow.flowCode !== ref) return false
+            found = { stageTitle: stage.title, processCode: proc.processCode || proc.name, flowCode: flow.flowCode, flow: flow }
+            return true
+          })
+        })
+      })
+      return found
+    },
+    upstreamOutputFlowOptions(stageIndex, processIndex) {
+      const options = []
+      ;(this.modelStages || []).forEach((stage, si) => {
+        ;(stage.processes || []).forEach((proc, pi) => {
+          ;(proc.outputs || []).forEach((flow) => {
+            if (!flow.flowCode) return
+            const procCode = this.processDisplayCode(si, pi, proc)
+            options.push({ value: flow.flowCode, label: stage.title + ' · ' + procCode + ' · ' + flow.flowCode + ' · ' + (flow.name || '未命名输出') })
+          })
+        })
+      })
+      return options
+    },
+    upstreamProcessOptions(stageIndex, processIndex) {
+      const options = []
+      ;(this.modelStages || []).forEach((stage, si) => {
+        ;(stage.processes || []).forEach((proc, pi) => {
+          if (si === stageIndex && pi === processIndex) return
+          const code = this.processDisplayCode(si, pi, proc)
+          options.push({ value: code, label: stage.title + ' · ' + code + ' · ' + (proc.name || '未命名过程') })
+        })
+      })
+      return options
+    },
+    downstreamProcessOptions(stageIndex, processIndex) {
+      const options = []
+      ;(this.modelStages || []).forEach((stage, si) => {
+        ;(stage.processes || []).forEach((proc, pi) => {
+          if (si === stageIndex && pi === processIndex) return
+          const code = this.processDisplayCode(si, pi, proc)
+          options.push({ value: code, label: stage.title + ' · ' + code + ' · ' + (proc.name || '未命名过程') })
+        })
+      })
+      return options
+    },
+    getProcessTypeLabel(type) {
+      const found = (this.processTypeOptions || []).find(item => item.value === type)
+      return found ? found.label : '生产工序'
+    },
+    openModelProcessDrawer(stageIndex, processIndex) {
+      this.modelProcessDrawerStageIndex = stageIndex
+      this.modelProcessDrawerProcessIndex = processIndex
+      this.modelProcessDrawerVisible = true
+    },
+    saveModelProcessDrawer() {
+      this.modelProcessDrawerVisible = false
+      this.invalidateModelValidation()
+      this.saveStageSnapshot()
+      this.$message.success('单元过程属性已保存')
+    },
+    openModelFlowDrawer(stageIndex, processIndex, type, flowIndex) {
+      this.modelFlowDrawerStageIndex = stageIndex
+      this.modelFlowDrawerProcessIndex = processIndex
+      this.modelFlowDrawerType = type
+      this.modelFlowDrawerIndex = flowIndex
+      this.modelFlowDrawerVisible = true
+    },
+    saveModelFlowDrawer() {
+      this.modelFlowDrawerVisible = false
+      this.invalidateModelValidation()
+      this.saveStageSnapshot()
+      this.$message.success('流属性已保存')
+    },
+    invalidateModelValidation() {
+      if (this.modelValidated) {
+        this.modelValidated = false
+        this.$message.info('模型已调整，请重新校核')
+      }
+    },
     createEmptyModelStages() {
       const stageNames = this.stdStageNames || []
       const META = {
@@ -1927,7 +2136,7 @@ import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
       const nextCode = (stageCode, typeCode) => {
         const k = stageCode + '-' + typeCode
         counter[k] = (counter[k] || 0) + 1
-        return 'U-' + stageCode + '-' + typeCode + String(counter[k]).padStart(4, '0')
+        return stageCode + '-P' + String(counter[k]).padStart(3, '0')
       }
 
       // 按系统聚合 BOM
@@ -2296,7 +2505,10 @@ import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
     },
     // 通用任务画像：口径由所选标准驱动；模型初始为空骨架，由用户在阶段3构建
     applyDefaultTaskProfile() {
-      this.selectedStandard = this.defaultStandardCode() || '乘用车生命周期碳排放核算技术规范'
+      if (!Array.isArray(this.standards) || !this.standards.length) {
+        this.standards = loadPcfStandardsForAgent()
+      }
+      this.selectedStandard = this.defaultStandardCode() || (this.standards[0] && this.standards[0].code) || '' ;
       this.modelStages = this.createEmptyModelStages()
       this.validationItems = this.createDefaultValidationItems()
       // 迟一拍同步：确保 selectedStandardConfig 已解析完成

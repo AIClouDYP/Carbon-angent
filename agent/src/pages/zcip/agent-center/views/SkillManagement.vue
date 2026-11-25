@@ -464,10 +464,10 @@ export default {
 }
 .stat-content { flex: 1; min-width: 0; }
 .stat-num { font-size: 24px; font-weight: 700; color: #303133; line-height: 1.2; }
-.stat-label { font-size: 12px; color: #909399; margin-top: 2px; }
+.stat-label { font-size: 13px; color: #909399; margin-top: 2px; }
 .skill-name { display: flex; align-items: center; gap: 8px; }
 .skill-name i { font-size: 16px; }
-.code-font { font-family: 'Consolas', 'Monaco', monospace; font-size: 12px; }
+.code-font { font-family: 'Consolas', 'Monaco', monospace; font-size: 13px; }
 
 /* Prompt 编辑区 */
 .prompt-edit-area { padding: 4px 0; }
@@ -480,7 +480,7 @@ export default {
 .editor-actions { display: flex; gap: 8px; }
 .prompt-textarea { border: none; }
 .prompt-textarea >>> .el-textarea__inner { border: none; border-radius: 0; font-family: 'Consolas', 'Monaco', monospace; font-size: 13px; line-height: 1.6; }
-.editor-hint { padding: 8px 14px; background: #fafbfc; border-top: 1px solid #ebeef5; font-size: 11px; color: #909399; }
+.editor-hint { padding: 8px 14px; background: #fafbfc; border-top: 1px solid #ebeef5; font-size: 13px; color: #909399; }
 
 /* 预览高亮 */
 .prompt-preview >>> .var-highlight {
@@ -575,7 +575,7 @@ export default {
 }
 .detail-title p {
   margin: 0;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.6;
   color: #909399;
 }
@@ -588,7 +588,7 @@ export default {
 .detail-chip {
   padding: 4px 10px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1.4;
   background: #f1f5f9;
@@ -617,7 +617,7 @@ export default {
   justify-content: space-between;
 }
 .section-title small {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 400;
   color: #909399;
 }
@@ -630,7 +630,7 @@ export default {
   font-family: 'Consolas', 'Monaco', monospace;
 }
 .empty-variables {
-  font-size: 12px;
+  font-size: 13px;
   color: #909399;
 }
 .prompt-panel {
@@ -646,7 +646,7 @@ export default {
   padding: 14px 16px;
   white-space: pre-wrap;
   font-family: 'Consolas', 'Monaco', monospace;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.6;
   color: #475569;
 }
@@ -654,7 +654,7 @@ export default {
   padding: 8px 16px;
   background: rgba(0,103,254,0.04);
   border-top: 1px solid var(--border-color, #ebeef5);
-  font-size: 11px;
+  font-size: 13px;
   color: #909399;
 }
 .table-scroll {
@@ -681,28 +681,28 @@ export default {
 }
 .empty-state i { font-size: 48px; margin-bottom: 12px; color: var(--text-placeholder); }
 .empty-state p { font-size: 14px; margin: 0 0 4px; }
-.empty-state span { font-size: 12px; }
+.empty-state span { font-size: 13px; }
 .boundary-scenario-section { margin-top: 18px; }
 .boundary-scenario-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
-.boundary-scenario-tab { border: 1px solid #dcdfe6; background: #fff; border-radius: 6px; padding: 6px 10px; cursor: pointer; color: #606266; display: flex; align-items: center; gap: 6px; font-size: 12px; }
-.boundary-scenario-tab small { color: #a8abb2; font-size: 10px; }
+.boundary-scenario-tab { border: 1px solid #dcdfe6; background: #fff; border-radius: 6px; padding: 6px 10px; cursor: pointer; color: #606266; display: flex; align-items: center; gap: 6px; font-size: 13px; }
+.boundary-scenario-tab small { color: #a8abb2; font-size: 12px; }
 .boundary-editor-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; margin-bottom: 10px; }
 .boundary-editor-head > div { display: flex; flex-direction: column; gap: 4px; }
 .boundary-editor-head strong { color: #303133; font-size: 13px; }
-.boundary-editor-head span { color: #909399; font-size: 11px; }
-.boundary-prompt-textarea >>> .el-textarea__inner { font-family: 'Consolas', 'Monaco', monospace; font-size: 12px; line-height: 1.65; }
-.boundary-editor-hint { margin-top: 6px; color: #909399; font-size: 11px; }
-.boundary-scenario-summary { display: flex; flex-direction: column; gap: 4px; padding: 9px 11px; margin-bottom: 12px; background: #f8fafc; border-left: 3px solid #0067FE; border-radius: 4px; font-size: 12px; color: #606266; }
+.boundary-editor-head span { color: #909399; font-size: 13px; }
+.boundary-prompt-textarea >>> .el-textarea__inner { font-family: 'Consolas', 'Monaco', monospace; font-size: 13px; line-height: 1.65; }
+.boundary-editor-hint { margin-top: 6px; color: #909399; font-size: 13px; }
+.boundary-scenario-summary { display: flex; flex-direction: column; gap: 4px; padding: 9px 11px; margin-bottom: 12px; background: #f8fafc; border-left: 3px solid #0067FE; border-radius: 4px; font-size: 13px; color: #606266; }
 .boundary-scenario-summary strong { color: #303133; font-size: 13px; }
-.boundary-modified-dot { margin-left: 2px; padding: 1px 5px; border-radius: 999px; background: #fff4e5; color: #d48806; font-size: 10px; font-style: normal; }
+.boundary-modified-dot { margin-left: 2px; padding: 1px 5px; border-radius: 999px; background: #fff4e5; color: #d48806; font-size: 12px; font-style: normal; }
 .boundary-scenario-tab.active { border-color: #0067FE; color: #0067FE; background: rgba(0,103,254,.06); }
 .boundary-purpose-row { display: grid; grid-template-columns: 72px 1fr; gap: 10px; align-items: start; margin-bottom: 10px; }
-.boundary-purpose-label { font-size: 12px; color: #606266; padding-top: 6px; }
+.boundary-purpose-label { font-size: 13px; color: #606266; padding-top: 6px; }
 .boundary-field-row { display: grid; grid-template-columns: 108px 1fr; gap: 10px; align-items: start; margin-bottom: 9px; }
-.boundary-field-row label { font-size: 12px; color: #606266; padding-top: 6px; line-height: 1.5; }
+.boundary-field-row label { font-size: 13px; color: #606266; padding-top: 6px; line-height: 1.5; }
 .boundary-editor-actions { display: flex; justify-content: flex-end; gap: 8px; margin: 14px 0; }
-.boundary-json-details { margin-top: 10px; font-size: 12px; color: #606266; }
+.boundary-json-details { margin-top: 10px; font-size: 13px; color: #606266; }
 .boundary-json-details summary { cursor: pointer; color: #0067FE; }
-.boundary-json-details pre { max-height: 220px; overflow: auto; padding: 10px; background: #f5f7fa; border-radius: 6px; font-size: 11px; }
-.boundary-inline-note { margin-top: 12px; padding: 8px 10px; border-radius: 6px; background: #fff8e6; color: #b88230; font-size: 12px; }
+.boundary-json-details pre { max-height: 220px; overflow: auto; padding: 10px; background: #f5f7fa; border-radius: 6px; font-size: 13px; }
+.boundary-inline-note { margin-top: 12px; padding: 8px 10px; border-radius: 6px; background: #fff8e6; color: #b88230; font-size: 13px; }
 </style>

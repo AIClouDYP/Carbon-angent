@@ -232,14 +232,14 @@ export default {
   margin-bottom: 16px;
 }
 .onboard-step-title {
-  font-family: 'Exo 2', sans-serif;
+  font-family: inherit;
   font-size: 20px;
   font-weight: 700;
   color: var(--text-primary);
   margin: 0 0 10px;
 }
 .onboard-step-text {
-  font-family: 'Exo 2', sans-serif;
+  font-family: inherit;
   font-size: 13.5px;
   color: var(--text-secondary);
   line-height: 1.75;
@@ -275,14 +275,14 @@ export default {
 }
 .feat-body { flex: 1; min-width: 0; }
 .feat-title {
-  font-family: 'Exo 2', sans-serif;
+  font-family: inherit;
   font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
   margin-bottom: 2px;
 }
 .feat-desc {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   line-height: 1.5;
 }
@@ -298,7 +298,7 @@ export default {
   background: rgba(0, 103, 254, 0.06);
   border: 1px solid rgba(0, 103, 254, 0.15);
   border-radius: 8px;
-  font-size: 12px;
+  font-size: 13px;
   color: #0067fe;
   line-height: 1.5;
 }
@@ -321,7 +321,7 @@ export default {
   background: var(--bg-card);
   color: var(--text-secondary);
   transition: all 0.2s ease;
-  font-family: 'Exo 2', sans-serif;
+  font-family: inherit;
 }
 .onboard-btn-skip:hover,
 .onboard-btn-prev:hover {
@@ -342,7 +342,7 @@ export default {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-family: 'Exo 2', sans-serif;
+  font-family: inherit;
 }
 .onboard-btn-next:hover {
   background: var(--primary-light);

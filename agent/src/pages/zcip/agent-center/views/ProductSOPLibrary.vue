@@ -26,7 +26,7 @@
           <el-table-column type="index" label="序号" width="55" align="center"></el-table-column>
           <el-table-column label="SOP编号" prop="id" width="100" align="center">
             <template slot-scope="{ row }">
-              <span style="font-family: monospace; font-size: 12px; color: #909399;">{{ row.id }}</span>
+              <span style="font-family: monospace; font-size: 13px; color: #909399;">{{ row.id }}</span>
             </template>
           </el-table-column>
           <el-table-column label="SOP名称" prop="name" min-width="200" show-overflow-tooltip>
@@ -96,10 +96,10 @@
         <div class="sop-model-info" v-if="currentSOP && currentSOP.processIds && currentSOP.processIds.length > 0">
           <div class="model-info-title"><i class="el-icon-connection"></i> 关联单元过程（{{ currentSOP.processIds.length }}）</div>
           <div class="model-info-body">
-            <div v-for="pid in currentSOP.processIds" :key="pid" style="display: inline-flex; align-items: center; gap: 4px; margin: 3px 6px 3px 0; padding: 2px 8px; background: var(--bg-hover, #f5f7fa); border-radius: 4px; font-size: 12px;">
-              <i class="el-icon-cpu" style="color: #0067FE; font-size: 12px;"></i>
+            <div v-for="pid in currentSOP.processIds" :key="pid" style="display: inline-flex; align-items: center; gap: 4px; margin: 3px 6px 3px 0; padding: 2px 8px; background: var(--bg-hover, #f5f7fa); border-radius: 4px; font-size: 13px;">
+              <i class="el-icon-cpu" style="color: #0067FE; font-size: 13px;"></i>
               <span>{{ getProcessName(pid) }}</span>
-              <span style="color: #C0C4CC; font-size: 11px; font-family: monospace;">{{ pid }}</span>
+              <span style="color: #C0C4CC; font-size: 13px; font-family: monospace;">{{ pid }}</span>
             </div>
           </div>
         </div>
@@ -270,7 +270,7 @@ export default {
 }
 .page-title i { color: var(--primary); }
 .page-desc {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   margin: 4px 0 0;
 }
@@ -330,7 +330,7 @@ export default {
 }
 .empty-state i { font-size: 48px; margin-bottom: 12px; color: var(--text-placeholder); }
 .empty-state p { font-size: 14px; margin: 0 0 4px; }
-.empty-state span { font-size: 12px; }
+.empty-state span { font-size: 13px; }
 /* 详情 */
 .sop-detail { padding: 0; }
 .sop-model-info {
@@ -351,7 +351,7 @@ export default {
 }
 .model-info-body {
   padding: 12px 14px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-secondary);
   line-height: 1.8;
 }

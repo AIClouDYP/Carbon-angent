@@ -469,7 +469,7 @@ export default {
 .dc-stat--partial i { color: #E6A23C; }
 .dc-stat--empty i { color: #c0c4cc; }
 .dc-stat-num { font-size: 26px; font-weight: 700; color: #303133; line-height: 1; }
-.dc-stat-label { font-size: 12px; color: #909399; margin-top: 4px; }
+.dc-stat-label { font-size: 13px; color: #909399; margin-top: 4px; }
 
 /* 分类组 */
 .category-group { margin-bottom: 18px; }
@@ -482,7 +482,7 @@ export default {
 .cat-dot { width: 4px; height: 20px; border-radius: 2px; display: inline-block; }
 .cat-fill-rate {
   display: inline-flex; align-items: center; gap: 6px;
-  font-size: 12px; color: #909399;
+  font-size: 13px; color: #909399;
 }
 
 /* 数据表格 */
@@ -490,7 +490,7 @@ export default {
   width: 100%; border-collapse: collapse;
 }
 .source-table th {
-  background: #fafbfc; color: #606266; font-size: 12px;
+  background: #fafbfc; color: #606266; font-size: 13px;
   padding: 10px 12px; text-align: left; border-bottom: 2px solid #ebeef5; font-weight: 600;
 }
 .source-table td {
@@ -501,21 +501,21 @@ export default {
 .row-error td { background: #fef0f0; }
 .row-warning td { background: #fdf6ec; }
 
-.source-name-cell strong { display: block; font-size: 13px; color: #303133; }
+.source-name-cell strong { display: block; font-size: 14px; color: #303133; }
 .activity-tag {
-  font-size: 11px; color: #909399; background: #f4f4f5; padding: 1px 6px; border-radius: 3px;
+  font-size: 12px; color: #909399; background: #f4f4f5; padding: 1px 6px; border-radius: 3px;
 }
 .note-tag { margin-left: 6px; }
 
 .star-icon { color: #E6A23C; font-size: 15px; }
 
 .attachment-area { display: flex; align-items: center; gap: 4px; }
-.attach-count { font-size: 11px; color: var(--primary, #0b294a); }
+.attach-count { font-size: 13px; color: var(--primary, #0b294a); }
 
 /* 质量指示器 */
 .quality-indicator {
   display: inline-block; padding: 3px 10px; border-radius: 10px;
-  font-size: 11px; font-weight: 600; text-align: center; min-width: 36px;
+  font-size: 12px; font-weight: 600; text-align: center; min-width: 36px;
 }
 .q-excellent { background: #f0f9eb; color: #67C23A; }
 .q-good { background: var(--primary-bg, #eef4fa); color: var(--primary, #0b294a); }
@@ -535,6 +535,6 @@ export default {
   position: relative; min-height: 4px; transition: height 0.5s ease;
   display: flex; align-items: flex-start; justify-content: center; padding-top: 4px;
 }
-.hc-val { font-size: 10px; color: #fff; font-family: monospace; white-space: nowrap; }
-.hc-month { font-size: 11px; color: #909399; margin-top: 6px; }
+.hc-val { font-size: 12px; color: #fff; font-family: monospace; white-space: nowrap; }
+.hc-month { font-size: 13px; color: #909399; margin-top: 6px; }
 </style>

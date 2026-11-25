@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="agent-page">
 
     <!-- ===== 任务对话模式（原有九阶段界面） ===== -->
@@ -1814,7 +1814,7 @@
           <!-- 统一悬浮确认栏（阶段1~7） -->
           <div v-if="stageConfirmConfig && currentStepIndex !== 5" class="stage-confirm-bar">
             <span class="stage-confirm-hint"><i class="el-icon-info"></i> {{ stageConfirmConfig.hint }}</span>
-            <el-button type="primary" size="small" :icon="stageConfirmConfig.icon" :disabled="isTyping" @click="stageConfirmConfig.action">{{ stageConfirmConfig.label }}</el-button>
+            <el-button type="primary" size="small" :icon="stageConfirmConfig.icon" :disabled="isTyping || stageConfirmConfig.disabled" @click="stageConfirmConfig.action">{{ stageConfirmConfig.label }}</el-button>
           </div>
         </div>
         <!-- sidebar-lower闭合 -->

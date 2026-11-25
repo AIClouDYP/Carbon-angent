@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="agent-page">
     <!-- ===== 任务列表模式（对话式+左右分栏） ===== -->
     <div v-if="pageMode === 'task-list'" class="tl-dialog-mode">
@@ -1964,7 +1964,7 @@
           <!-- 统一悬浮确认栏（仅阶段1、2 使用；阶段3~9 已各自有专属底部栏） -->
           <div v-if="stageConfirmConfig && (currentStepIndex === 0 || currentStepIndex === 1)" class="stage-confirm-bar">
             <span class="stage-confirm-hint"><i class="el-icon-info"></i> {{ stageConfirmConfig.hint }}</span>
-            <el-button type="primary" size="small" :icon="stageConfirmConfig.icon" :disabled="isTyping" @click="stageConfirmConfig.action">{{ stageConfirmConfig.label }}</el-button>
+            <el-button type="primary" size="small" :icon="stageConfirmConfig.icon" :disabled="isTyping || stageConfirmConfig.disabled" @click="stageConfirmConfig.action">{{ stageConfirmConfig.label }}</el-button>
           </div>
         </div>
         <!-- sidebar-lower闭合 -->

@@ -229,7 +229,9 @@ export default {
         ? JSON.parse(JSON.stringify(snapshot.modelStages))
         : this.modelStages
       this.emissionValueMap = snapshot.emissionValueMap ? JSON.parse(JSON.stringify(snapshot.emissionValueMap)) : this.emissionValueMap
-      this.standards = snapshot.standards ? JSON.parse(JSON.stringify(snapshot.standards)) : this.standards
+      if (Array.isArray(snapshot.standards) && snapshot.standards.length) {
+        this.standards = JSON.parse(JSON.stringify(snapshot.standards))
+      }
       this.messages = snapshot.messages ? JSON.parse(JSON.stringify(snapshot.messages)) : this.messages
     },
     // （原 handleTlSend/handleTlSendKey/autoResizeTlTextarea 系页内 task-list 对话输入，已随该模式回退移除）
@@ -883,6 +885,13 @@ export default {
       if (this.currentStepIndex === 1) {
         // 拦截"确认边界配置"——用户点击右侧确认按钮，直接完成全部边界配置并进入阶段3
         if (lower.includes('确认边界') || lower.includes('进入核算模型')) {
+            const boundaryError = this.validateBoundaryBeforeNextStage()
+            if (boundaryError) {
+              return {
+                content: '**无法进入下一阶段**\n\n' + boundaryError,
+                suggestions: ['确认边界配置']
+              }
+            }
           this.boundarySubStep = 5
           // 模型保持空骨架，由用户在阶段3「上传材料并构建模型」后填充
           this.isModelBuilt = false

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="agent-page">
     <!-- ===== 任务列表模式（对话式+左右分栏） ===== -->
     <div v-if="pageMode === 'task-list'" class="tl-dialog-mode">
@@ -1793,7 +1793,7 @@
           <!-- 统一悬浮确认栏（阶段1~7） -->
           <div v-if="stageConfirmConfig && currentStepIndex !== 6" class="stage-confirm-bar">
             <span class="stage-confirm-hint"><i class="el-icon-info"></i> {{ stageConfirmConfig.hint }}</span>
-            <el-button type="primary" size="small" :icon="stageConfirmConfig.icon" :disabled="isTyping" @click="stageConfirmConfig.action">{{ stageConfirmConfig.label }}</el-button>
+            <el-button type="primary" size="small" :icon="stageConfirmConfig.icon" :disabled="isTyping || stageConfirmConfig.disabled" @click="stageConfirmConfig.action">{{ stageConfirmConfig.label }}</el-button>
           </div>
         </div>
         <!-- sidebar-lower闭合 -->
@@ -2053,10 +2053,10 @@ export default {
 .result-banner-multi { flex-wrap: wrap; gap: 8px; }
 .result-banner-multi .rb-main { display: flex; align-items: baseline; gap: 10px; }
 .result-banner-multi .rb-others { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; flex: 1; min-width: 0; }
-.rb-other-item { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; color: #606266; }
+.rb-other-item { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: #606266; }
 .rb-other-item b { color: #303133; font-weight: 600; }
-.rb-other-item small { color: #909399; font-size: 10px; }
+.rb-other-item small { color: #909399; font-size: 12px; }
 .rb-dot { width: 6px; height: 6px; border-radius: 50%; flex: none; }
-.rb-other-more { font-size: 11px; color: #909399; }
+.rb-other-more { font-size: 13px; color: #909399; }
 
 </style>

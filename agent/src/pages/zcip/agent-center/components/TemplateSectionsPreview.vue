@@ -233,54 +233,54 @@ export default {
 .tsp-wrap { display: flex; gap: 16px; height: 56vh; }
 .tsp-aside { width: 240px; flex-shrink: 0; border-right: 1px solid #ebeef5; padding-right: 14px; display: flex; flex-direction: column; }
 .tsp-toc { flex: 1; min-height: 0; overflow-y: auto; }
-.tsp-toc-group-title { display: flex; align-items: baseline; gap: 6px; font-size: 11px; font-weight: 600; color: #909399; letter-spacing: 1px; padding: 8px 8px 3px; }
+.tsp-toc-group-title { display: flex; align-items: baseline; gap: 6px; font-size: 13px; font-weight: 600; color: #909399; letter-spacing: 1px; padding: 8px 8px 3px; }
 .tsp-toc-group-title span { font-weight: 400; }
 .tsp-toc-group-title:not(:first-child) { margin-top: 8px; border-top: 1px dashed #ebeef5; padding-top: 10px; }
-.tsp-toc-item { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 12px; color: #606266; transition: all .15s; }
+.tsp-toc-item { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; color: #606266; transition: all .15s; }
 .tsp-toc-item:hover { background: #f5f7fa; }
 .tsp-toc-item.active { background: var(--rs-color-bg, rgba(0, 103, 254, 0.06)); color: var(--rs-color, #0067FE); font-weight: 600; }
-.tsp-toc-no { flex-shrink: 0; font-family: Consolas, Monaco, monospace; font-size: 11px; color: #909399; min-width: 34px; }
+.tsp-toc-no { flex-shrink: 0; font-family: Consolas, Monaco, monospace; font-size: 13px; color: #909399; min-width: 34px; }
 .tsp-toc-item.active .tsp-toc-no { color: var(--rs-color, #0067FE); }
 .tsp-toc-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tsp-toc-tag { flex-shrink: 0; transform: scale(.9); }
 
 .tsp-main { flex: 1; min-width: 0; overflow-y: auto; padding-right: 4px; }
 .tsp-title { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #303133; }
-.tsp-title-no { background: var(--rs-color, #0067FE); color: #fff; border-radius: 4px; padding: 1px 7px; font-size: 12px; font-family: Consolas, Monaco, monospace; }
+.tsp-title-no { background: var(--rs-color, #0067FE); color: #fff; border-radius: 4px; padding: 1px 7px; font-size: 13px; font-family: Consolas, Monaco, monospace; }
 .tsp-meta { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
-.tsp-meta-row { display: flex; gap: 8px; font-size: 12px; line-height: 1.6; }
+.tsp-meta-row { display: flex; gap: 8px; font-size: 13px; line-height: 1.6; }
 .tsp-meta-label { flex-shrink: 0; width: 56px; color: #909399; }
 .tsp-meta-row p { margin: 0; flex: 1; min-width: 0; color: #303133; }
-.tsp-sec { margin-top: 14px; font-size: 12px; font-weight: 600; color: #303133; display: flex; align-items: center; gap: 5px; }
+.tsp-sec { margin-top: 14px; font-size: 13px; font-weight: 600; color: #303133; display: flex; align-items: center; gap: 5px; }
 /* 概况表基本信息：分组卡片 + 字段 chips */
 .tsp-profile { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
 .tsp-profile-grp { border: 1px solid #f0f3f8; border-radius: 6px; padding: 8px 10px; background: #fbfcfe; }
-.tsp-profile-grp-name { font-size: 12px; font-weight: 600; color: #303133; display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; }
+.tsp-profile-grp-name { font-size: 13px; font-weight: 600; color: #303133; display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; }
 .tsp-profile-grp-name.is-clickable { cursor: pointer; }
 .tsp-profile-grp-name.is-clickable:hover { color: var(--rs-color, #0067FE); }
-.tsp-profile-grp-name i { margin-left: auto; font-size: 12px; color: #909399; align-self: center; }
-.tsp-profile-grp-name span { font-weight: 400; font-size: 11px; color: #909399; }
+.tsp-profile-grp-name i { margin-left: auto; font-size: 13px; color: #909399; align-self: center; }
+.tsp-profile-grp-name span { font-weight: 400; font-size: 13px; color: #909399; }
 .tsp-profile-fields { display: flex; flex-wrap: wrap; gap: 4px; }
-.tsp-profile-field { font-size: 11px; color: #475569; background: #fff; border: 1px solid #ebeef5; border-radius: 4px; padding: 2px 7px; }
+.tsp-profile-field { font-size: 13px; color: #475569; background: #fff; border: 1px solid #ebeef5; border-radius: 4px; padding: 2px 7px; }
 /* 报表按官方版式呈现：表号标题居中 + 全框线 + 表头居中 + 待填空白格 */
 .tsp-table-caption { margin-top: 10px; text-align: center; font-size: 13px; font-weight: 700; color: #0f172a; }
 .tsp-table-wrap { margin-top: 6px; overflow-x: auto; }
-.tsp-table { border-collapse: collapse; width: 100%; font-size: 11px; }
+.tsp-table { border-collapse: collapse; width: 100%; font-size: 13px; }
 .tsp-table th { border: 1px solid #b9c4d4; background: #f5f7fa; color: #303133; font-weight: 600; text-align: center; padding: 7px 9px; white-space: nowrap; }
 .tsp-table td { border: 1px solid #c9d3e0; padding: 8px 9px; color: #606266; white-space: nowrap; height: 26px; }
 .tsp-table td:first-child { color: #303133; }
-.tsp-rownote { margin-top: 6px; font-size: 11px; color: #909399; }
+.tsp-rownote { margin-top: 6px; font-size: 13px; color: #909399; }
 /* 官方版式 blocks：一张连续表格（区块间不再断开），fixed 网格保证各区块 colspan 边界严格对齐，min-width 配合横向滚动放宽表格宽度；
    排版对齐官方表样：行高舒展、文字居中、标签底色浅灰 */
-.tsp-blocks { table-layout: fixed; min-width: 1080px; font-size: 12px; }
+.tsp-blocks { table-layout: fixed; min-width: 1080px; font-size: 13px; }
 .tsp-blocks col { width: 4.1667%; }  /* 24 等分：跨行/跨块的 colspan 边界都落在等宽网格上 */
 .tsp-blocks th { padding: 9px 10px; white-space: normal; }  /* 表头允许换行：窄列（如"计量单位"）不再溢出到相邻格 */
 .tsp-blocks td { white-space: normal; height: auto; padding: 9px 12px; text-align: center; line-height: 1.6; }
 .tsp-blocks tbody tr { height: 38px; }
-.tsp-kv-caption { margin-top: 8px; font-size: 12px; color: #303133; }
+.tsp-kv-caption { margin-top: 8px; font-size: 13px; color: #303133; }
 .tsp-kv-label { color: #303133; }  /* 官方原表标签无底色，跨行边界差不显眼 */
-.tsp-tail { margin-top: 8px; text-align: center; font-size: 12px; color: #303133; }
-.tsp-note { margin-top: 10px; font-size: 11px; color: #E6A23C; background: #fdf6ec; border-radius: 6px; padding: 8px 10px; line-height: 1.6; display: flex; gap: 5px; align-items: flex-start; }
+.tsp-tail { margin-top: 8px; text-align: center; font-size: 13px; color: #303133; }
+.tsp-note { margin-top: 10px; font-size: 13px; color: #E6A23C; background: #fdf6ec; border-radius: 6px; padding: 8px 10px; line-height: 1.6; display: flex; gap: 5px; align-items: flex-start; }
 .tsp-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #909399; font-size: 13px; }
 .tsp-empty i { font-size: 28px; color: #dcdfe6; }
 </style>

@@ -317,7 +317,7 @@ export default {
 }
 
 .xy-subtitle {
-  font-size: 12px;
+  font-size: 13px;
   color: #475569;
   margin: 0;
   line-height: 1.5;
@@ -384,14 +384,14 @@ export default {
 }
 
 .cap-name {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: #1e293b;
   white-space: nowrap;
 }
 
 .cap-arrow {
-  font-size: 12px;
+  font-size: 13px;
   color: #94a3b8;
   margin-left: 6px;
 }
@@ -454,7 +454,7 @@ export default {
 }
 
 .kb-desc {
-  font-size: 12px;
+  font-size: 13px;
   color: #475569;
   line-height: 1.4;
   white-space: nowrap;
@@ -473,7 +473,7 @@ export default {
 }
 
 .kb-unit {
-  font-size: 11px;
+  font-size: 13px;
   color: #475569;
   font-weight: 400;
 }
@@ -547,7 +547,7 @@ export default {
   gap: 4px;
   padding: 3px 8px;
   border-radius: 10px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   backdrop-filter: blur(8px);
 }
@@ -588,7 +588,7 @@ export default {
 }
 
 .scenario-desc {
-  font-size: 12px;
+  font-size: 13px;
   color: #475569;
   line-height: 1.4;
   margin: 0;

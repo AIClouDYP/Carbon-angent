@@ -683,7 +683,7 @@ export default {
   white-space: nowrap;
 }
 .tree-node-count {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-muted);
   background: var(--bg-hover);
   padding: 2px 6px;
@@ -817,12 +817,12 @@ export default {
   margin: 0 0 4px;
 }
 .empty-state span {
-  font-size: 12px;
+  font-size: 13px;
 }
 
 /* 对话框 */
 .divider-label {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
 }
 

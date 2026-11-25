@@ -190,7 +190,7 @@ export default {
 .tab-selector {
   flex: 1;
   text-align: center;
-  font-size: 12px;
+  font-size: 13px;
   padding: 6px 0;
   border-radius: 6px;
   cursor: pointer;
@@ -327,11 +327,11 @@ export default {
 .task-info-row {
   display: flex;
   align-items: center;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 20px;
 }
 .task-product, .conv-product {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-secondary);
   display: flex;
   align-items: center;
@@ -348,7 +348,7 @@ export default {
   flex: 1;
 }
 .task-percent {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-secondary);
   min-width: 32px;
@@ -361,7 +361,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-muted);
 }
 .task-time {
@@ -389,7 +389,7 @@ export default {
   margin: 0 0 8px;
 }
 .empty-create-link {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--primary);
   cursor: pointer;
 }
@@ -448,7 +448,7 @@ export default {
 .product-info-row {
   display: flex;
   align-items: center;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 20px;
 }
 .info-label {
@@ -468,7 +468,7 @@ export default {
 }
 .calc-btn {
   width: 100%;
-  font-size: 12px;
+  font-size: 13px;
   border-radius: 6px;
 }
 </style>

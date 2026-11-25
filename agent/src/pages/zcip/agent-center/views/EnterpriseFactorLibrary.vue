@@ -209,15 +209,15 @@ export default {
 .page-header { margin-bottom: 12px; }
 .page-title { font-size: 20px; color: #1e293b; margin: 0 0 6px; display: flex; align-items: center; gap: 8px; }
 .page-desc { font-size: 13px; color: #64748b; margin: 0; }
-.chain-note { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #0067FE; background: #f0f7ff; border: 1px solid #cfe3ff; border-radius: 6px; padding: 8px 12px; margin-bottom: 14px; }
+.chain-note { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #0067FE; background: #f0f7ff; border: 1px solid #cfe3ff; border-radius: 6px; padding: 8px 12px; margin-bottom: 14px; }
 .chain-note b { color: #0052CC; }
 .toolbar { display: flex; align-items: center; margin-bottom: 14px; }
 .table-wrapper { background: #fff; border-radius: 8px; padding: 14px 16px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
 .table-title-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .table-title-text { font-size: 14px; font-weight: 700; color: #1e293b; }
-.table-title-count { font-size: 12px; color: #909399; }
-.code-font { font-family: 'Exo 2', monospace; font-size: 12px; color: #475569; }
-.lab-font { font-size: 12px; color: #475569; }
+.table-title-count { font-size: 13px; color: #909399; }
+.code-font { font-family: 'Exo 2', monospace; font-size: 13px; color: #475569; }
+.lab-font { font-size: 13px; color: #475569; }
 .btn-danger { color: #f56c6c; }
 .detail-content { padding-bottom: 20px; }
 </style>

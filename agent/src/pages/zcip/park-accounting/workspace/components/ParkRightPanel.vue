@@ -194,7 +194,7 @@ export default {
 }
 .panel-header-count {
   margin-left: auto;
-  font-size: 11.5px;
+  font-size: 13px;
   color: #64748b;
 }
 .panel-add-btn {
@@ -209,7 +209,7 @@ export default {
   background: rgba(0, 103, 254, 0.08);
   cursor: pointer;
   transition: background-color 0.2s, color 0.2s;
-  font-size: 12px;
+  font-size: 13px;
 }
 .panel-add-btn:hover {
   background: rgba(0, 103, 254, 0.16);
@@ -239,7 +239,7 @@ export default {
   flex-wrap: wrap;
 }
 .filter-tag {
-  font-size: 12.5px;
+  font-size: 13px;
   color: #475569;
   padding: 4px 10px;
   border-radius: 10px;
@@ -314,7 +314,7 @@ export default {
   flex-shrink: 0;
 }
 .task-time {
-  font-size: 11.5px;
+  font-size: 13px;
   color: var(--text-muted);
   flex-shrink: 0;
   margin-left: 8px;
@@ -325,7 +325,7 @@ export default {
   display: flex;
   align-items: baseline;
   gap: 8px;
-  font-size: 12.5px;
+  font-size: 13px;
   line-height: 2;
 }
 .field-label {
@@ -373,7 +373,7 @@ export default {
 .load-more {
   text-align: center;
   padding: 10px;
-  font-size: 12.5px;
+  font-size: 13px;
   color: #0067fe;
   cursor: pointer;
   border-radius: 6px;
@@ -403,7 +403,7 @@ export default {
   margin: 0 0 8px;
 }
 .empty-create-link {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--primary);
   cursor: pointer;
 }

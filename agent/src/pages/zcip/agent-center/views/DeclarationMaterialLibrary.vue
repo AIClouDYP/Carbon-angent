@@ -185,8 +185,8 @@ export default {
 .table-wrapper { background: #fff; border-radius: 8px; padding: 14px 16px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
 .table-title-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .table-title-text { font-size: 14px; font-weight: 700; color: #1e293b; }
-.table-title-count { font-size: 12px; color: #909399; }
-.code-font { font-family: 'Exo 2', monospace; font-size: 12px; color: #475569; }
+.table-title-count { font-size: 13px; color: #909399; }
+.code-font { font-family: 'Exo 2', monospace; font-size: 13px; color: #475569; }
 .btn-danger { color: #f56c6c; }
 .detail-content { padding-bottom: 20px; }
 </style>

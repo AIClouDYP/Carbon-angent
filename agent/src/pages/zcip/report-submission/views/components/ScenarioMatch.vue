@@ -66,6 +66,6 @@ export default {
 .sm-body { background: var(--rs-color-bg, #f0f6ff); border: 1px solid var(--rs-color-border, #d4e3ff); border-radius: 6px; padding: 10px 12px; }
 .sm-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .sm-row:last-of-type { margin-bottom: 0; }
-.sm-label { flex-shrink: 0; min-width: 58px; font-size: 12px; font-weight: 600; color: #303133; }
-.sm-tip { font-size: 11.5px; color: #909399; line-height: 1.6; margin-top: 8px; }
+.sm-label { flex-shrink: 0; min-width: 58px; font-size: 13px; font-weight: 600; color: #303133; }
+.sm-tip { font-size: 13px; color: #909399; line-height: 1.6; margin-top: 8px; }
 </style>

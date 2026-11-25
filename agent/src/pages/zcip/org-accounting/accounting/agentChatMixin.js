@@ -1,4 +1,4 @@
-﻿import * as echarts from 'echarts'
+import * as echarts from 'echarts'
 
 export default {
   watch: {
@@ -1341,6 +1341,13 @@ export default {
       if (this.currentStepIndex === 1) {
         // 拦截"确认边界配置"——用户点击右侧确认按钮，直接完成全部边界配置并进入阶段3
         if (lower.includes('确认边界') || lower.includes('进入核算模型')) {
+            const boundaryError = this.validateBoundaryBeforeNextStage()
+            if (boundaryError) {
+              return {
+                content: '**无法进入下一阶段**\n\n' + boundaryError,
+                suggestions: ['确认边界配置']
+              }
+            }
           this.boundarySubStep = 5
           this.isModelBuilt = true
           // 优先从资源台账匹配排放清单，失败回退标准模板

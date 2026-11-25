@@ -25,7 +25,7 @@
             <el-select v-model="newTask.productId" filterable placeholder="选择企业产品" style="width:100%;" @change="onProductSelect">
               <el-option v-for="p in enterpriseProducts" :key="p.id" :label="p.name" :value="p.id">
                 <span style="float:left">{{ p.name }}</span>
-                <span style="float:right;color:#8492a6;font-size:12px;">{{ p.category }}</span>
+                <span style="float:right;color:#8492a6;font-size: 13px;">{{ p.category }}</span>
               </el-option>
             </el-select>
           </el-form-item>
@@ -392,14 +392,14 @@ export default {
                     '<div style="margin-top:8px;padding:10px 14px;background:rgba(230,126,34,0.04);border-radius:8px;border-left:3px solid #E67E22;">' +
           '<strong style="color:#E67E22;">企业产品库</strong><br/>' +
           '共 ' + this.enterpriseProducts.length + ' 个产品：<span style="color:#0067fe;font-weight:600;">' + sopCount + ' 个已建SOP可一键核算</span> · <span style="color:#E6A23C;">' + noSopCount + ' 个待构建模型</span>' +
-          '<br/><span style="font-size:12px;color:#909399;">点击右侧"企业产品库"Tab查看详情，有SOP的产品支持一键继承模型核算</span>' +
+          '<br/><span style="font-size: 13px;color:#909399;">点击右侧"企业产品库"Tab查看详情，有SOP的产品支持一键继承模型核算</span>' +
           '</div>' +
           '<div style="margin-top:8px;padding:10px 14px;background:rgba(0,103,254,0.04);border-radius:8px;border-left:3px solid #0067fe;">' +
           '<strong style="color:#0067fe;">当前状态</strong><br/>' +
           '共 ' + this.tasks.length + ' 个核算任务：' + running + ' 个运行中 · ' + done + ' 个已完成' +
           (expt > 0 ? ' · <span style="color:#F56C6C;font-weight:600;">' + expt + ' 个异常待处理</span>' : '') +
           '</div>' +
-          '<div style="margin-top:10px;color:#909399;font-size:12px;">直接在下方输入问题，或点击右侧面板查看历史对话、核算任务和企业产品。</div>',
+          '<div style="margin-top:10px;color:#909399;font-size: 13px;">直接在下方输入问题，或点击右侧面板查看历史对话、核算任务和企业产品。</div>',
         time: '刚刚',
         type: 'text'
       })
@@ -434,7 +434,7 @@ export default {
   background: rgba(0,103,254,0.08);
   border-radius: 10px;
   padding: 1px 8px;
-  font-size: 11px;
+  font-size: 13px;
   color: #909399;
   font-weight: 400;
 }
@@ -454,18 +454,18 @@ export default {
 }
 .fp-side-item:hover { background: rgba(0,103,254,0.06); }
 .fp-side-name {
-  font-size: 12px;
+  font-size: 13px;
   color: #303133;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.fp-side-meta { font-size: 10px; color: #c0c4cc; margin-top: 2px; }
+.fp-side-meta { font-size: 12px; color: #c0c4cc; margin-top: 2px; }
 .fp-side-empty {
   text-align: center;
   padding: 30px 0;
   color: #c0c4cc;
-  font-size: 12px;
+  font-size: 13px;
 }
 .fp-side-empty i { font-size: 28px; display: block; margin-bottom: 6px; }
 }
@@ -495,7 +495,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
+  font-size: 13px;
   color: #475569;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -504,7 +504,7 @@ export default {
   border-radius: 8px;
   border: 1px solid #dbe5f1;
   background: rgba(255, 255, 255, 0.7);
-  font-family: 'Exo 2', sans-serif;
+  font-family: inherit;
 }
 .header-onboarding-btn:hover {
   border-color: #0067fe;
@@ -516,7 +516,7 @@ export default {
 }
 /* token 消耗 */
 .token-counter {
-  font-size: 11px;
+  font-size: 13px;
   color: #94a3b8;
   padding: 3px 10px;
   background: rgba(0,103,254,0.04);
@@ -526,7 +526,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-family: 'Exo 2', sans-serif;
+  font-family: inherit;
 }
 .token-counter i { font-size: 13px; color: #E6A23C; }
 </style>

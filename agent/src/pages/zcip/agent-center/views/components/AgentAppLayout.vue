@@ -209,7 +209,7 @@ export default {
 .aap-history-toggle i { font-size: 16px; }
 .aap-history-vertical {
   writing-mode: vertical-rl;
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 2px;
 }
 .aap-history-content {
@@ -305,7 +305,7 @@ export default {
   margin-left: 4px;
 }
 .header-status {
-  font-size: 11px;
+  font-size: 13px;
   color: #909399;
 }
 .header-actions {
@@ -362,7 +362,7 @@ export default {
   margin-top: 10px;
 }
 .sug-chip {
-  font-size: 12px;
+  font-size: 13px;
   color: #0067fe;
   padding: 5px 12px;
   border: 1px solid rgba(0, 103, 254, 0.25);
@@ -395,7 +395,7 @@ export default {
   box-shadow: none;
 }
 .msg-time {
-  font-size: 11px;
+  font-size: 13px;
   color: #909399;
   margin-top: 4px;
   padding-left: 2px;

@@ -396,7 +396,7 @@ export default {
 }
 .cat-summary { text-align: right; }
 .cat-emission { margin-right: 12px; }
-.cat-pct { color: #909399; font-size: 12px; }
+.cat-pct { color: #909399; font-size: 13px; }
 
 .mini-bars { padding: 4px 0; }
 .mini-bar-row {
@@ -429,18 +429,18 @@ export default {
 /* 表格视图 */
 .table-view { margin-top: 0; }
 .mono { font-family: 'Monaco', monospace; font-size: 13px; }
-.unit-muted { color: #c0c4cc; font-size: 11px; }
+.unit-muted { color: #c0c4cc; font-size: 12px; }
 .factor-cell { display: inline-block; text-align: center; line-height: 1.4; }
 .factor-val { font-weight: 600; color: var(--primary, #0b294a); }
-.factor-unit { font-size: 10px; color: #c0c4cc; }
+.factor-unit { font-size: 11px; color: #c0c4cc; }
 .text-neg { color: #67C23A !important; }
 .text-max { color: #E6A23C !important; }
-.uncertainty-txt { font-size: 11px; color: #909399; margin-left: 4px; vertical-align: middle;}
+.uncertainty-txt { font-size: 12px; color: #909399; margin-left: 4px; vertical-align: middle;}
 
 /* 瀑布图 */
 .waterfall-chart { padding: 20px 10px; }
 .wf-bar-wrapper {
-  display: flex; align-items: center; margin-bottom: 8px; font-size: 12px;
+  display: flex; align-items: center; margin-bottom: 8px; font-size: 13px;
 }
 .wf-bar-label {
   width: 150px; text-align: right; padding-right: 10px;
@@ -461,20 +461,20 @@ export default {
   transition: all 0.5s ease;
 }
 .wf-bar-tip {
-  color: #fff; font-size: 11px; font-weight: 600;
+  color: #fff; font-size: 12px; font-weight: 600;
   text-shadow: 0 1px 2px rgba(0,0,0,0.3);
   white-space: nowrap;
 }
 .wf-running-total {
   width: 80px; text-align: left; padding-left: 10px;
-  font-family: monospace; font-size: 11px; font-weight: 600;
+  font-family: monospace; font-size: 12px; font-weight: 600;
 }
 
 /* 详情弹窗 */
 .factor-detail-box { display: flex; align-items: baseline; gap: 8px; }
 .factor-big { font-size: 24px; font-weight: 700; color: var(--primary, #0b294a); font-family: monospace; }
 .factor-unit-lg { color: #909399; }
-.factor-meta { font-size: 12px; color: #909399; margin-top: 4px; }
+.factor-meta { font-size: 13px; color: #909399; margin-top: 4px; }
 .formula-input { font-family: monospace; }
 .result-big { font-size: 28px; font-weight: 700; color: #F56C6C; }
 .result-unit { color: #909399; font-size: 14px; margin-left: 4px; }
@@ -484,7 +484,7 @@ export default {
   height: 160px; padding: 10px 0; border-bottom: 1px solid #ebeef5;
 }
 .m-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; }
-.m-month { font-size: 10px; color: #909399; margin-bottom: 4px; }
+.m-month { font-size: 11px; color: #909399; margin-bottom: 4px; }
 .m-track {
   flex: 1; width: 100%; display: flex; align-items: flex-end; justify-content: center;
 }
@@ -492,7 +492,7 @@ export default {
   width: 70%; background: linear-gradient(to top, var(--primary, #0b294a), var(--primary-light, #183f6c)); border-radius: 3px 3px 0 0;
   min-height: 4px; transition: height 0.5s;
 }
-.m-val { font-size: 10px; color: #606266; margin-top: 4px; font-family: monospace; }
+.m-val { font-size: 11px; color: #606266; margin-top: 4px; font-family: monospace; }
 
 .no-monthly-data {
   text-align: center; padding: 30px; color: #c0c4cc;

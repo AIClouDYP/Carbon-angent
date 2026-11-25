@@ -429,7 +429,7 @@ export default {
 }
 
 .form-tip {
-  font-size: 12px;
+  font-size: 13px;
   color: #909399;
   margin-top: 4px;
 }
@@ -508,7 +508,7 @@ export default {
   list-style: none;
   padding: 0;
   margin: 0;
-  font-size: 12px;
+  font-size: 13px;
   color: #909399;
   line-height: 1.8;
 }
@@ -538,7 +538,7 @@ export default {
   background: #f0f9eb;
   border: 1px solid #e1f3d8;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 13px;
   color: #67c23a;
   display: flex;
   align-items: center;

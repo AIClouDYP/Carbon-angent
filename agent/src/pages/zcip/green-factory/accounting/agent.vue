@@ -492,7 +492,7 @@
                           <div class="pi-title" style="margin-top:8px;"><i class="el-icon-search"></i> 核查地址（公示数据源）</div>
                           <div class="pi-row" style="align-items:center;">
                             <span>{{ c.checkSource }}</span>
-                            <el-link type="primary" :underline="false" :href="c.checkUrl" target="_blank" style="font-size:12px;margin-left:auto;">
+                            <el-link type="primary" :underline="false" :href="c.checkUrl" target="_blank" style="font-size: 13px;margin-left:auto;">
                               前往核查 <i class="el-icon-top-right"></i>
                             </el-link>
                           </div>
@@ -501,7 +501,7 @@
                             <span>覆盖全部负面清单条款（企业信息预填）</span>
                             <el-button size="mini" type="text" icon="el-icon-download" style="padding:0;margin-left:auto;" @click="downloadCommitment(c)">下载模板</el-button>
                           </div>
-                          <div class="pi-row" style="margin-top:6px;color:#909399;font-size:11px;border-top:1px dashed #e4e7ed;padding-top:6px;">
+                          <div class="pi-row" style="margin-top:6px;color:#909399;font-size: 13px;border-top:1px dashed #e4e7ed;padding-top:6px;">
                             判定：勾选「无此情况」+ 关联证明材料 → 该项通过。承诺书为线下签章流程（打印 → 法定代表人签字盖章 → 扫描回传佐证材料库）。
                           </div>
                         </div>
@@ -954,7 +954,7 @@
               <div class="pd-section">
                 <div class="pd-title" style="cursor:pointer;user-select:none;" @click="evidenceChainExpanded = !evidenceChainExpanded">
                   <i class="el-icon-link"></i> 数据溯源与四级证据链 <span class="pd-title-progress">指标结果 → 计算过程 → 输入参数 → 数据来源</span>
-                  <span style="font-weight:400;color:#94a3b8;font-size:11px;margin-left:6px;">{{ evidenceChainExpanded ? '' : '（' + phaseDetails[3].evidence.total + ' 项参数：自动采集 ' + phaseDetails[3].evidence.autoCollected + ' · 手动提供 ' + phaseDetails[3].evidence.manualProvided + ' · 明细默认收起，点击展开）' }}</span>
+                  <span style="font-weight:400;color:#94a3b8;font-size: 13px;margin-left:6px;">{{ evidenceChainExpanded ? '' : '（' + phaseDetails[3].evidence.total + ' 项参数：自动采集 ' + phaseDetails[3].evidence.autoCollected + ' · 手动提供 ' + phaseDetails[3].evidence.manualProvided + ' · 明细默认收起，点击展开）' }}</span>
                   <i :class="evidenceChainExpanded ? 'el-icon-arrow-up' : 'el-icon-arrow-down'" style="margin-left:auto;color:#909399;"></i>
                 </div>
                 <div v-if="evidenceChainExpanded" class="pd-card" style="margin-bottom:8px;">
@@ -1231,7 +1231,7 @@ export default {
           '3. 指标核算与评价 — 核算·核心指标评价<br/>' +
           '4. 材料编制与数据溯源 — 方案生成·数据溯源·归档下载' +
           '</div>' +
-          '<div style="margin-top:8px;color:#909399;font-size:12px;">点击下方按钮或输入「开始自评」启动流程。</div>',
+          '<div style="margin-top:8px;color:#909399;font-size: 13px;">点击下方按钮或输入「开始自评」启动流程。</div>',
         suggestions: ['开始自评'],
         time: '刚刚'
       })
@@ -1254,7 +1254,7 @@ export default {
           '3. 指标核算与评价 — 核算·核心指标评价<br/>' +
           '4. 材料编制与数据溯源 — 方案生成·数据溯源·归档下载' +
           '</div>' +
-          '<div style="margin-top:8px;color:#909399;font-size:12px;">点击下方按钮或输入「开始自评」启动流程，企业名称与主体类型由系统引导确认。</div>',
+          '<div style="margin-top:8px;color:#909399;font-size: 13px;">点击下方按钮或输入「开始自评」启动流程，企业名称与主体类型由系统引导确认。</div>',
         suggestions: ['开始自评'],
         time: '刚刚'
       })

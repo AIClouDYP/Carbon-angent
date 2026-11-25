@@ -324,7 +324,7 @@ export default {
 }
 .page-title i { color: var(--primary); }
 .page-desc {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   margin: 4px 0 0;
 }
@@ -382,7 +382,7 @@ export default {
 .stat-green .stat-num { color: var(--success); }
 .stat-orange .stat-num { color: var(--warning); }
 .stat-label {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   margin-top: 2px;
 }
@@ -463,12 +463,12 @@ export default {
   margin: 0 0 4px;
 }
 .empty-state span {
-  font-size: 12px;
+  font-size: 13px;
 }
 
 /* 对话框 */
 .divider-label {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
 }
 </style>

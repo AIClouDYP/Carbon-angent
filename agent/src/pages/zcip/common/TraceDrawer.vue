@@ -137,7 +137,7 @@ export default {
 </script>
 
 <style>
-.cd-detail-title {font-size:12px;font-weight:600;color:#303133;margin-bottom:6px}
+.cd-detail-title {font-size: 13px;font-weight:600;color:#303133;margin-bottom:6px}
 .cd-detail-total {border-top:1px solid #ebeef5;margin-top:4px;padding-top:6px;font-weight:700}
 .cd-detail-total .cd-dr-label {color:#303133}
 /* ===== 数据溯源抽屉 ===== */
@@ -145,17 +145,17 @@ export default {
 .cd-trace { padding: 18px 20px 28px; }
 .cd-trace-head { padding-bottom: 12px; border-bottom: 1px solid #ebeef5; margin-bottom: 14px; }
 .cd-trace-title { font-size: 15px; font-weight: 600; color: #1e293b; }
-.cd-trace-sub { font-size: 11.5px; color: #909399; margin-top: 4px; }
+.cd-trace-sub { font-size: 13px; color: #909399; margin-top: 4px; }
 .cd-trace-sec { margin-bottom: 16px; }
-.cd-trace-sec-t { font-size: 12px; font-weight: 600; color: #1e293b; margin-bottom: 6px; }
-.cd-trace-sec-t em { font-style: normal; font-size: 11px; color: #c0c4cc; font-weight: 400; margin-left: 4px; }
-.cd-trace-kv { display: flex; align-items: center; justify-content: space-between; padding: 5px 8px; font-size: 12px; background: #fafbfc; border-radius: 3px; margin-bottom: 4px; }
+.cd-trace-sec-t { font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 6px; }
+.cd-trace-sec-t em { font-style: normal; font-size: 13px; color: #c0c4cc; font-weight: 400; margin-left: 4px; }
+.cd-trace-kv { display: flex; align-items: center; justify-content: space-between; padding: 5px 8px; font-size: 13px; background: #fafbfc; border-radius: 3px; margin-bottom: 4px; }
 .cd-trace-kv span { color: #909399; }
 .cd-trace-kv b { color: #303133; font-weight: 500; }
 .cd-trace-todo { color: #e6a23c !important; font-weight: 400 !important; }
-.cd-trace-formula { font-size: 12px; color: #303133; background: #f5f9ff; border-radius: 4px; padding: 8px 10px; line-height: 1.6; }
+.cd-trace-formula { font-size: 13px; color: #303133; background: #f5f9ff; border-radius: 4px; padding: 8px 10px; line-height: 1.6; }
 .cd-trace-formula b { color: #0067fe; font-weight: 600; }
-.cd-trace-chain { display: flex; align-items: center; gap: 6px; font-size: 11.5px; }
+.cd-trace-chain { display: flex; align-items: center; gap: 6px; font-size: 13px; }
 .cd-trace-chain span { padding: 2px 8px; background: #f2f3f5; border-radius: 3px; color: #606266; }
 .cd-trace-chain span.on { background: #eaf2ff; color: #0067fe; }
 .cd-trace-chain i { color: #c0c4cc; font-style: normal; }
@@ -167,40 +167,40 @@ export default {
 /* 抽屉 UI（与园区一致） */
 .cd-trace-emission {margin-top:4px;display:flex;align-items:baseline;gap:3px;color:#0067fe}
 .cd-trace-emission b {font-size:20px;font-family:Consolas,Menlo,monospace}
-.cd-trace-emission span {font-size:10px;color:#94a3b8}
+.cd-trace-emission span {font-size: 12px;color:#94a3b8}
 .cd-trace-param {border:1px solid #eef2f7;border-radius:6px;padding:6px 8px;margin-bottom:6px;background:#fff}
 .cd-trace-param-row {display:flex;align-items:center;gap:6px}
-.cd-trace-param-name {font-size:11px;color:#475569;min-width:104px}
-.cd-trace-param-val {flex:1;font-size:11.5px;font-weight:700;color:#0f172a;font-family:Consolas,Menlo,monospace}
-.cd-trace-param-meta {display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:4px;font-size:10px;color:#94a3b8}
+.cd-trace-param-name {font-size: 13px;color:#475569;min-width:104px}
+.cd-trace-param-val {flex:1;font-size: 13px;font-weight:700;color:#0f172a;font-family:Consolas,Menlo,monospace}
+.cd-trace-param-meta {display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:4px;font-size: 12px;color:#94a3b8}
 .cd-trace-src {color:#64748b}
 .cd-match-tag {padding:1px 6px;border-radius:9px;background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;cursor:help}
 .cd-trace-actions {display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:1px dashed #e2e8f0}
 /* 抽屉：上参数 / 下页签 */
-.cd-trace-sub {font-size:11px;color:#94a3b8;margin-top:2px}
+.cd-trace-sub {font-size: 13px;color:#94a3b8;margin-top:2px}
 .cd-trace-part {border:1px solid #eef2f7;border-radius:8px;background:#fff;padding:8px 10px;margin-bottom:10px}
-.cd-trace-part-t {display:flex;align-items:center;justify-content:space-between;font-size:11.5px;font-weight:700;color:#334155;margin-bottom:6px}
+.cd-trace-part-t {display:flex;align-items:center;justify-content:space-between;font-size: 13px;font-weight:700;color:#334155;margin-bottom:6px}
 .cd-trace-params {display:flex;flex-direction:column;gap:2px}
 .cd-trace-prow {display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px dashed #f1f5f9}
 .cd-trace-prow:last-child {border-bottom:none}
-.cd-trace-sym {flex:none;width:26px;height:16px;line-height:16px;text-align:center;font-size:9.5px;font-weight:700;color:#0067fe;background:#e8f2ff;border-radius:3px}
-.cd-trace-pname {flex:1;min-width:0;font-size:11px;color:#475569;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.cd-trace-pval {flex:none;font-size:11.5px;font-weight:700;color:#0f172a;font-family:Consolas,Menlo,monospace}
-.cd-trace-edit {flex:none;color:#0067fe;cursor:pointer;font-size:12px;opacity:.75}
+.cd-trace-sym {flex:none;width:26px;height:16px;line-height:16px;text-align:center;font-size: 13px;font-weight:700;color:#0067fe;background:#e8f2ff;border-radius:3px}
+.cd-trace-pname {flex:1;min-width:0;font-size: 13px;color:#475569;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cd-trace-pval {flex:none;font-size: 13px;font-weight:700;color:#0f172a;font-family:Consolas,Menlo,monospace}
+.cd-trace-edit {flex:none;color:#0067fe;cursor:pointer;font-size: 13px;opacity:.75}
 .cd-trace-edit:hover {opacity:1}
 .cd-trace-tabs {display:flex;gap:4px;border-bottom:1px solid #eef2f7;margin-bottom:8px}
-.cd-trace-tab {padding:5px 12px;font-size:11.5px;color:#64748b;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.cd-trace-tab {padding:5px 12px;font-size: 13px;color:#64748b;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
 .cd-trace-tab.on {color:#0067fe;font-weight:700;border-bottom-color:#0067fe}
 .cd-trace-pane {min-height:80px}
 .cd-match-row {border:1px solid #eef2f7;border-radius:6px;padding:6px 8px;margin-bottom:6px;background:#fff}
 .cd-match-row-h {display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:3px}
-.cd-match-row-h b {font-size:11px;color:#334155}
-.cd-match-row-b {font-size:10.5px;color:#64748b;line-height:1.5}
-.cd-match-row-f {font-size:10.5px;color:#0f766e;margin-top:2px}
+.cd-match-row-h b {font-size: 13px;color:#334155}
+.cd-match-row-b {font-size: 13px;color:#64748b;line-height:1.5}
+.cd-match-row-f {font-size: 13px;color:#0f766e;margin-top:2px}
 .cd-log {margin-top:8px}
-.cd-log-item {display:flex;gap:6px;font-size:10.5px;color:#475569;padding:3px 0;border-bottom:1px dashed #f1f5f9}
+.cd-log-item {display:flex;gap:6px;font-size: 13px;color:#475569;padding:3px 0;border-bottom:1px dashed #f1f5f9}
 .cd-log-time {flex:none;color:#94a3b8}
-.cd-log-empty {font-size:11px;color:#cbd5e1;text-align:center;padding:12px 0}
+.cd-log-empty {font-size: 13px;color:#cbd5e1;text-align:center;padding:12px 0}
 /* 抽屉 v4：选中态 / 凭证卡 / 分组 */
 .cd-trace-prow {cursor:pointer;border-radius:5px;transition:background .15s;padding:4px 6px}
 .cd-trace-prow:hover {background:#f8fafc}
@@ -209,23 +209,23 @@ export default {
 .cd-match-row.on {border-color:#0067fe;background:#f5f9ff}
 .cd-proof-card {border:1px solid #e6f0ff;background:#f7fbff;border-radius:8px;padding:10px;margin-bottom:8px}
 .cd-proof-card.empty {border-color:#eef2f7;background:#fafbfc}
-.cd-proof-card-h {display:flex;align-items:center;gap:6px;font-size:12px;color:#0f172a}
+.cd-proof-card-h {display:flex;align-items:center;gap:6px;font-size: 13px;color:#0f172a}
 .cd-proof-card-h i {color:#0067fe}
 .cd-proof-card-n {flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
-.cd-proof-card-tag {flex:none;padding:1px 6px;border-radius:9px;background:#e6f7ec;color:#0f9d58;font-size:10px;border:1px solid #cdebd7}
-.cd-proof-card-b {display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;font-size:10.5px;color:#94a3b8}
+.cd-proof-card-tag {flex:none;padding:1px 6px;border-radius:9px;background:#e6f7ec;color:#0f9d58;font-size: 12px;border:1px solid #cdebd7}
+.cd-proof-card-b {display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;font-size: 13px;color:#94a3b8}
 .cd-proof-card-src {flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* 抽屉 v5：选中参数的三段详情 */
 .cd-trace-detail {margin-top:4px}
 .cd-detail-block {margin-bottom:10px}
-.cd-detail-t {display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#334155;margin-bottom:6px}
-.cd-detail-sub {font-weight:400;color:#94a3b8;font-size:10px}
+.cd-detail-t {display:flex;align-items:center;gap:6px;font-size: 13px;font-weight:700;color:#334155;margin-bottom:6px}
+.cd-detail-sub {font-weight:400;color:#94a3b8;font-size: 12px}
 .cd-match-box {border:1px solid #eef2f7;border-radius:6px;padding:8px 10px;background:#fff}
 /* 符号类型配色 */
 .cd-trace-sym {background:#f1f5f9;color:#64748b}
 .cd-trace-sym.is-ad {background:#e8f2ff;color:#0067fe}
 .cd-trace-sym.is-ef {background:#e9f7ef;color:#0f9d58}
 /* 匹配标签：轻量徽章（圆点 + 浅蓝） */
-.cd-match-tag {display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:10px;background:#f0f7ff;color:#1d4ed8;border:1px solid #dbeafe;font-size:10px;font-weight:600;line-height:17px;letter-spacing:.2px}
+.cd-match-tag {display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:10px;background:#f0f7ff;color:#1d4ed8;border:1px solid #dbeafe;font-size: 12px;font-weight:600;line-height:17px;letter-spacing:.2px}
 .cd-match-tag::before {content:'';width:5px;height:5px;border-radius:50%;background:#3b82f6;flex:none}
 </style>

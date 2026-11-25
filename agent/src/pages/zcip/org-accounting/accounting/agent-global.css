@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&display=swap');
 @keyframes spin { 100% { transform: rotate(360deg); } }
 @keyframes spin-reverse { 100% { transform: rotate(-360deg); } }
 .spin-slow { transform-origin: center; animation: spin 8s linear infinite; }
@@ -146,7 +146,7 @@
 .cmd-group { margin-bottom: 14px; }
 .cmd-group:last-child { margin-bottom: 0; }
 .cmd-group-title {
-  font-size: 11px;
+  font-size: 13px;
   color: #94a3b8;
   font-weight: 600;
   margin-bottom: 6px;
@@ -166,7 +166,7 @@
   background: rgba(0,103,254,0.06);
   border: 1px solid rgba(0,103,254,0.1);
   border-radius: 16px;
-  font-size: 12px;
+  font-size: 13px;
   color: #0067FE;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -176,7 +176,7 @@
   transform: translateY(-1px);
   box-shadow: 0 2px 6px rgba(0,103,254,0.15);
 }
-.cmd-item i { font-size: 12px; }
+.cmd-item i { font-size: 13px; }
 .cmd-item-highlight {
   background: linear-gradient(135deg, rgba(0,103,254,0.12), rgba(0,103,254,0.12));
   border-color: rgba(0,103,254,0.25);
@@ -187,7 +187,7 @@
 }
 /* header 操作按钮 */
 .toolbar-icon-sep {
-  font-size: 12px;
+  font-size: 13px;
   color: #475569;
   cursor: pointer;
   display: flex;
@@ -199,7 +199,7 @@
   border-radius: 8px;
   border: 1px solid #dbe5f1;
   background: rgba(255,255,255,0.7);
-  font-family: 'Exo 2', sans-serif;
+  font-family: inherit;
 }
 .toolbar-icon-sep:hover {
   border-color: #0067fe;
@@ -217,7 +217,7 @@
   flex-shrink: 0;
 }
 .header-onboarding-btn {
-  font-size: 12px;
+  font-size: 13px;
   color: #475569;
   cursor: pointer;
   display: flex;
@@ -229,7 +229,7 @@
   border-radius: 8px;
   border: 1px solid #dbe5f1;
   background: rgba(255,255,255,0.7);
-  font-family: 'Exo 2', sans-serif;
+  font-family: inherit;
 }
 .header-onboarding-btn:hover {
   border-color: #0067fe;
@@ -248,7 +248,7 @@
 }
 .fp-history-new .el-icon-plus,
 .history-new-btn .el-icon-plus,
-.rs-history-new .el-icon-plus { font-size: 12px; }
+.rs-history-new .el-icon-plus { font-size: 13px; }
 .history-new-btn { padding: 0 4px !important; }
 .fp-history-new { padding: 0 4px !important; margin-left: auto; }
 .rs-history-new { padding: 0 4px !important; margin-left: auto; }
@@ -313,7 +313,7 @@
   color: #303133;
 }
 .checklist-item-desc {
-  font-size: 12px;
+  font-size: 13px;
   color: #909399;
   margin-bottom: 4px;
 }
@@ -321,18 +321,18 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 11px;
+  font-size: 13px;
   color: #0067fe;
 }
-.checklist-item-suggest i { font-size: 12px; }
+.checklist-item-suggest i { font-size: 13px; }
 .checklist-item-status {
   margin-top: 4px;
-  font-size: 11px;
+  font-size: 13px;
   color: #67c23a;
 }
 .checklist-resolved-tip {
   padding: 6px 12px;
-  font-size: 11px;
+  font-size: 13px;
   color: #67c23a;
   display: flex;
   align-items: center;
@@ -366,11 +366,11 @@
   line-height: 1;
 }
 .val-upload-body .el-upload__text {
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
 }
 .val-upload-body .el-upload__tip {
-  font-size: 11px;
+  font-size: 13px;
   color: #909399;
   text-align: center;
   margin-top: 6px;
@@ -401,7 +401,7 @@
   background: #fff;
   border: 1px solid #ebeef5;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 13px;
   color: #606266;
 }
 .supplement-file-item i {
@@ -416,7 +416,7 @@
 }
 .supplement-file-status {
   color: #67c23a;
-  font-size: 11px;
+  font-size: 13px;
 }
 .val-edit-list {
   display: flex;
@@ -469,7 +469,7 @@
 .vtc-arrow {
   margin: 0 8px;
   color: #c0c4cc;
-  font-size: 12px;
+  font-size: 13px;
 }
 .vtc-problem-desc {
   margin-left: 14px;
@@ -523,7 +523,7 @@
 }
 .vtc-recommend-note {
   color: #909399;
-  font-size: 12px;
+  font-size: 13px;
   margin-left: 8px;
 }
 .vtc-adopt-btn {
@@ -561,7 +561,7 @@
   border-radius: 6px;
   padding: 9px 12px;
   margin-bottom: 12px;
-  font-size: 12.5px;
+  font-size: 13px;
   line-height: 1.6;
   color: #4a6b9a;
 }
@@ -627,7 +627,7 @@
   transition: background-color 0.2s, border-color 0.2s;
 }
 .lib-checkbox i {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: #fff;
 }
@@ -655,7 +655,7 @@
   padding: 0 6px;
   height: 18px;
   line-height: 17px;
-  font-size: 11px;
+  font-size: 13px;
   border-radius: 3px;
   border: 1px solid transparent;
 }
@@ -671,14 +671,14 @@
 }
 .lib-desc {
   margin-top: 5px;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.6;
   color: #7a8699;
 }
 .lib-status {
   flex-shrink: 0;
   margin-top: 1px;
-  font-size: 12px;
+  font-size: 13px;
 }
 .lib-status-on {
   color: #0e8a4f;
@@ -737,7 +737,7 @@
   color: #d48806;
 }
 .lib-count {
-  font-size: 12.5px;
+  font-size: 13px;
   color: #7a8699;
 }
 .lib-count strong {

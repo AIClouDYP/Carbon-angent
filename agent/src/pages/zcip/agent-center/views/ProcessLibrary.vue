@@ -29,7 +29,7 @@
     <el-table :data="pagedProcesses" border stripe size="small" style="width: 100%;" :header-cell-style="headerCellStyle" @row-click="viewDetail">
       <el-table-column label="编号" prop="id" width="90" align="center">
         <template slot-scope="{ row }">
-          <span style="font-family: monospace; font-size: 12px; color: #909399;">{{ row.id || '—' }}</span>
+          <span style="font-family: monospace; font-size: 13px; color: #909399;">{{ row.id || '—' }}</span>
         </template>
       </el-table-column>
       <el-table-column label="单元过程名称" prop="name" min-width="180">
@@ -489,7 +489,7 @@ export default {
 .stats-row { display: flex; gap: 16px; margin-bottom: 16px; flex-shrink: 0; }
 .stat-card { flex: 1; background: #fff; border-radius: 8px; padding: 16px 20px; border: 1px solid #ebeef5; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
 .stat-num { font-size: 28px; font-weight: 700; color: #303133; }
-.stat-label { font-size: 12px; color: #909399; margin-top: 4px; }
+.stat-label { font-size: 13px; color: #909399; margin-top: 4px; }
 .stat-green .stat-num { color: #67C23A; }
 .stat-blue .stat-num { color: #409EFF; }
 .stat-orange .stat-num { color: #E6A23C; }
@@ -502,11 +502,11 @@ export default {
 .io-input .io-column-title { color: #67C23A; border-color: #67C23A; }
 .io-output .io-column-title { color: #E6A23C; border-color: #E6A23C; }
 .io-arrow { display: flex; align-items: center; font-size: 20px; color: #c0c4cc; padding: 0 16px; }
-.io-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 12px; border-bottom: 1px solid #f5f7fa; }
+.io-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 13px; border-bottom: 1px solid #f5f7fa; }
 .io-name { flex: 1; color: #303133; }
-.io-type { font-size: 10px; padding: 1px 4px; border: 1px solid; border-radius: 3px; white-space: nowrap; }
+.io-type { font-size: 13px; padding: 1px 4px; border: 1px solid; border-radius: 3px; white-space: nowrap; }
 .io-val { color: #606266; white-space: nowrap; }
-.io-factor { color: #909399; font-size: 11px; white-space: nowrap; }
+.io-factor { color: #909399; font-size: 13px; white-space: nowrap; }
 
 /* 编辑弹窗 */
 .edit-io-section { display: flex; gap: 16px; margin-top: 8px; }
@@ -564,5 +564,5 @@ export default {
 }
 .empty-state i { font-size: 48px; margin-bottom: 12px; color: var(--text-placeholder); }
 .empty-state p { font-size: 14px; margin: 0 0 4px; }
-.empty-state span { font-size: 12px; }
+.empty-state span { font-size: 13px; }
 </style>

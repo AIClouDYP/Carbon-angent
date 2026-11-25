@@ -378,7 +378,7 @@ import { loadOrgStandardsForAgent, loadBjStandardsForAgent, ensureSeed } from '@
 
     stageConfirmConfig() {
       const configs = {
-        1: { label: '确认边界配置，进入核算模型', icon: 'el-icon-check', hint: '确认边界配置无误后进入核算模型阶段', action: () => this.sendSuggestion('确认边界配置') },
+        1: this.boundaryConfirmConfig(),
         2: { label: '确认清单，启动数据收集', icon: 'el-icon-check', hint: '确认核算清单无误后，系统将自动完成活动数据采集与因子匹配', action: () => this.sendSuggestion('确认模型，启动数据收集') },
         5: this.validationActiveTab === 'activity'
           ? { label: '确认调整，重新校核', icon: 'el-icon-refresh-right', hint: '数据调整完成后重新进入「数据采集→因子匹配→数据校验」循环', action: () => this.confirmActivityData() }
@@ -1180,6 +1180,45 @@ import { loadOrgStandardsForAgent, loadBjStandardsForAgent, ensureSeed } from '@
   },
 
   methods: {
+    /** 阶段2确认栏：日期未填或顺序错误时直接提示并禁用 */
+    boundaryConfirmConfig() {
+      const error = this.validateBoundaryBeforeNextStage()
+      return {
+        label: '确认边界配置，进入核算模型',
+        icon: 'el-icon-check',
+        hint: error || '确认5项边界配置无误后进入核算模型阶段',
+        disabled: Boolean(error),
+        action: () => {
+          const currentError = this.validateBoundaryBeforeNextStage()
+          if (currentError) {
+            this.$message.warning(currentError)
+            return
+          }
+          this.sendSuggestion('确认边界配置')
+        }
+      }
+    },
+
+    /**
+     * 阶段2 → 阶段3 前置校验：时间边界必填且起止顺序有效。
+     * 返回 null 表示通过，否则返回给用户展示的错误信息。
+     */
+    validateBoundaryBeforeNextStage() {
+      const range = String((this.boundaryConfig && this.boundaryConfig.timeBoundary) || '').trim()
+      if (!range) return '时间边界为必填项，请先选择完整的开始日期和结束日期。'
+      // 仅以「空格 - 空格」分隔起止日期，避免把日期自身的连字符当成分隔符
+      const parts = range.split(/\s+-\s+/)
+      if (parts.length !== 2 || !parts[0] || !parts[1]) {
+        return '时间边界格式不完整，请重新选择开始日期和结束日期。'
+      }
+      const start = Date.parse(parts[0] + 'T00:00:00')
+      const end = Date.parse(parts[1] + 'T00:00:00')
+      if (!Number.isFinite(start) || !Number.isFinite(end)) {
+        return '时间边界包含无法识别的日期，请重新选择。'
+      }
+      if (start > end) return '时间边界的开始日期不能晚于结束日期，请调整后再继续。'
+      return null
+    },
     /** 按阶段过滤参数：阶段4（活动数据）只显示 AD，其余阶段显示全部 */
     paramsForStep(u) {
       const list = (u && u.params) || []

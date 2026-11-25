@@ -678,7 +678,7 @@ export default {
   color: #F56C6C; font-weight: 600;
   font-family: "Consolas", "Monaco", monospace;
 }
-.emission-val small { color: #909399; font-weight: normal; font-size: 11px; }
+.emission-val small { color: #909399; font-weight: normal; font-size: 13px; }
 
 /* ===== 空状态 ===== */
 .empty-state {
@@ -688,7 +688,7 @@ export default {
 .empty-state p { margin: 8px 0; font-size: 14px; color: #909399; }
 .empty-hint {
   display: inline-block; margin-top: 8px; color: #C0C4CC;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 /* ===== 详情弹窗 ===== */

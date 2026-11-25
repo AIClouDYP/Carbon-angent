@@ -26,7 +26,7 @@
       <div class="table-title-bar">
         <span class="table-title-text">标准列表</span>
         <div style="display:flex;align-items:center;">
-          <span class="sync-source-hint" style="font-size:12px;color:#8c8c8c;margin-right:12px;">
+          <span class="sync-source-hint" style="font-size: 13px;color:#8c8c8c;margin-right:12px;">
             政策文件来源：政策采集与发布 · 上次同步 {{ lastSyncTime || '—' }}
           </span>
           <el-button size="small" icon="el-icon-refresh" :loading="syncing" @click="syncPolicies">同步政策</el-button>
@@ -209,7 +209,7 @@
             <el-select v-model="parsedStd.scenarios" multiple style="width:100%" placeholder="选择该标准适用的核算场景（决定解析模板）" @change="onParseScenariosChange">
               <el-option v-for="sc in scenarioEnum" :key="sc.key" :label="sc.label" :value="sc.key"></el-option>
             </el-select>
-            <div v-if="parsedStd.scenarios && parsedStd.scenarios.length" class="std-parse-hint" style="margin-top:4px;color:#909399;font-size:12px;">
+            <div v-if="parsedStd.scenarios && parsedStd.scenarios.length" class="std-parse-hint" style="margin-top:4px;color:#909399;font-size: 13px;">
               已按「标准解析 Skill」的 {{ parsedStd.scenarios.join(' / ') }} 分组模板生成草稿，请在标准详情页逐项核对
             </div>
           </el-form-item>
@@ -297,7 +297,7 @@
         </el-table-column>
         <el-table-column prop="status" label="结果" width="80" align="center"></el-table-column>
       </el-table>
-      <div style="margin-top:12px;font-size:12px;color:#8c8c8c;">
+      <div style="margin-top:12px;font-size: 13px;color:#8c8c8c;">
         说明：同步仅更新政策文件的上游字段（编号/名称/机构/年份/简介/状态），不覆盖本模块已维护的业务场景与结构化配置。
       </div>
       <span slot="footer" class="dialog-footer">
@@ -997,7 +997,7 @@ export default {
 }
 .stat-content { flex: 1; min-width: 0; }
 .stat-num { font-size: 24px; font-weight: 700; color: #303133; line-height: 1.2; }
-.stat-label { font-size: 12px; color: #909399; margin-top: 2px; }
+.stat-label { font-size: 13px; color: #909399; margin-top: 2px; }
 .toolbar { display: flex; align-items: center; margin-bottom: 12px; flex-shrink: 0; }
 /* 分页 */
 .pagination-wrap { display: flex; justify-content: flex-end; margin-top: 16px; }
@@ -1040,7 +1040,7 @@ export default {
   flex-shrink: 0;
 }
 /* 编号等宽字体 */
-.code-font { font-family: 'Consolas', 'Monaco', monospace; font-size: 12px; }
+.code-font { font-family: 'Consolas', 'Monaco', monospace; font-size: 13px; }
 /* 穿透详情按钮 */
 .btn-drill { color: #0067FE; }
 .btn-drill:hover { color: #409eff; }
@@ -1055,11 +1055,11 @@ export default {
 /* ===== 上传解析对话框 ===== */
 .std-upload-dialog .el-dialog__body { padding: 16px 20px; }
 .std-steps { display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
-.std-step { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #94a3b8; }
+.std-step { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #94a3b8; }
 .std-step-dot {
   width: 24px; height: 24px; border-radius: 50%; background: #f1f5f9;
   border: 2px solid #e2e8f0; display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 600; color: #94a3b8;
+  font-size: 13px; font-weight: 600; color: #94a3b8;
 }
 .std-step.step-active { color: #0067FE; font-weight: 600; }
 .std-step.step-active .std-step-dot { background: #0067FE; border-color: #0067FE; color: #fff; }
@@ -1070,7 +1070,7 @@ export default {
 .std-agent-tip {
   display: flex; align-items: flex-start; gap: 8px; background: #f0f7ff;
   border-radius: 8px; padding: 10px 12px; margin-bottom: 14px;
-  font-size: 12.5px; color: #606266; line-height: 1.5;
+  font-size: 13px; color: #606266; line-height: 1.5;
 }
 .std-agent-tip i { color: #0067FE; margin-top: 1px; flex-shrink: 0; }
 .std-agent-tip.success { background: #f0f9eb; }
@@ -1083,7 +1083,7 @@ export default {
 .std-drop-icon { font-size: 36px; color: #c0c4cc; margin-bottom: 8px; }
 .std-drop-zone:hover .std-drop-icon { color: #0067FE; }
 .std-drop-text { font-size: 13px; color: #606266; margin-bottom: 4px; }
-.std-drop-hint { font-size: 11px; color: #94a3b8; }
+.std-drop-hint { font-size: 13px; color: #94a3b8; }
 .std-file-card {
   display: flex; align-items: center; gap: 10px; margin-top: 12px;
   padding: 10px 12px; background: #f0f7ff; border: 1px solid rgba(0,103,254,0.15); border-radius: 8px;
@@ -1096,7 +1096,7 @@ export default {
 .std-file-info { flex: 1; min-width: 0; }
 .std-file-name { font-size: 13px; font-weight: 600; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .std-file-name .el-tag { margin-left: 6px; }
-.std-file-size { font-size: 11px; color: #94a3b8; }
+.std-file-size { font-size: 13px; color: #94a3b8; }
 .std-file-remove { cursor: pointer; color: #94a3b8; font-size: 14px; padding: 4px; border-radius: 4px; }
 .std-file-remove:hover { color: #f56c6c; background: rgba(245,108,108,0.1); }
 /* 解析区 */
@@ -1111,7 +1111,7 @@ export default {
 .std-parse-task.task-running i { color: #0067FE; }
 .std-parse-task.task-done { color: #606266; }
 .std-parse-task.task-done i { color: #67C23A; }
-.task-result { margin-left: auto; font-size: 11px; color: #67C23A; font-weight: 600; }
+.task-result { margin-left: auto; font-size: 13px; color: #67C23A; font-weight: 600; }
 /* 确认区 */
 .std-confirm-form { margin-top: 6px; }
 
@@ -1119,15 +1119,15 @@ export default {
 .std-structured { margin-top: 14px; border: 1px solid #ebeef5; border-radius: 8px; padding: 12px 14px; }
 .ss-title { font-size: 14px; font-weight: 600; color: #303133; margin-bottom: 10px; }
 .ss-title i { color: #0067FE; margin-right: 4px; }
-.ss-title-hint { font-size: 12px; font-weight: 400; color: #909399; margin-left: 6px; }
+.ss-title-hint { font-size: 13px; font-weight: 400; color: #909399; margin-left: 6px; }
 .ss-dim { margin-bottom: 10px; }
 .ss-dim:last-child { margin-bottom: 0; }
-.ss-dim-label { font-size: 12.5px; font-weight: 600; color: #0067FE; margin-bottom: 6px; }
+.ss-dim-label { font-size: 13px; font-weight: 600; color: #0067FE; margin-bottom: 6px; }
 .ss-points { margin: 0; padding-left: 18px; }
-.ss-points li { font-size: 12.5px; color: #606266; line-height: 1.8; }
+.ss-points li { font-size: 13px; color: #606266; line-height: 1.8; }
 .ss-table { margin-top: 2px; }
 .ss-empty {
-  margin-top: 14px; padding: 18px; text-align: center; font-size: 12.5px; color: #909399;
+  margin-top: 14px; padding: 18px; text-align: center; font-size: 13px; color: #909399;
   background: #fafbfc; border: 1px dashed #e2e8f0; border-radius: 8px; line-height: 1.7;
 }
 .ss-empty i { font-size: 22px; color: #c0c4cc; display: block; margin-bottom: 6px; }
@@ -1135,6 +1135,6 @@ export default {
   margin-top: 14px; display: flex; justify-content: space-between; align-items: center;
   padding: 10px 12px; background: #fdf6ec; border: 1px solid #faecd8; border-radius: 8px;
 }
-.ss-audit-tip { font-size: 12.5px; color: #e6a23c; }
+.ss-audit-tip { font-size: 13px; color: #e6a23c; }
 .ss-audit-tip i { margin-right: 4px; }
 </style>

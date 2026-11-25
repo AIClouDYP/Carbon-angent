@@ -36,7 +36,7 @@ a { text-decoration: none; color: $secondary; }
     flex: 1;
     .stat-label { color: $text-secondary; font-size: 13px; margin-bottom: 4px; }
     .stat-value { font-size: 28px; font-weight: 600; color: $text-primary; }
-    .stat-trend { font-size: 12px; margin-top: 2px; }
+    .stat-trend { font-size: 13px; margin-top: 2px; }
   }
 }
 
@@ -68,7 +68,7 @@ a { text-decoration: none; color: $secondary; }
     .agent-stat-item {
       text-align: center;
       .agent-stat-val { font-size: 22px; font-weight: 600; }
-      .agent-stat-label { font-size: 12px; color: $text-muted; }
+      .agent-stat-label { font-size: 13px; color: $text-muted; }
     }
   }
   .agent-actions { display: flex; gap: 8px; }

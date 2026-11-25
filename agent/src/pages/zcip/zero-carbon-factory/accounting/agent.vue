@@ -344,9 +344,9 @@
                     <span class="pd-cat-ind">{{ cat.indicators }}</span>
                   </div>
                   <div style="margin-top:10px;background:rgba(0,103,254,0.03);border:1px solid rgba(0,103,254,0.08);border-radius:8px;padding:8px 10px;">
-                    <div style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:#1e293b;margin-bottom:4px;">
+                    <div style="display:flex;align-items:center;gap:5px;font-size: 13px;font-weight:700;color:#1e293b;margin-bottom:4px;">
                       <i class="el-icon-finished" style="color:#0067FE;"></i> 指标适用性规则
-                      <span style="font-weight:400;color:#94a3b8;font-size:11px;">（政策豁免与限定 · 实际判定在建模与采数后进行）</span>
+                      <span style="font-weight:400;color:#94a3b8;font-size: 13px;">（政策豁免与限定 · 实际判定在建模与采数后进行）</span>
                     </div>
                     <div v-for="a in phaseDetails[0].standard.applicability" :key="a.name" class="pd-cat-row" style="border-top:none;margin-top:0;padding:4px 0;white-space:nowrap;">
                       <span class="pd-cat-name" style="flex-shrink:0;">{{ a.name }}</span>
@@ -489,7 +489,7 @@
                           <div class="pi-title" style="margin-top:8px;"><i class="el-icon-search"></i> 核查地址（公示数据源）</div>
                           <div class="pi-row" style="align-items:center;">
                             <span>{{ c.checkSource }}</span>
-                            <el-link type="primary" :underline="false" :href="c.checkUrl" target="_blank" style="font-size:12px;margin-left:auto;">
+                            <el-link type="primary" :underline="false" :href="c.checkUrl" target="_blank" style="font-size: 13px;margin-left:auto;">
                               前往核查 <i class="el-icon-top-right"></i>
                             </el-link>
                           </div>
@@ -498,7 +498,7 @@
                             <span>覆盖全部负面清单条款（企业信息预填）</span>
                             <el-button size="mini" type="text" icon="el-icon-download" style="padding:0;margin-left:auto;" @click="downloadCommitment(c)">下载模板</el-button>
                           </div>
-                          <div class="pi-row" style="margin-top:6px;color:#909399;font-size:11px;border-top:1px dashed #e4e7ed;padding-top:6px;">
+                          <div class="pi-row" style="margin-top:6px;color:#909399;font-size: 13px;border-top:1px dashed #e4e7ed;padding-top:6px;">
                             判定：勾选「无此情况」+ 关联证明材料 → 该项通过。承诺书为线下签章流程（打印 → 法定代表人签字盖章 → 扫描回传佐证材料库）。
                           </div>
                         </div>
@@ -639,7 +639,7 @@
                       </div>
                       <div class="vtc-body vtc-body-compact">
                         <span class="vtc-label">建议提供：</span>
-                        <span style="font-size:12px;color:#64748b;">{{ item.hint }}</span>
+                        <span style="font-size: 13px;color:#64748b;">{{ item.hint }}</span>
                       </div>
                     </div>
                     <div v-if="!pendingValCount()" class="val-empty-state">
@@ -815,7 +815,7 @@
               <div class="pd-section">
                 <div class="pd-title" style="cursor:pointer;user-select:none;" @click="toggleAccDetail">
                   <i class="el-icon-document-copy"></i> 核算明细（按核算模型计算组成）
-                  <span style="font-weight:400;color:#94a3b8;font-size:11px;margin-left:6px;">{{ accDetailExpanded ? '' : '（默认收起 · 点击展开计算过程）' }}</span>
+                  <span style="font-weight:400;color:#94a3b8;font-size: 13px;margin-left:6px;">{{ accDetailExpanded ? '' : '（默认收起 · 点击展开计算过程）' }}</span>
                   <i :class="accDetailExpanded ? 'el-icon-arrow-up' : 'el-icon-arrow-down'" style="margin-left:auto;color:#909399;"></i>
                 </div>
                 <template v-if="accDetailExpanded">
@@ -1085,7 +1085,7 @@
               <div class="pd-section">
                 <div class="pd-title" style="cursor:pointer;user-select:none;" @click="evidenceChainExpanded = !evidenceChainExpanded">
                   <i class="el-icon-link"></i> 数据溯源与四级证据链 <span class="pd-title-progress">指标结果 → 计算过程 → 输入参数 → 数据来源</span>
-                  <span style="font-weight:400;color:#94a3b8;font-size:11px;margin-left:6px;">{{ evidenceChainExpanded ? '' : '（' + phaseDetails[5].evidence.total + ' 项参数：自动采集 ' + phaseDetails[5].evidence.autoCollected + ' · 手动提供 ' + phaseDetails[5].evidence.manualProvided + ' · 明细默认收起，点击展开）' }}</span>
+                  <span style="font-weight:400;color:#94a3b8;font-size: 13px;margin-left:6px;">{{ evidenceChainExpanded ? '' : '（' + phaseDetails[5].evidence.total + ' 项参数：自动采集 ' + phaseDetails[5].evidence.autoCollected + ' · 手动提供 ' + phaseDetails[5].evidence.manualProvided + ' · 明细默认收起，点击展开）' }}</span>
                   <i :class="evidenceChainExpanded ? 'el-icon-arrow-up' : 'el-icon-arrow-down'" style="margin-left:auto;color:#909399;"></i>
                 </div>
                 <div v-if="evidenceChainExpanded" class="pd-card" style="margin-bottom:8px;">
@@ -1363,7 +1363,7 @@ export default {
           '5. 建设目标与优化建议 — 目标设定·差距分析·措施推荐·改善计划<br/>' +
           '6. 材料编制与数据溯源 — 方案生成·数据溯源·归档下载' +
           '</div>' +
-          '<div style="margin-top:8px;color:#909399;font-size:12px;">点击下方按钮或输入「开始申报」启动流程。</div>',
+          '<div style="margin-top:8px;color:#909399;font-size: 13px;">点击下方按钮或输入「开始申报」启动流程。</div>',
         suggestions: ['开始申报'],
         time: '刚刚'
       })
@@ -1388,7 +1388,7 @@ export default {
           '5. 建设目标与优化建议 — 目标设定·差距分析·措施推荐·改善计划<br/>' +
           '6. 材料编制与数据溯源 — 方案生成·数据溯源·归档下载' +
           '</div>' +
-          '<div style="margin-top:8px;color:#909399;font-size:12px;">点击下方按钮或输入「开始申报」启动流程，企业名称与主体类型由系统引导确认。</div>',
+          '<div style="margin-top:8px;color:#909399;font-size: 13px;">点击下方按钮或输入「开始申报」启动流程，企业名称与主体类型由系统引导确认。</div>',
         suggestions: ['开始申报'],
         time: '刚刚'
       })

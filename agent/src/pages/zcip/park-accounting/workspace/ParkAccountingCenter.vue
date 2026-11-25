@@ -508,7 +508,7 @@ export default {
           '<strong style="color:#0067fe;">进行中的任务</strong><br/>' +
           running + ' 个任务进行中，' + done + ' 个已完成' +
           (expt > 0 ? ' · <span style="color:#F56C6C;font-weight:600;">' + expt + ' 个异常待处理</span>' : '') +
-          (lastRunning ? '<br/><span style="font-size:12px;color:#909399;">最近：' + lastRunning.name + ' · ' + lastRunning.currentStage + '</span>' : '') +
+          (lastRunning ? '<br/><span style="font-size: 13px;color:#909399;">最近：' + lastRunning.name + ' · ' + lastRunning.currentStage + '</span>' : '') +
           '</div>' +
           '<div style="margin-top:8px;padding:10px 14px;background:rgba(0,103,254,0.04);border-radius:8px;border-left:3px solid #0067fe;">' +
           '<strong style="color:#0067fe;">我能做什么</strong><br/>' +
@@ -517,7 +517,7 @@ export default {
           '• <strong>报告编制</strong> — 核算完成后生成排放报告<br/>' +
           '• <strong>数据核对</strong> — 提示数据缺失、口径不一致等问题' +
           '</div>' +
-          '<div style="margin-top:10px;color:#909399;font-size:12px;">需要我做什么？您可以直接输入问题，或点击右侧查看核算任务。</div>',
+          '<div style="margin-top:10px;color:#909399;font-size: 13px;">需要我做什么？您可以直接输入问题，或点击右侧查看核算任务。</div>',
         time: '刚刚',
         type: 'text',
         suggestions: lastRunning ? ['继续上次核算', '新建核算', '查看进度'] : ['新建核算', '查看进度']
@@ -554,7 +554,7 @@ export default {
   background: rgba(0, 103, 254, 0.08);
   border-radius: 10px;
   padding: 1px 8px;
-  font-size: 11px;
+  font-size: 12px;
   color: #909399;
   font-weight: 400;
 }
@@ -574,18 +574,18 @@ export default {
 }
 .fp-side-item:hover { background: rgba(0, 103, 254, 0.06); }
 .fp-side-name {
-  font-size: 12px;
+  font-size: 13px;
   color: #303133;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.fp-side-meta { font-size: 10px; color: #c0c4cc; margin-top: 2px; }
+.fp-side-meta { font-size: 11px; color: #c0c4cc; margin-top: 2px; }
 .fp-side-empty {
   text-align: center;
   padding: 30px 0;
   color: #c0c4cc;
-  font-size: 12px;
+  font-size: 13px;
 }
 .fp-side-empty i { font-size: 28px; display: block; margin-bottom: 6px; }
 
@@ -598,7 +598,7 @@ export default {
   padding: 8px 10px;
   background: rgba(0, 103, 254, 0.04);
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 13px;
   color: #475569;
   line-height: 1.7;
 }
@@ -607,7 +607,7 @@ export default {
 }
 .range-detail {
   color: #64748b;
-  font-size: 11.5px;
+  font-size: 13px;
 }
 .range-empty {
   background: rgba(230, 162, 60, 0.08);
@@ -635,7 +635,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
+  font-size: 13px;
   color: #475569;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -644,7 +644,7 @@ export default {
   border-radius: 8px;
   border: 1px solid #dbe5f1;
   background: rgba(255, 255, 255, 0.7);
-  font-family: 'Exo 2', sans-serif;
+  font-family: inherit;
 }
 .header-onboarding-btn:hover {
   border-color: #0067fe;
@@ -656,7 +656,7 @@ export default {
 }
 /* token 消耗 */
 .token-counter {
-  font-size: 11px;
+  font-size: 12px;
   color: #94a3b8;
   padding: 3px 10px;
   background: rgba(0, 103, 254, 0.04);
@@ -666,7 +666,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-family: 'Exo 2', sans-serif;
+  font-family: inherit;
 }
 .token-counter i { font-size: 13px; color: #E6A23C; }
 </style>

@@ -31,7 +31,7 @@
           <el-table-column type="index" label="序号" width="55" align="center"></el-table-column>
           <el-table-column label="编号" prop="id" width="90" align="center">
             <template slot-scope="{ row }">
-              <span style="font-family: monospace; font-size: 12px; color: #909399;">{{ row.id }}</span>
+              <span style="font-family: monospace; font-size: 13px; color: #909399;">{{ row.id }}</span>
             </template>
           </el-table-column>
           <el-table-column label="核算对象" prop="calcObject" width="140">
@@ -42,7 +42,7 @@
           <el-table-column label="核算指标（输出）" min-width="160">
             <template slot-scope="{ row }">
               <span style="font-weight: 600; color: var(--text-primary);">{{ row.indicator }}</span>
-              <span style="font-size: 11px; color: var(--text-muted); margin-left: 4px;">({{ row.indicatorUnit }})</span>
+              <span style="font-size: 13px; color: var(--text-muted); margin-left: 4px;">({{ row.indicatorUnit }})</span>
             </template>
           </el-table-column>
           <el-table-column label="计算公式" prop="formula" min-width="220" show-overflow-tooltip>
@@ -389,7 +389,7 @@ export default {
 }
 .page-title i { color: var(--primary); }
 .page-desc {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   margin: 4px 0 0;
 }
@@ -427,7 +427,7 @@ export default {
   line-height: 1.2;
 }
 .stat-label {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   margin-top: 2px;
 }
@@ -487,10 +487,10 @@ export default {
 }
 .empty-state i { font-size: 48px; margin-bottom: 12px; color: var(--text-placeholder); }
 .empty-state p { font-size: 14px; margin: 0 0 4px; }
-.empty-state span { font-size: 12px; }
+.empty-state span { font-size: 13px; }
 .formula-code {
   font-family: 'Courier New', monospace;
-  font-size: 12px;
+  font-size: 13px;
   background: var(--bg-hover, #f5f7fa);
   padding: 2px 6px;
   border-radius: 3px;
@@ -498,7 +498,7 @@ export default {
 }
 .source-batch {
   display: block;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-muted, #a8abb2);
   margin-top: 2px;
 }
@@ -529,7 +529,7 @@ export default {
   margin-bottom: 8px;
 }
 .section-body {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-secondary);
   line-height: 1.8;
   padding: 8px 10px;
@@ -547,7 +547,7 @@ export default {
   margin-bottom: 8px;
 }
 .params-tip {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-muted);
 }
 .params-list {
@@ -563,7 +563,7 @@ export default {
 .params-empty {
   text-align: center;
   padding: 16px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-placeholder);
   background: var(--bg-hover, #f5f7fa);
   border-radius: 4px;

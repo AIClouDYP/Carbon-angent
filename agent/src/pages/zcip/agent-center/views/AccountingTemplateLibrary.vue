@@ -31,7 +31,7 @@
           <el-table-column type="index" label="序号" width="55" align="center"></el-table-column>
           <el-table-column label="编号" prop="id" width="90" align="center">
             <template slot-scope="{ row }">
-              <span style="font-family: monospace; font-size: 12px; color: #909399;">{{ row.id }}</span>
+              <span style="font-family: monospace; font-size: 13px; color: #909399;">{{ row.id }}</span>
             </template>
           </el-table-column>
           <el-table-column label="模板名称" prop="name" min-width="180" show-overflow-tooltip>
@@ -237,7 +237,7 @@ export default {
 }
 .page-title i { color: var(--primary); }
 .page-desc {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   margin: 4px 0 0;
 }
@@ -297,7 +297,7 @@ export default {
 }
 .empty-state i { font-size: 48px; margin-bottom: 12px; color: var(--text-placeholder); }
 .empty-state p { font-size: 14px; margin: 0 0 4px; }
-.empty-state span { font-size: 12px; }
+.empty-state span { font-size: 13px; }
 /* 详情 */
 .template-config-section {
   margin-top: 16px;
@@ -317,7 +317,7 @@ export default {
 }
 .config-body {
   padding: 12px 14px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-secondary);
   line-height: 1.8;
 }

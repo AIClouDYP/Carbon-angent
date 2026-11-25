@@ -1001,12 +1001,12 @@ export default {
 }
 .source-main { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .source-tag {
-  padding: 2px 8px; font-size: 12px; color: #0067FE;
+  padding: 2px 8px; font-size: 13px; color: #0067FE;
   background: #e8f1ff; border-radius: 10px; font-weight: 600;
 }
-.source-text { font-size: 12px; color: #606266; }
+.source-text { font-size: 13px; color: #606266; }
 .source-simulated {
-  padding: 2px 8px; font-size: 12px; color: #b88230;
+  padding: 2px 8px; font-size: 13px; color: #b88230;
   background: #fdf6ec; border-radius: 10px;
 }
 .detail-card {
@@ -1021,7 +1021,7 @@ export default {
 .tab-pane-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 0 2px 16px; }
 .card-title { font-size: 14px; font-weight: 600; color: #303133; margin-bottom: 14px; }
 .card-title i { color: #0067FE; margin-right: 4px; }
-.card-hint { font-size: 12px; font-weight: 400; color: #909399; margin-left: 6px; }
+.card-hint { font-size: 13px; font-weight: 400; color: #909399; margin-left: 6px; }
 .detail-form { max-width: 1100px; }
 
 /* 页头标题内的名称 */
@@ -1041,11 +1041,11 @@ export default {
 .detail-tabs ::v-deep .el-tabs__item { font-size: 14px; height: 42px; line-height: 42px; }
 .tab-count {
   display: inline-block; min-width: 18px; padding: 0 5px; margin-left: 4px;
-  font-size: 11px; line-height: 16px; text-align: center;
+  font-size: 13px; line-height: 16px; text-align: center;
   color: #0067FE; background: #e8f1ff; border-radius: 8px;
 }
 .tab-desc {
-  font-size: 12.5px; color: #909399; line-height: 1.7;
+  font-size: 13px; color: #909399; line-height: 1.7;
   background: #f7f9fc; border-left: 3px solid #d6e4ff; border-radius: 4px;
   padding: 8px 12px; margin-bottom: 14px;
 }
@@ -1053,7 +1053,7 @@ export default {
 /* ===== 标准知识分组 ===== */
 .dim-block { margin-bottom: 16px; padding: 12px 14px; background: #fafbfc; border: 1px solid #eef1f6; border-radius: 6px; }
 .dim-block:last-child { margin-bottom: 0; }
-.dim-label { font-size: 12.5px; font-weight: 600; color: #0067FE; margin-bottom: 8px; }
+.dim-label { font-size: 13px; font-weight: 600; color: #0067FE; margin-bottom: 8px; }
 .dim-group { background: #fff; }
 .dim-group-head {
   display: flex; align-items: center; gap: 10px;
@@ -1062,12 +1062,12 @@ export default {
 }
 .dim-group-index {
   flex-shrink: 0; width: 22px; height: 22px; line-height: 22px; text-align: center;
-  font-size: 11px; font-weight: 600; color: #fff; background: #0067FE; border-radius: 4px;
+  font-size: 13px; font-weight: 600; color: #fff; background: #0067FE; border-radius: 4px;
 }
 .dim-group-name { flex: 1; max-width: 380px; }
 .dim-group-name ::v-deep .el-input__inner { font-weight: 600; color: #303133; font-size: 13px; }
-.dim-group-count { font-size: 12px; color: #909399; flex-shrink: 0; }
-.dim-group-desc { font-size: 12px; color: #a8abb2; margin-bottom: 10px; line-height: 1.6; }
+.dim-group-count { font-size: 13px; color: #909399; flex-shrink: 0; }
+.dim-group-desc { font-size: 13px; color: #a8abb2; margin-bottom: 10px; line-height: 1.6; }
 
 /* 单条知识条目 */
 .dim-item {
@@ -1091,7 +1091,7 @@ export default {
   margin-top: 4px;
 }
 .long-point-count {
-  font-size: 12px;
+  font-size: 13px;
   color: #909399;
 }
 .cell-long-editor {
@@ -1117,8 +1117,8 @@ export default {
 .dim-item-refs { margin-top: 6px; padding-left: 10px; }
 .dim-ref-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
 .dim-ref-row .el-input { flex: 1; max-width: 420px; }
-.dim-ref-icon { color: #94a3b8; font-size: 12px; flex-shrink: 0; }
-.dim-item-refs .el-button--text { font-size: 12px; color: #94a3b8; padding: 2px 0; }
+.dim-ref-icon { color: #94a3b8; font-size: 13px; flex-shrink: 0; }
+.dim-item-refs .el-button--text { font-size: 13px; color: #94a3b8; padding: 2px 0; }
 .dim-item-refs .el-button--text:hover { color: #0067FE; }
 
 /* 表格型分组 */
@@ -1133,7 +1133,7 @@ export default {
 .sub-tabs ::v-deep .el-tabs__header { margin-bottom: 12px; }
 .sub-tabs ::v-deep .el-tabs__item { font-size: 13px; height: 34px; line-height: 34px; }
 .sub-tab-body { padding: 2px 0; }
-.sub-tab-hint { font-size: 12px; color: #a8abb2; margin-top: 8px; line-height: 1.6; }
+.sub-tab-hint { font-size: 13px; color: #a8abb2; margin-top: 8px; line-height: 1.6; }
 
 /* ===== 报告模板 ===== */
 .tpl-file {
@@ -1142,9 +1142,9 @@ export default {
 }
 .tpl-file-icon { color: #67C23A; font-size: 18px; }
 .tpl-file-name { font-size: 13px; color: #303133; font-weight: 500; }
-.tpl-file-meta { font-size: 12px; color: #909399; }
+.tpl-file-meta { font-size: 13px; color: #909399; }
 .tpl-file-empty { display: flex; align-items: center; gap: 10px; }
-.tpl-file-tip { font-size: 12px; color: #a8abb2; }
+.tpl-file-tip { font-size: 13px; color: #a8abb2; }
 .tpl-section { margin-bottom: 14px; padding: 10px 12px; background: #fff; border: 1px solid #e4e7ed; border-radius: 4px; }
 .tpl-section-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .tpl-section-name { flex: 1; max-width: 400px; }
@@ -1160,14 +1160,14 @@ export default {
 .audit-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; min-width: 0; }
 .detail-audit-tip { font-size: 13px; color: #b88230; }
 .detail-audit-tip i { margin-right: 4px; }
-.audit-progress { font-size: 12px; color: #8a611f; background: rgba(255,255,255,.65); padding: 3px 8px; border-radius: 10px; }
+.audit-progress { font-size: 13px; color: #8a611f; background: rgba(255,255,255,.65); padding: 3px 8px; border-radius: 10px; }
 .verify-check { margin-right: 8px; white-space: nowrap; }
-.verify-check ::v-deep .el-checkbox__label { font-size: 12px; color: #606266; }
+.verify-check ::v-deep .el-checkbox__label { font-size: 13px; color: #606266; }
 .section-verify { margin-right: 8px; flex-shrink: 0; }
-.section-verify ::v-deep .el-checkbox__label { font-size: 12px; color: #606266; }
+.section-verify ::v-deep .el-checkbox__label { font-size: 13px; color: #606266; }
 .tab-count-warn {
   color: #e6a23c;
   background: #fdf6ec;
 }
-.empty-hint { font-size: 12px; color: #a8abb2; margin-top: 6px; }
+.empty-hint { font-size: 13px; color: #a8abb2; margin-top: 6px; }
 </style>

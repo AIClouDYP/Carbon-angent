@@ -137,7 +137,7 @@
               <el-tag size="mini" :type="typeTagType(currentDb.type)">{{ currentDb.type }}</el-tag>
               <el-tag size="mini" type="warning" effect="plain" style="margin-left: 8px;">来源优先级 P{{ currentDb.sourceTier || 4 }}</el-tag>
               <el-tag size="mini" type="success" effect="plain" style="margin-left: 8px;">小时级 × 省市级</el-tag>
-              <span style="margin-left: 8px; color: #909399; font-size: 12px;">
+              <span style="margin-left: 8px; color: #909399; font-size: 13px;">
                 {{ currentDb.publisher }} | {{ currentDb.regionCount || 0 }} 个区域 | {{ currentDb.dayCount || 0 }} 天 | {{ (currentDb.records || []).length }} 条记录
               </span>
             </div>
@@ -184,7 +184,7 @@
         <el-select v-model="tsFilterRegion" placeholder="区域" size="small" clearable filterable style="width: 160px; margin-left: 8px;">
           <el-option v-for="r in tsRegionOptions" :key="r.code" :label="r.name" :value="r.code">
             <span>{{ r.name }}</span>
-            <span style="float: right; color: #8492a6; font-size: 12px;">{{ levelLabel(r.level) }}</span>
+            <span style="float: right; color: #8492a6; font-size: 13px;">{{ levelLabel(r.level) }}</span>
           </el-option>
         </el-select>
         <el-date-picker
@@ -229,7 +229,7 @@
             <el-table-column label="碳排放因子" width="160" align="right">
               <template slot-scope="{ row }">
                 <span :style="{ color: intensityColor(row.value), fontWeight: 600 }">{{ row.value }}</span>
-                <span class="code-font" style="font-size: 11px; color: #909399; margin-left: 2px;">kgCO₂e/kWh</span>
+                <span class="code-font" style="font-size: 13px; color: #909399; margin-left: 2px;">kgCO₂e/kWh</span>
               </template>
             </el-table-column>
             <el-table-column label="数据来源" prop="source" min-width="200" show-overflow-tooltip></el-table-column>
@@ -389,7 +389,7 @@
             <div class="db-meta">
               <el-tag size="mini" :type="typeTagType(currentDb.type)">{{ currentDb.type }}</el-tag>
               <el-tag size="mini" type="warning" effect="plain" style="margin-left: 8px;">来源优先级 P{{ currentDb.sourceTier || 4 }}</el-tag>
-              <span style="margin-left: 8px; color: #909399; font-size: 12px;">
+              <span style="margin-left: 8px; color: #909399; font-size: 13px;">
                 {{ currentDb.publisher }} | 覆盖地区：{{ currentDb.region }} | 版本：{{ currentDb.version }} | {{ currentDb.factors.length }}条因子
               </span>
             </div>
@@ -430,7 +430,7 @@
               </div>
               <div v-if="isGwpDb" class="fp-tags">
                 <label>使用说明</label>
-                <span style="color: #909399; font-size: 12px;">GWP系数为折算参数，不参与智能体活动匹配；由核算引擎在分气体因子折算CO₂e时按标准要求的GWP版本调用（如CBAM用AR5、国内新标准用AR6）。</span>
+                <span style="color: #909399; font-size: 13px;">GWP系数为折算参数，不参与智能体活动匹配；由核算引擎在分气体因子折算CO₂e时按标准要求的GWP版本调用（如CBAM用AR5、国内新标准用AR6）。</span>
               </div>
               <div v-else class="fp-tags">
                 <label>匹配关键词</label>
@@ -651,7 +651,7 @@
           <el-col :span="12">
             <el-form-item label="DQR评分">
               <el-input-number v-model="factorForm.dqr" :min="1" :max="5" :step="0.5" size="small" style="width: 120px;"></el-input-number>
-              <span style="margin-left: 8px; color: #909399; font-size: 12px;">1~5分</span>
+              <span style="margin-left: 8px; color: #909399; font-size: 13px;">1~5分</span>
             </el-form-item>
           </el-col>
         </el-row>
@@ -2118,16 +2118,16 @@ export default {
 
 /* 因子匹配规则配置 */
 .rule-toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-.rule-tip { margin-left: auto; font-size: 12px; color: #909399; }
+.rule-tip { margin-left: auto; font-size: 13px; color: #909399; }
 .rule-table-scroll { max-height: 60vh; overflow-y: auto; }
-.rule-table-scroll .el-input__inner { padding: 0 6px; font-size: 12px; }
+.rule-table-scroll .el-input__inner { padding: 0 6px; font-size: 13px; }
 .stats-row { display: flex; gap: 16px; margin-bottom: 16px; flex-shrink: 0; }
 .stat-card {
   flex: 1; background: #fff; border-radius: 8px; padding: 16px 20px;
   border: 1px solid #ebeef5; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 .stat-num { font-size: 28px; font-weight: 700; color: #303133; }
-.stat-label { font-size: 12px; color: #909399; margin-top: 4px; }
+.stat-label { font-size: 13px; color: #909399; margin-top: 4px; }
 .stat-green .stat-num { color: #67C23A; }
 .stat-blue .stat-num { color: #409EFF; }
 .stat-orange .stat-num { color: #E6A23C; }
@@ -2135,8 +2135,8 @@ export default {
 .btn-danger { color: #f56c6c; }
 .btn-danger:hover { color: #f78989; }
 .ef-value { font-weight: 600; color: #0067FE; }
-.ef-unit { font-size: 11px; color: #909399; }
-.code-font { font-family: 'Consolas', 'Monaco', monospace; font-size: 12px; color: #909399; }
+.ef-unit { font-size: 13px; color: #909399; }
+.code-font { font-family: 'Consolas', 'Monaco', monospace; font-size: 13px; color: #909399; }
 
 /* 第二层详情页头 */
 .db-detail-header {
@@ -2149,7 +2149,7 @@ export default {
 .db-name { font-size: 18px; font-weight: 600; color: #303133; }
 .db-meta { display: flex; align-items: center; margin-top: 4px; }
 .db-format-desc {
-  margin-top: 6px; font-size: 12px; color: #67C23A; line-height: 1.5;
+  margin-top: 6px; font-size: 13px; color: #67C23A; line-height: 1.5;
 }
 .db-format-desc i { margin-right: 4px; }
 
@@ -2158,14 +2158,14 @@ export default {
 .fp-grid {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 24px; margin-bottom: 10px;
 }
-.fp-item { display: flex; align-items: baseline; gap: 8px; font-size: 12px; }
+.fp-item { display: flex; align-items: baseline; gap: 8px; font-size: 13px; }
 .fp-item label { color: #909399; white-space: nowrap; min-width: 84px; }
 .fp-item span { color: #303133; font-weight: 500; }
 .fp-tags { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
-.fp-tags label { font-size: 12px; color: #909399; margin-right: 4px; }
+.fp-tags label { font-size: 13px; color: #909399; margin-right: 4px; }
 .fp-tag { margin-right: 2px; }
-.fp-en { font-size: 12px; color: #909399; font-style: italic; }
-.fp-unc { font-size: 12px; color: #909399; font-family: 'Consolas', 'Monaco', monospace; }
+.fp-en { font-size: 13px; color: #909399; font-style: italic; }
+.fp-unc { font-size: 13px; color: #909399; font-family: 'Consolas', 'Monaco', monospace; }
 
 /* 数据质量三态 */
 .q-dqr { display: flex; align-items: center; gap: 6px; justify-content: center; }
@@ -2173,7 +2173,7 @@ export default {
 .prefill-bar {
   display: flex; align-items: center; gap: 8px; background: #f0f9eb;
   border: 1px solid #e1f3d8; border-radius: 6px; padding: 8px 12px; margin-bottom: 14px;
-  font-size: 12px; color: #67C23A; line-height: 1.5;
+  font-size: 13px; color: #67C23A; line-height: 1.5;
 }
 .prefill-bar i { color: #00A8A0; flex-shrink: 0; }
 .prefill-bar span { flex: 1; }
@@ -2183,7 +2183,7 @@ export default {
 .import-tip {
   display: flex; align-items: flex-start; gap: 8px; background: #f0f7ff;
   border-radius: 8px; padding: 10px 12px; margin-bottom: 14px;
-  font-size: 12.5px; color: #606266; line-height: 1.7;
+  font-size: 13px; color: #606266; line-height: 1.7;
 }
 .import-tip i { color: #0067FE; margin-top: 3px; flex-shrink: 0; }
 .import-drop {
@@ -2194,23 +2194,23 @@ export default {
 .import-drop i { font-size: 36px; color: #c0c4cc; margin-bottom: 8px; }
 .import-drop:hover i { color: #0067FE; }
 .import-drop-text { font-size: 13px; color: #606266; margin-bottom: 4px; }
-.import-drop-hint { font-size: 11px; color: #94a3b8; }
+.import-drop-hint { font-size: 13px; color: #94a3b8; }
 .import-preview { padding: 0; }
-.import-more { font-size: 12px; color: #909399; padding: 6px 0; }
+.import-more { font-size: 13px; color: #909399; padding: 6px 0; }
 .import-errors { margin-top: 10px; padding: 8px 12px; background: #fef0f0; border-radius: 6px; }
-.import-errors-title { font-size: 12.5px; color: #F56C6C; font-weight: 600; margin-bottom: 4px; }
-.import-error-row { font-size: 12px; color: #909399; line-height: 1.8; }
+.import-errors-title { font-size: 13px; color: #F56C6C; font-weight: 600; margin-bottom: 4px; }
+.import-error-row { font-size: 13px; color: #909399; line-height: 1.8; }
 /* 智能体活动标识建议 */
 .aid-pop { padding: 4px; }
-.aid-pop-title { font-size: 12.5px; color: #0067FE; font-weight: 600; padding: 4px 8px 8px; }
+.aid-pop-title { font-size: 13px; color: #0067FE; font-weight: 600; padding: 4px 8px 8px; }
 .aid-cand {
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
   padding: 6px 8px; border-radius: 4px; cursor: pointer; transition: background 0.15s;
 }
 .aid-cand:hover { background: rgba(0,103,254,0.06); }
-.aid-empty { font-size: 12px; color: #C0C4CC; text-align: center; padding: 12px; }
+.aid-empty { font-size: 13px; color: #C0C4CC; text-align: center; padding: 12px; }
 .aid-sug { color: #00A8A0; }
-.q-num { font-size: 12px; font-weight: 700; color: #0067FE; font-family: 'Consolas', monospace; }
+.q-num { font-size: 13px; font-weight: 700; color: #0067FE; font-family: 'Consolas', monospace; }
 .q-bar { width: 40px; height: 5px; border-radius: 3px; background: #ebeef5; overflow: hidden; }
 .q-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #67C23A, #0067FE); }
 
@@ -2273,7 +2273,7 @@ export default {
 }
 .empty-state i { font-size: 48px; margin-bottom: 12px; color: var(--text-placeholder); }
 .empty-state p { font-size: 14px; margin: 0 0 4px; }
-.empty-state span { font-size: 12px; }
+.empty-state span { font-size: 13px; }
 
 /* ============ 分时分区电碳因子库 ============ */
 .ts-overview {
@@ -2290,7 +2290,7 @@ export default {
   box-shadow: var(--shadow-card);
 }
 .ts-ov-label {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   margin-bottom: 4px;
 }
@@ -2305,7 +2305,7 @@ export default {
   font-weight: 500;
 }
 .ts-ov-unit {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 400;
   color: var(--text-muted);
   margin-left: 2px;
@@ -2323,7 +2323,7 @@ export default {
   align-items: center;
   flex-wrap: wrap;
   gap: 6px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-secondary);
 }
 .ts-import-summary {
@@ -2344,14 +2344,14 @@ export default {
   color: var(--text-primary);
 }
 .ts-is-num.ts-is-sm {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
   line-height: 1.3;
 }
 .ts-is-item.ts-is-ok .ts-is-num { color: #67C23A; }
 .ts-is-item.ts-is-err .ts-is-num { color: #F56C6C; }
 .ts-is-label {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-muted);
   margin-top: 2px;
 }
@@ -2364,7 +2364,7 @@ export default {
 .ts-det-row {
   display: flex;
   gap: 10px;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.9;
   color: var(--text-primary);
 }
@@ -2382,7 +2382,7 @@ export default {
 }
 .ts-err-header {
   padding: 8px 12px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: #F56C6C;
   border-bottom: 1px solid #FDE2E2;
@@ -2394,12 +2394,12 @@ export default {
   padding: 8px 12px;
 }
 .ts-err-item {
-  font-size: 12px;
+  font-size: 13px;
   color: #C45656;
   line-height: 1.8;
 }
 .ts-err-more {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   padding-top: 4px;
 }
@@ -2410,7 +2410,7 @@ export default {
 }
 .ts-prev-header {
   padding: 8px 12px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
   background: var(--bg-subtle);

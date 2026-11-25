@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div id="app-wrapper">
     <!-- 第一层：系统标题栏（底图 + 叠加系统名称 + 按钮组） -->
     <header class="sys-header">
@@ -522,7 +522,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 .toggle-label {
   writing-mode: vertical-rl;
   text-orientation: upright;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 2px;
   color: rgba(150, 195, 235, 0.85);
   font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
@@ -530,7 +530,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 }
 
 .toggle-arrow {
-  font-size: 8px;
+  font-size: 11px;
   color: rgba(120, 175, 220, 0.7);
   line-height: 1;
   margin-top: 2px;
@@ -649,7 +649,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
   flex: 1;
 }
 .nav-item-arrow {
-  font-size: 12px;
+  font-size: 13px;
   color: #8ba8bf;
   transition: transform 0.25s ease;
   margin-left: auto;
