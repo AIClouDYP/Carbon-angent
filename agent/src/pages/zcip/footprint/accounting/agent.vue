@@ -1388,22 +1388,22 @@
                       <div class="process-col input-col">
                         <div v-for="(inp, ii) in proc.inputs" :key="inp.flowId || ii" class="io-item input-item">
                           <div class="io-bubble editable-bubble model-flow-bubble">
-                            <div class="model-flow-row">
+                            <div class="model-flow-row model-flow-head-row">
                               <el-select v-model="inp.listType" size="mini" class="io-edit-listtype" @change="onModelFlowTypeChange(inp, 'inputs')">
                                 <el-option v-for="opt in inputTypeOptions" :key="opt.value" :label="opt.label" :value="opt.value"></el-option>
                               </el-select>
+                              <span class="model-flow-code" :title="inp.flowCode || modelFlowShortCode(inp, 'inputs', ii)">{{ inp.flowCode || modelFlowShortCode(inp, 'inputs', ii) }}</span>
+                            </div>
+                            <div class="model-flow-row model-flow-name-row">
                               <el-input v-if="inp.linkMode !== 'reference'" v-model="inp.name" size="mini" class="io-edit-name" placeholder="输入内容" @input="invalidateModelValidation"></el-input>
                               <el-select v-else v-model="inp.sourceFlowRef" size="mini" class="io-edit-name" filterable placeholder="选择上游输出流" @change="onModelFlowRefChange(inp)">
                                 <el-option v-for="ref in upstreamOutputFlowOptions(gi, pi)" :key="ref.value" :label="ref.label" :value="ref.value"></el-option>
                               </el-select>
                               <el-tooltip content="手工输入 / 引用其他单元过程的输出流" placement="top">
-                                <i :class="['el-icon-connection', 'model-flow-link-toggle', { active: inp.linkMode === 'reference' }]" @click="toggleModelFlowLink(inp, 'inputs')"></i>
+                                <i :class="['el-icon-connection', 'model-flow-link-toggle', { active: inp.linkMode === 'reference' }]" title="切换来源方式" @click="toggleModelFlowLink(inp, 'inputs')"></i>
                               </el-tooltip>
                               <i class="el-icon-setting model-flow-settings" title="流属性" @click="openModelFlowDrawer(gi, pi, 'inputs', ii)"></i>
-                              <i class="el-icon-close io-del-btn" @click="removeIO(proc, 'inputs', ii)"></i>
-                            </div>
-                            <div class="model-flow-meta">
-                              <span class="model-flow-code">{{ inp.flowCode || modelFlowShortCode(inp, 'inputs', ii) }}</span>
+                              <i class="el-icon-close io-del-btn" title="删除输入流" @click="removeIO(proc, 'inputs', ii)"></i>
                             </div>
                             <div v-if="inp.linkMode === 'reference'" class="model-flow-ref-hint">
                               <i class="el-icon-link"></i> {{ referencedFlowLabel(inp) || '请选择上游单元过程的输出流' }}
@@ -1435,16 +1435,16 @@
                       <div class="process-col output-col">
                         <div v-for="(out, oi) in proc.outputs" :key="out.flowId || oi" class="io-item output-item">
                           <div class="io-bubble editable-bubble model-flow-bubble">
-                            <div class="model-flow-row">
+                            <div class="model-flow-row model-flow-head-row">
                               <el-select v-model="out.listType" size="mini" class="io-edit-listtype" @change="onModelFlowTypeChange(out, 'outputs')">
                                 <el-option v-for="opt in outputTypeOptions" :key="opt.value" :label="opt.label" :value="opt.value"></el-option>
                               </el-select>
+                              <span class="model-flow-code" :title="out.flowCode || modelFlowShortCode(out, 'outputs', oi)">{{ out.flowCode || modelFlowShortCode(out, 'outputs', oi) }}</span>
+                            </div>
+                            <div class="model-flow-row model-flow-name-row">
                               <el-input v-model="out.name" size="mini" class="io-edit-name" placeholder="输出内容" @input="invalidateModelValidation"></el-input>
                               <i class="el-icon-setting model-flow-settings" title="流属性" @click="openModelFlowDrawer(gi, pi, 'outputs', oi)"></i>
-                              <i class="el-icon-close io-del-btn" @click="removeIO(proc, 'outputs', oi)"></i>
-                            </div>
-                            <div class="model-flow-meta">
-                              <span class="model-flow-code">{{ out.flowCode || modelFlowShortCode(out, 'outputs', oi) }}</span>
+                              <i class="el-icon-close io-del-btn" title="删除输出流" @click="removeIO(proc, 'outputs', oi)"></i>
                             </div>
                           </div>
                         </div>
@@ -1725,38 +1725,88 @@
         <el-button size="small" @click="tsDetailVisible = false">关闭</el-button>
       </div>
     </el-dialog>
-    <el-drawer title="单元过程属性" :visible.sync="modelProcessDrawerVisible" direction="rtl" size="420px" custom-class="model-attr-drawer">
-      <div v-if="modelProcessDrawerProcess" class="model-attr-form">
-        <div class="model-attr-head"><span class="model-attr-code">{{ processDisplayCode(modelProcessDrawerStageIndex, modelProcessDrawerProcessIndex, modelProcessDrawerProcess) }}</span><div><strong>{{ modelProcessDrawerProcess.name || '未命名单元过程' }}</strong><span>{{ modelProcessDrawerStage ? modelProcessDrawerStage.title : '' }}</span></div></div>
-        <el-form label-position="top" size="small">
-          <el-form-item label="过程名称"><el-input v-model="modelProcessDrawerProcess.name"></el-input></el-form-item>
-          <el-form-item label="上游单元过程编号（如有）"><el-select v-model="modelProcessDrawerProcess.upstreamProcessCode" clearable filterable placeholder="无上游过程" style="width:100%;"><el-option v-for="item in upstreamProcessOptions(modelProcessDrawerStageIndex, modelProcessDrawerProcessIndex)" :key="item.value" :label="item.label" :value="item.value"></el-option></el-select></el-form-item>
-          <el-form-item label="分配规则"><el-select v-model="modelProcessDrawerProcess.allocation" style="width:100%;" @change="onProcAllocationChange(modelProcessDrawerProcess)"><el-option label="质量分配" value="mass"></el-option><el-option label="经济分配" value="economic"></el-option><el-option label="能源分配" value="energy"></el-option><el-option label="物理分配" value="physical"></el-option><el-option label="不适用" value="none"></el-option></el-select></el-form-item>
-          <el-form-item v-if="modelProcessDrawerProcess.allocation && modelProcessDrawerProcess.allocation !== 'mass'" label="分配说明"><el-input v-model="modelProcessDrawerProcess.allocationRemark" type="textarea" :rows="2"></el-input></el-form-item>
-          <el-form-item label="需采集活动数据"><el-input v-model="modelProcessDrawerProcess.dataRequirement" placeholder="只记录要求，不录入数值"></el-input></el-form-item>
-          <el-form-item label="需匹配因子类别"><el-input v-model="modelProcessDrawerProcess.factorCategory" placeholder="只记录类别，不录入因子值"></el-input></el-form-item>
-          <el-form-item label="备注"><el-input v-model="modelProcessDrawerProcess.note" type="textarea" :rows="3"></el-input></el-form-item>
-        </el-form>
-        <div class="model-attr-tip"><i class="el-icon-info"></i> 修改属性后模型状态变为待重新校核；本阶段不录入活动数据和因子值。</div>
+    <el-drawer title="单元过程属性" :visible.sync="modelProcessDrawerVisible" direction="rtl" size="min(92vw, 520px)" custom-class="model-attr-drawer" :with-header="false" append-to-body @opened="focusModelProcessDrawer" @closed="discardModelProcessDrawerDraft">
+      <div v-if="modelProcessDrawerDraft" class="model-attr-shell">
+        <header class="model-attr-topbar">
+          <div><span class="model-attr-kicker">阶段 3 · 核算模型</span><span class="model-attr-topbar-title">单元过程属性</span></div>
+          <button type="button" class="model-attr-close" aria-label="关闭单元过程属性" @click="closeModelProcessDrawer"><i class="el-icon-close"></i></button>
+        </header>
+        <div class="model-attr-identity">
+          <span class="model-attr-identity-icon"><i class="el-icon-cpu"></i></span>
+          <div class="model-attr-identity-copy">
+            <div class="model-attr-identity-meta"><span class="model-attr-code">{{ processDisplayCode(modelProcessDrawerStageIndex, modelProcessDrawerProcessIndex, modelProcessDrawerProcess) }}</span><span v-if="modelProcessDrawerStage" class="model-attr-stage">{{ modelProcessDrawerStage.title }}</span></div>
+            <h2 :title="modelProcessDrawerDraft.name">{{ modelProcessDrawerDraft.name || '未命名单元过程' }}</h2>
+            <p><span>{{ (modelProcessDrawerDraft.inputs || []).length }} 项输入</span><span>{{ (modelProcessDrawerDraft.outputs || []).length }} 项输出</span></p>
+          </div>
+        </div>
+        <div class="model-attr-scroll">
+          <el-form label-position="top" size="small" class="model-attr-fields">
+            <section class="model-attr-section">
+              <div class="model-attr-section-head"><h3><span>01</span>基础信息</h3><small>过程识别与工艺类型</small></div>
+              <el-form-item label="过程名称" required><el-input ref="modelProcessNameInput" v-model="modelProcessDrawerDraft.name" maxlength="80" show-word-limit placeholder="请输入单元过程名称"></el-input></el-form-item>
+              <el-form-item label="过程类型"><el-select v-model="modelProcessDrawerDraft.processType" class="model-attr-control"><el-option v-for="item in processTypeOptions" :key="item.value" :label="item.label" :value="item.value"></el-option></el-select></el-form-item>
+              <el-form-item label="分配规则"><el-select v-model="modelProcessDrawerDraft.allocation" class="model-attr-control" @change="onProcAllocationChange(modelProcessDrawerDraft)"><el-option label="质量分配" value="mass"></el-option><el-option label="经济分配" value="economic"></el-option><el-option label="能源分配" value="energy"></el-option><el-option label="物理分配" value="physical"></el-option><el-option label="不适用" value="none"></el-option></el-select></el-form-item>
+              <el-form-item v-if="modelProcessDrawerDraft.allocation && modelProcessDrawerDraft.allocation !== 'mass'" label="分配说明"><el-input v-model="modelProcessDrawerDraft.allocationRemark" type="textarea" :rows="2" maxlength="240" show-word-limit></el-input></el-form-item>
+            </section>
+            <section class="model-attr-section">
+              <div class="model-attr-section-head"><h3><span>02</span>结构关联</h3><small>工艺拓扑位置</small></div>
+              <el-form-item label="上游单元过程"><el-select v-model="modelProcessDrawerDraft.upstreamProcessCode" class="model-attr-control" clearable filterable placeholder="无上游过程，可作为链路起点"><el-option v-for="item in upstreamProcessOptions(modelProcessDrawerStageIndex, modelProcessDrawerProcessIndex)" :key="item.value" :label="item.label" :value="item.value"></el-option></el-select><div class="model-attr-field-help">仅建立过程级关系；具体物料或能源流向请在「流属性」中维护。</div></el-form-item>
+              <div class="model-attr-relation-card" :class="{ 'is-empty': !modelProcessDrawerDraft.upstreamProcessCode }"><i :class="modelProcessDrawerDraft.upstreamProcessCode ? 'el-icon-link' : 'el-icon-minus'"></i><div><span>当前上游</span><strong>{{ modelProcessUpstreamLabel || '未设置上游过程' }}</strong></div></div>
+            </section>
+            <section class="model-attr-section">
+              <div class="model-attr-section-head"><h3><span>03</span>补充说明</h3><small>边界判定或工艺说明</small></div>
+              <el-form-item label="过程备注"><el-input v-model="modelProcessDrawerDraft.note" type="textarea" :rows="3" maxlength="500" show-word-limit placeholder="补充该过程的工艺口径或模型说明"></el-input></el-form-item>
+            </section>
+          </el-form>
+          <div class="model-attr-tip"><i class="el-icon-info"></i> 保存后更新模型并使已有校核结果失效；活动数据与排放因子分别在阶段 4、阶段 5 录入。</div>
+        </div>
+        <footer class="model-attr-footer"><span><i class="el-icon-warning-outline"></i> 取消将放弃本次修改</span><div><el-button size="small" @click="closeModelProcessDrawer">取消</el-button><el-button size="small" type="primary" @click="saveModelProcessDrawer">保存属性</el-button></div></footer>
       </div>
-      <div slot="footer" class="dialog-footer"><el-button size="small" @click="modelProcessDrawerVisible = false">取消</el-button><el-button size="small" type="primary" @click="saveModelProcessDrawer">保存属性</el-button></div>
     </el-drawer>
-    <el-drawer title="流属性" :visible.sync="modelFlowDrawerVisible" direction="rtl" size="420px" custom-class="model-attr-drawer">
-      <div v-if="modelFlowDrawerFlow" class="model-attr-form">
-        <div class="model-attr-head"><span class="model-attr-code">{{ modelFlowDrawerFlow.flowCode || (modelFlowDrawerType === 'inputs' ? '输入流' : '输出流') }}</span><div><strong>{{ modelFlowDrawerFlow.name || '未命名流' }}</strong><span>{{ modelFlowDrawerProcess ? (processDisplayCode(modelFlowDrawerStageIndex, modelFlowDrawerProcessIndex, modelFlowDrawerProcess) + ' · ' + modelFlowDrawerProcess.name) : '' }}</span></div></div>
-        <el-form label-position="top" size="small">
-          <el-form-item label="流类型"><el-select v-model="modelFlowDrawerFlow.listType" style="width:100%;" @change="onModelFlowTypeChange(modelFlowDrawerFlow, modelFlowDrawerType)"><el-option v-for="item in (modelFlowDrawerType === 'inputs' ? inputTypeOptions : outputTypeOptions)" :key="item.value" :label="item.label" :value="item.value"></el-option></el-select></el-form-item>
-          <el-form-item label="流名称"><el-input v-model="modelFlowDrawerFlow.name"></el-input></el-form-item>
-          <el-form-item v-if="modelFlowDrawerType === 'inputs'" label="上游来源"><el-select v-model="modelFlowDrawerFlow.sourceFlowRef" clearable filterable placeholder="手工输入时留空" style="width:100%;" @change="onModelFlowRefChange(modelFlowDrawerFlow)"><el-option v-for="item in upstreamOutputFlowOptions(modelFlowDrawerStageIndex, modelFlowDrawerProcessIndex)" :key="item.value" :label="item.label" :value="item.value"></el-option></el-select></el-form-item>
-          <el-form-item v-if="modelFlowDrawerType === 'outputs'" label="下游去向"><el-select v-model="modelFlowDrawerFlow.targetFlowRef" clearable filterable placeholder="可留空，后续阶段关联" style="width:100%;"><el-option v-for="item in downstreamProcessOptions(modelFlowDrawerStageIndex, modelFlowDrawerProcessIndex)" :key="item.value" :label="item.label" :value="item.value"></el-option></el-select></el-form-item>
-          <el-form-item label="计量单位"><el-input v-model="modelFlowDrawerFlow.unit"></el-input></el-form-item>
-          <el-form-item label="备注"><el-input v-model="modelFlowDrawerFlow.note" type="textarea" :rows="2"></el-input></el-form-item>
-        </el-form>
-        <div class="model-attr-tip"><i class="el-icon-info"></i> 本阶段只固化流的结构属性；数量与排放因子分别在阶段4、阶段5录入。</div>
+    <el-drawer title="流属性" :visible.sync="modelFlowDrawerVisible" direction="rtl" size="min(92vw, 520px)" custom-class="model-attr-drawer" :with-header="false" append-to-body @opened="focusModelFlowDrawer" @closed="discardModelFlowDrawerDraft">
+      <div v-if="modelFlowDrawerDraft" class="model-attr-shell">
+        <header class="model-attr-topbar">
+          <div><span class="model-attr-kicker">阶段 3 · 核算模型</span><span class="model-attr-topbar-title">流属性</span></div>
+          <button type="button" class="model-attr-close" aria-label="关闭流属性" @click="closeModelFlowDrawer"><i class="el-icon-close"></i></button>
+        </header>
+        <div class="model-attr-identity" :class="modelFlowDrawerType === 'inputs' ? 'is-input' : 'is-output'">
+          <span class="model-attr-identity-icon"><i :class="modelFlowDrawerType === 'inputs' ? 'el-icon-bottom' : 'el-icon-top'"></i></span>
+          <div class="model-attr-identity-copy">
+            <div class="model-attr-identity-meta"><span class="model-attr-code">{{ modelFlowDrawerDraft.flowCode || (modelFlowDrawerType === 'inputs' ? '输入流' : '输出流') }}</span><span class="model-attr-direction-tag" :class="modelFlowDrawerType === 'inputs' ? 'is-input' : 'is-output'">{{ modelFlowDrawerType === 'inputs' ? '输入流' : '输出流' }}</span><span class="model-attr-stage">{{ getListTypeLabel(modelFlowDrawerDraft.listType) || '未分类' }}</span></div>
+            <h2 :title="modelFlowDrawerDraft.name">{{ modelFlowDrawerDraft.name || '未命名流' }}</h2>
+            <p v-if="modelFlowDrawerProcess"><span>{{ processDisplayCode(modelFlowDrawerStageIndex, modelFlowDrawerProcessIndex, modelFlowDrawerProcess) }}</span><span>/</span><span>{{ modelFlowDrawerProcess.name }}</span></p>
+          </div>
+        </div>
+        <div class="model-attr-scroll">
+          <el-form label-position="top" size="small" class="model-attr-fields">
+            <section class="model-attr-section">
+              <div class="model-attr-section-head"><h3><span>01</span>基础信息</h3><small>名称、分类与计量口径</small></div>
+              <el-form-item label="流名称" required><el-input ref="modelFlowNameInput" v-model="modelFlowDrawerDraft.name" maxlength="80" show-word-limit placeholder="请输入流名称"></el-input></el-form-item>
+              <el-form-item label="流类型"><el-select v-model="modelFlowDrawerDraft.listType" class="model-attr-control" @change="onModelFlowDrawerTypeChange"><el-option v-for="item in (modelFlowDrawerType === 'inputs' ? inputTypeOptions : outputTypeOptions)" :key="item.value" :label="item.label" :value="item.value"></el-option></el-select></el-form-item>
+              <el-form-item label="计量单位"><el-select v-model="modelFlowDrawerDraft.unit" class="model-attr-control" filterable allow-create default-first-option clearable placeholder="选择或输入单位"><el-option v-for="unit in modelUnitOptions" :key="unit" :label="unit" :value="unit"></el-option></el-select></el-form-item>
+            </section>
+            <section class="model-attr-section">
+              <div class="model-attr-section-head"><h3><span>02</span>{{ modelFlowDrawerType === 'inputs' ? '来源关联' : '去向关联' }}</h3><small>{{ modelFlowDrawerType === 'inputs' ? '手工录入或引用上游' : '可指定下游承接过程' }}</small></div>
+              <template v-if="modelFlowDrawerType === 'inputs'">
+                <el-form-item label="来源方式"><el-radio-group v-model="modelFlowDrawerDraft.linkMode" class="model-attr-radio-group" @change="onModelFlowDrawerLinkModeChange"><el-radio-button label="manual">手工输入</el-radio-button><el-radio-button label="reference">关联上游输出</el-radio-button></el-radio-group></el-form-item>
+                <el-form-item v-if="modelFlowDrawerDraft.linkMode === 'reference'" label="上游输出流" required><el-select v-model="modelFlowDrawerDraft.sourceFlowRef" class="model-attr-control" clearable filterable placeholder="选择上游单元过程的输出流" @change="onModelFlowDrawerRefChange"><el-option v-for="item in upstreamOutputFlowOptions(modelFlowDrawerStageIndex, modelFlowDrawerProcessIndex)" :key="item.value" :label="item.label" :value="item.value"></el-option></el-select><div class="model-attr-field-help">选择后同步上游流名称与单位，并在模型清单中显示关联关系。</div></el-form-item>
+                <div class="model-attr-relation-card" :class="{ 'is-empty': modelFlowDrawerDraft.linkMode !== 'reference' || !modelFlowDrawerDraft.sourceFlowRef }"><i :class="modelFlowDrawerDraft.sourceFlowRef ? 'el-icon-link' : 'el-icon-edit-outline'"></i><div><span>{{ modelFlowDrawerDraft.sourceFlowRef ? '已关联上游输出' : '当前为手工输入' }}</span><strong>{{ modelFlowDrawerDraft.sourceFlowRef ? (referencedFlowLabel(modelFlowDrawerDraft) || modelFlowDrawerDraft.sourceFlowRef) : '后续直接录入活动数据，无需绑定上游流' }}</strong></div></div>
+              </template>
+              <template v-else>
+                <el-form-item label="下游去向"><el-select v-model="modelFlowDrawerDraft.targetFlowRef" class="model-attr-control" clearable filterable placeholder="可留空，后续阶段再关联"><el-option v-for="item in downstreamProcessOptions(modelFlowDrawerStageIndex, modelFlowDrawerProcessIndex)" :key="item.value" :label="item.label" :value="item.value"></el-option></el-select><div class="model-attr-field-help">用于表达输出流的下游承接过程；留空不影响本阶段保存。</div></el-form-item>
+                <div class="model-attr-relation-card" :class="{ 'is-empty': !modelFlowDrawerDraft.targetFlowRef }"><i :class="modelFlowDrawerDraft.targetFlowRef ? 'el-icon-right' : 'el-icon-minus'"></i><div><span>当前下游</span><strong>{{ modelFlowTargetLabel || '尚未指定下游过程' }}</strong></div></div>
+              </template>
+            </section>
+            <section class="model-attr-section">
+              <div class="model-attr-section-head"><h3><span>03</span>补充说明</h3><small>计量口径、来源或待确认事项</small></div>
+              <el-form-item label="流备注"><el-input v-model="modelFlowDrawerDraft.note" type="textarea" :rows="3" maxlength="500" show-word-limit placeholder="补充该流的计量口径、凭证来源或关联说明"></el-input></el-form-item>
+            </section>
+          </el-form>
+          <div class="model-attr-tip"><i class="el-icon-info"></i> 本阶段只固化流的结构属性；数量与排放因子分别在阶段 4、阶段 5 录入。</div>
+        </div>
+        <footer class="model-attr-footer"><span><i class="el-icon-warning-outline"></i> 取消将放弃本次修改</span><div><el-button size="small" @click="closeModelFlowDrawer">取消</el-button><el-button size="small" type="primary" @click="saveModelFlowDrawer">保存属性</el-button></div></footer>
       </div>
-      <div slot="footer" class="dialog-footer"><el-button size="small" @click="modelFlowDrawerVisible = false">取消</el-button><el-button size="small" type="primary" @click="saveModelFlowDrawer">保存属性</el-button></div>
     </el-drawer>
-
   </div>
 </template>
 

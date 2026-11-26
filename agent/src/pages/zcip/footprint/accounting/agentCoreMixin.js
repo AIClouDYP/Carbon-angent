@@ -155,11 +155,14 @@ import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
       modelProcessDrawerVisible: false,
       modelProcessDrawerStageIndex: 0,
       modelProcessDrawerProcessIndex: 0,
+      modelProcessDrawerDraft: null,
       modelFlowDrawerVisible: false,
       modelFlowDrawerStageIndex: 0,
       modelFlowDrawerProcessIndex: 0,
       modelFlowDrawerType: 'inputs',
       modelFlowDrawerIndex: 0,
+      modelFlowDrawerDraft: null,
+      modelUnitOptions: ['kg', 't', 'g', 'kWh', 'MWh', 'MJ', 'Nm³', 'm³', 'L', 't·km', '件', '台', '套', 'm²', 'km'],
       processTypeOptions: [
         { value: 'material_acquisition', label: '物料获取' },
         { value: 'production', label: '生产工序' },
@@ -242,6 +245,13 @@ import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
       const stage = this.modelProcessDrawerStage
       return stage && (stage.processes || [])[this.modelProcessDrawerProcessIndex]
     },
+    modelProcessUpstreamLabel() {
+      const draft = this.modelProcessDrawerDraft
+      if (!draft || !draft.upstreamProcessCode) return ''
+      const option = this.upstreamProcessOptions(this.modelProcessDrawerStageIndex, this.modelProcessDrawerProcessIndex)
+        .find(item => item.value === draft.upstreamProcessCode)
+      return option ? option.label : draft.upstreamProcessCode
+    },
     modelFlowDrawerStage() {
       return (this.modelStages || [])[this.modelFlowDrawerStageIndex] || null
     },
@@ -253,6 +263,13 @@ import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
       const proc = this.modelFlowDrawerProcess
       const list = proc && proc[this.modelFlowDrawerType]
       return list && list[this.modelFlowDrawerIndex]
+    },
+    modelFlowTargetLabel() {
+      const draft = this.modelFlowDrawerDraft
+      if (!draft || !draft.targetFlowRef) return ''
+      const option = this.downstreamProcessOptions(this.modelFlowDrawerStageIndex, this.modelFlowDrawerProcessIndex)
+        .find(item => item.value === draft.targetFlowRef)
+      return option ? option.label : draft.targetFlowRef
     },
     formattedTokens() {
       const t = this.estimatedTokens
@@ -1857,28 +1874,124 @@ import { loadCfpProducts, saveCfpProducts } from '@/utils/productStore'
       return found ? found.label : '生产工序'
     },
     openModelProcessDrawer(stageIndex, processIndex) {
+      const stage = (this.modelStages || [])[stageIndex]
+      const process = stage && (stage.processes || [])[processIndex]
+      if (!process) return
       this.modelProcessDrawerStageIndex = stageIndex
       this.modelProcessDrawerProcessIndex = processIndex
+      this.modelProcessDrawerDraft = JSON.parse(JSON.stringify(process))
       this.modelProcessDrawerVisible = true
     },
-    saveModelProcessDrawer() {
+    closeModelProcessDrawer() {
       this.modelProcessDrawerVisible = false
+    },
+    discardModelProcessDrawerDraft() {
+      this.modelProcessDrawerDraft = null
+    },
+    focusModelProcessDrawer() {
+      this.$nextTick(() => {
+        const input = this.$refs.modelProcessNameInput
+        if (input && input.focus) input.focus()
+      })
+    },
+    saveModelProcessDrawer() {
+      const draft = this.modelProcessDrawerDraft
+      const target = this.modelProcessDrawerProcess
+      if (!draft || !target) return
+      const name = String(draft.name || '').trim()
+      if (!name) {
+        this.$message.warning('请填写单元过程名称')
+        return
+      }
+      const duplicated = ((this.modelProcessDrawerStage || {}).processes || []).some((proc, index) =>
+        index !== this.modelProcessDrawerProcessIndex && String(proc.name || '').trim() === name
+      )
+      if (duplicated) {
+        this.$message.warning('同一阶段内已存在同名单元过程')
+        return
+      }
+      Object.keys(target).forEach(key => {
+        if (!(key in draft)) this.$delete(target, key)
+      })
+      Object.keys(draft).forEach(key => this.$set(target, key, draft[key]))
+      target.name = name
       this.invalidateModelValidation()
       this.saveStageSnapshot()
       this.$message.success('单元过程属性已保存')
+      this.modelProcessDrawerVisible = false
     },
     openModelFlowDrawer(stageIndex, processIndex, type, flowIndex) {
+      const stage = (this.modelStages || [])[stageIndex]
+      const process = stage && (stage.processes || [])[processIndex]
+      const flow = process && (process[type] || [])[flowIndex]
+      if (!flow) return
       this.modelFlowDrawerStageIndex = stageIndex
       this.modelFlowDrawerProcessIndex = processIndex
       this.modelFlowDrawerType = type
       this.modelFlowDrawerIndex = flowIndex
+      this.modelFlowDrawerDraft = JSON.parse(JSON.stringify(flow))
       this.modelFlowDrawerVisible = true
     },
-    saveModelFlowDrawer() {
+    closeModelFlowDrawer() {
       this.modelFlowDrawerVisible = false
+    },
+    discardModelFlowDrawerDraft() {
+      this.modelFlowDrawerDraft = null
+    },
+    focusModelFlowDrawer() {
+      this.$nextTick(() => {
+        const input = this.$refs.modelFlowNameInput
+        if (input && input.focus) input.focus()
+      })
+    },
+    onModelFlowDrawerTypeChange() {
+      this.onModelFlowTypeChange(this.modelFlowDrawerDraft, this.modelFlowDrawerType)
+    },
+    onModelFlowDrawerLinkModeChange(mode) {
+      const draft = this.modelFlowDrawerDraft
+      if (!draft) return
+      if (mode === 'manual') {
+        draft.sourceFlowRef = ''
+      } else {
+        draft.listType = 'product'
+        draft.flowType = 'elementary'
+        draft.productSubType = null
+      }
+    },
+    onModelFlowDrawerRefChange() {
+      this.onModelFlowRefChange(this.modelFlowDrawerDraft)
+    },
+    saveModelFlowDrawer() {
+      const draft = this.modelFlowDrawerDraft
+      const target = this.modelFlowDrawerFlow
+      if (!draft || !target) return
+      const name = String(draft.name || '').trim()
+      if (!name) {
+        this.$message.warning('请填写流名称')
+        return
+      }
+      if (draft.linkMode === 'reference' && !draft.sourceFlowRef) {
+        this.$message.warning('请选择上游输出流，或切换为手工输入')
+        return
+      }
+      const list = (this.modelFlowDrawerProcess || {})[this.modelFlowDrawerType] || []
+      const duplicated = list.some((flow, index) =>
+        index !== this.modelFlowDrawerIndex && String(flow.name || '').trim() === name
+      )
+      if (duplicated) {
+        const typeLabel = this.modelFlowDrawerType === 'inputs' ? '输入流' : '输出流'
+        this.$message.warning('同一单元过程内已存在同名' + typeLabel)
+        return
+      }
+      Object.keys(target).forEach(key => {
+        if (!(key in draft)) this.$delete(target, key)
+      })
+      Object.keys(draft).forEach(key => this.$set(target, key, draft[key]))
+      target.name = name
       this.invalidateModelValidation()
       this.saveStageSnapshot()
       this.$message.success('流属性已保存')
+      this.modelFlowDrawerVisible = false
     },
     invalidateModelValidation() {
       if (this.modelValidated) {
